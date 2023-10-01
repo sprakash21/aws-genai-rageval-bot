@@ -20,8 +20,7 @@ class VPCNetworkStack(Stack):
                 ec2.SubnetConfiguration(name="private",subnet_type=ec2.SubnetType.PRIVATE_ISOLATED,cidr_mask=24)
             ]
         )
-    
-        
+
     @property
     def vpc(self) -> ec2.Vpc:
         return self.output_vpc

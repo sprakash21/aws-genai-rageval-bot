@@ -1,0 +1,6 @@
+sagemaker
+boto3
+streamlit
+pandas
+numpy
+spacy
