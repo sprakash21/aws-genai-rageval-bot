@@ -9,7 +9,7 @@ from aws_cdk import (
 from deploy_constructs.sagemaker_endpoint_construct import SageMakerEndpointConstruct
 
 class SageMakerLLMStack(Stack):
-    def __init__(self, scope: Construct, construct_id: str, vpc: ec2.IVpc, model_info, **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, model_info, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
         
         role = iam.Role(self, "llm-sagemaker-policy", assumed_by=iam.ServicePrincipal("sagemaker.amazonaws.com"))

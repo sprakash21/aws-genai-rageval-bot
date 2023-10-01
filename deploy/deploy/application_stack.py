@@ -36,15 +36,14 @@ class AppStack(Stack):
             timeout=Duration.seconds(180),
             memory_size=512,
             environment={
-                "TOP_K": 50,
-                "TOP_P": 0.6,
-                "DO_SAMPLE": True,
-                "TEMPERATURE": 0.9,
-                "MAX_NEW_TOKENS": 512,
-                "REPETATION_PENALITY": 1.03
+                "TOP_K": "50",
+                "TOP_P": "0.6",
+                "TEMPERATURE": "0.9",
+                "MAX_NEW_TOKENS": "512",
+                "REPETATION_PENALITY": "1.03"
             },
             vpc_subnets=ec2.SubnetSelection(
-                subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
+                subnet_type=ec2.SubnetType.PRIVATE_WITH_NAT
             ),
             vpc=vpc
         )
@@ -56,7 +55,7 @@ class AppStack(Stack):
         )
 
         # Parameter Store to contain the URL
-        ssm.StringParameter(self, "code_llama_apigw_endpoint", parameter_name="code_llama_apigw_endpoint", string_value=code_llama_apigw_endpoint.url)
+        ssm.StringParameter(self, "code_llama_sm_apigw_endpoint", parameter_name="code_llama_apigw_endpoint", string_value=code_llama_apigw_endpoint.url)
 
     @property
     def apigw(self) -> apigw.LambdaRestApi.url:

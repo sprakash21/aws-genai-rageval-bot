@@ -24,11 +24,11 @@ model_information = get_sagemaker_uris(model_id=TXT2IMG_MODEL_ID,
                                         region_name=region_name)
 
 app = cdk.App()
-network_stack = VPCNetworkStack(app, "VPCNetworkStack")
+network_stack = VPCNetworkStack(app, "VPCNetworkStack", env=aws_environment)
 # If sagemaker studio needs to be setup
 #SagemakerStudioStack(app, "deploy", vpc=network_stack.vpc)
 # If sagemaker llm app deployment and endpoint with lambda + apigw needs to be setup
-AppStack(app, "llm-app-stack", env=aws_environment)
+AppStack(app, "llm-app-stack", env=aws_environment, vpc=network_stack.vpc)
 SageMakerLLMStack(app, "llm-sm-stack", env=aws_environment, model_info=model_information)
 
 app.synth()

@@ -5,12 +5,12 @@ import boto3
 runtime = boto3.client("runtime.sagemaker")
 
 # Hyperparameters
-TOP_K = os.environ.get("TOP_K")
-TOP_P = os.environ.get("TOP_P")
-DO_SAMPLE = os.environ.get("DO_SAMPLE")
-TEMPERATURE = os.environ.get("TEMPERATURE")
-MAX_NEW_TOKENS = os.environ.get("MAX_NEW_TOKENS")
-REPETATION_PENALITY = os.environ.get("REPETATION_PENALITY")
+TOP_K = int(os.environ.get("TOP_K"))
+TOP_P = float(os.environ.get("TOP_P"))
+DO_SAMPLE = True
+TEMPERATURE = float(os.environ.get("TEMPERATURE"))
+MAX_NEW_TOKENS = int(os.environ.get("MAX_NEW_TOKENS"))
+REPETATION_PENALITY = float(os.environ.get("REPETATION_PENALITY"))
 
 
 def handler(event, context):
