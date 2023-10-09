@@ -1,10 +1,9 @@
 from constructs import Construct
 from aws_cdk import (
     Stack,
-    aws_ec2 as ec2,
     aws_iam as iam,
     aws_ssm as ssm,
-    aws_sagemaker as sagemaker,
+    aws_sagemaker as sagemaker
 )
 
 

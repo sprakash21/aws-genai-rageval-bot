@@ -65,7 +65,7 @@ class AppStack(Stack):
                 "SM_ENDPOINT_NAME": endpoint.endpoint_name,
             },
             vpc_subnets=ec2.SubnetSelection(
-                subnet_type=ec2.SubnetType.PRIVATE_WITH_NAT
+                subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
             ),
             vpc=vpc,
         )

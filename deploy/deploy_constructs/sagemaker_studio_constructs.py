@@ -1,10 +1,10 @@
-from typing import List
+import os.path as path
+import typing
 
 from aws_cdk import aws_iam as iam
 
 import aws_cdk.cloudformation_include as cfn_inc
-import os.path as path
-import typing
+
 from constructs import Construct
 
 

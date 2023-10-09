@@ -11,7 +11,7 @@ class VPCNetworkStack(Stack):
             "VPC",
             vpc_name="nc-genai-vpc",
             nat_gateways=1,
-            cidr="10.0.0.0/16",
+            ip_addresses=ec2.IpAddresses.cidr("10.0.0.0/16"),
             max_azs=2,
             subnet_configuration=[
                 ec2.SubnetConfiguration(
@@ -19,7 +19,7 @@ class VPCNetworkStack(Stack):
                 ),
                 ec2.SubnetConfiguration(
                     name="private",
-                    subnet_type=ec2.SubnetType.PRIVATE_WITH_NAT,
+                    subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS,
                     cidr_mask=24,
                 ),
             ],
