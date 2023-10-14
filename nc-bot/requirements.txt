@@ -2,3 +2,6 @@ requests==2.31.0
 boto3==1.28.62
 streamlit==1.27.0
 python-dotenv==1.0.0
+pypdf
+langchain
+unstructured[pdf]
