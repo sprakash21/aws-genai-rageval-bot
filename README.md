@@ -1,5 +1,6 @@
-# Generative AI with AWS
 
+# Generative AI with AWS
+## TODO: Update Full updated README
 # Part-1: Investigating the service offerings.  
 # Part-2: Setting up Sagemaker infrastructure for Foundational model usage.  
 # Part-2a: Consuming the foundational model.  

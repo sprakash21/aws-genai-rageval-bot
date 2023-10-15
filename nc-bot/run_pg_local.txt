@@ -1,0 +1,11 @@
+Running pgvector on docker and using for vectordb tests
+
+Build:
+docker build -t pgvector_local -f pgvector_dockerfile .
+
+Run:
+docker run \
+    --name postgresql-container \
+    -p 5432:5432 \
+    -e POSTGRES_PASSWORD=test \
+    -d pgvector_local

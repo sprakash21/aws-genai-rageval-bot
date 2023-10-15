@@ -166,3 +166,4 @@ terraform.tfstate.backup
 .DS_Store
 .vscode
 test.txt
+*.pdf

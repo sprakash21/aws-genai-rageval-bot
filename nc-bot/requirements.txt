@@ -4,4 +4,10 @@ streamlit==1.27.0
 python-dotenv==1.0.0
 pypdf
 langchain
+pgvector
+openai
+psycopg2-binary
+tiktoken
+# Start Embedder on sentences
+sentence_transformers
 unstructured[pdf]
