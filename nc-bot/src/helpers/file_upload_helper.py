@@ -6,9 +6,12 @@ from logging_config import get_logger
 
 logger = get_logger(__name__)
 
+
 class S3FileUpload:
     def __init__(self):
-        self.client = boto3.Session(profile_name=os.environ.get("AWS_PROFILE")).client("s3")
+        self.client = boto3.Session(profile_name=os.environ.get("AWS_PROFILE")).client(
+            "s3"
+        )
         self.bucket = os.environ.get("BUCKET_NAME")
 
     def get_object(self, key: str):
@@ -98,7 +101,13 @@ class S3FileUpload:
         >>> client.put_object(f_body="string_body", object_name="prefix_name")
         """
         try:
-            self.client.put_object(ACL='public-read', Bucket=self.bucket, Body=f_body, ContentType="application/pdf", Key=object_name)
+            self.client.put_object(
+                ACL="public-read",
+                Bucket=self.bucket,
+                Body=f_body,
+                ContentType="application/pdf",
+                Key=object_name,
+            )
         except ClientError as e:
             logger.error(e)
             return False

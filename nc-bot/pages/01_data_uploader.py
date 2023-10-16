@@ -10,7 +10,9 @@ st.sidebar.markdown("# Data Uploader")
 st.title("Data Uploader")
 st.caption("Extend the Vector Database by uploading Pdf data")
 
-uploaded_files = st.file_uploader("Choose a PDF File", accept_multiple_files=True, type=["pdf"])
+uploaded_files = st.file_uploader(
+    "Choose a PDF File", accept_multiple_files=True, type=["pdf"]
+)
 for uploaded_file in uploaded_files:
     bytes_data = uploaded_file.read()
     s3_client = S3FileUpload()
@@ -25,4 +27,3 @@ for uploaded_file in uploaded_files:
         st.write(f"Status - {status}")
         # Pass this to the request for lambda
         # Lambda reads this file and puts it into vectorstore.
-
