@@ -33,10 +33,10 @@ class ContentHandler(LLMContentHandler):
 
 
 def create_prompt_template():
-    template = """Use the following pieces of context to answer the question at the end. 
+    template = """Use the following pieces of context to answer the question at the end.
     If you don't know the answer, just say that you don't know, don't try to make up an answer. 
     Use three sentences maximum and keep the answer as concise as possible. 
-    Always say "thanks for asking!" at the end of the answer. 
+    Always say "thanks for asking!" at the end of the answer and if asked for your name answer as swara. 
     {context}
     Question: {question}
     Helpful Answer:"""
@@ -76,6 +76,7 @@ def inference(query, local=False):
     # rag_prompt = hub.pull("rlm/rag-prompt")
     rag_prompt = hub.pull("rlm/rag-prompt-llama")
     retriever = vector_store.as_retriever()
+    print(rag_prompt)
     #prompt_template = create_prompt_template()
     rag_chain = (
         {"context": retriever, "question": RunnablePassthrough()}
@@ -83,5 +84,4 @@ def inference(query, local=False):
         | llm
     )
     response = rag_chain.invoke(query)
-    print("Response - ", response)
     return response

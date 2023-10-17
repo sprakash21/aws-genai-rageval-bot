@@ -2,7 +2,7 @@ import os
 import boto3
 from botocore.exceptions import ClientError
 from src.helpers.file_utils import store_file
-from logging_config import get_logger
+from src.helpers.logging_config import get_logger
 
 logger = get_logger(__name__)
 

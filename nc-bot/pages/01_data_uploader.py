@@ -23,7 +23,7 @@ for uploaded_file in uploaded_files:
         bucket_name = os.environ.get("BUCKET_NAME")
         s3_uri = f"https://{bucket_name}.s3.eu-central-1.amazonaws.com/pdf_data/{fname}"
         st.write(f"You can access it from - {s3_uri}")
-        status = process_data(fname=fname)
+        status = process_data(fname=f"pdf_data/{fname}")
         st.write(f"Status - {status}")
         # Pass this to the request for lambda
         # Lambda reads this file and puts it into vectorstore.

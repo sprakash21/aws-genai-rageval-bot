@@ -35,6 +35,11 @@ def make_connection():
     cur = conn.cursor()
     return cur
 
+def setup_db(cur):
+    cur.execute("""
+                CREATE EXTENSION IF NOT EXISTS vector;
+                """
+    )
 
 def is_existing_collection(cur):
     cur.execute(
@@ -62,17 +67,18 @@ def process_data(fname, test_delete=False):
     COLLECTION_NAME = "time_reporting"
     loader = S3FileLoader(bucket=os.environ.get("BUCKET_NAME"), key=fname)
     text_splitter = RecursiveCharacterTextSplitter(
-        separators=["\n"], chunk_size=100, chunk_overlap=0
+        separators=["\n"], chunk_size=1024, chunk_overlap=50
     )
     documents = loader.load_and_split(text_splitter=text_splitter)
     # TODO: Switch to powerful embeddings like titan, fast-embedding, ada_002 probably
     embedding = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
     curr = make_connection()
+    setup_db(curr)
     if is_existing_collection(curr) and test_delete is False:
         s3_fname = f"s3://{os.environ.get('BUCKET_NAME')}/{fname}"
         if is_file_embedded(curr, s3_fname):
-            print("Not storing the data into vector store for retrival")
-            return None
+            print("Same PDF data is being uploaded and it will not be uploaded")
+            return False
         else:
             # Extend vectorstore.
             store = PGVector(
@@ -81,7 +87,8 @@ def process_data(fname, test_delete=False):
                 embedding_function=embedding,
             )
             store.add_documents(documents)
-            return store
+
+            return True
     else:
         # Create new set of document store
         vector_store = PGVector.from_documents(
@@ -91,10 +98,10 @@ def process_data(fname, test_delete=False):
             pre_delete_collection=True,
             connection_string=get_connection_str(),
         )
-        return vector_store
+        return True
 
 
-def retrieve_docs():
+def retrieve_document_similarity(query):
     COLLECTION_NAME = "time_reporting"
     embedding = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
     vector_store = PGVector(
@@ -103,7 +110,7 @@ def retrieve_docs():
         embedding_function=embedding,
     )
     docs_with_score = vector_store.similarity_search_with_score(
-        "What is the regular working hours in Austria?"
+        query
     )
     for doc, score in docs_with_score:
         print("-" * 80)

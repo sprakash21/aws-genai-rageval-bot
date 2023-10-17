@@ -1,5 +1,5 @@
 import os
-from logging_config import get_logger
+from src.helpers.logging_config import get_logger
 
 logger = get_logger(__name__)
 
