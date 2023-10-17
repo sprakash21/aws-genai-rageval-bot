@@ -1,4 +1,5 @@
 import streamlit as st
+from src.helpers.inference import inference
 
 st.sidebar.markdown("# Chatbot 💬")
 st.title("Chatbot 💬")
@@ -14,7 +15,7 @@ for msg in st.session_state.messages:
 
 if prompt := st.chat_input("Ask me some Question?"):
     st.session_state.messages.append({"role": "user", "content": prompt})
-    response = f"Echo: {prompt}"
+    response = inference(prompt, local=True)
     # Display swara response in chat message container
     with st.chat_message("swara"):
         st.markdown(response)
