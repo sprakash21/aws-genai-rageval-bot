@@ -15,9 +15,14 @@ for msg in st.session_state.messages:
 
 if prompt := st.chat_input("Ask me some Question?"):
     st.session_state.messages.append({"role": "user", "content": prompt})
-    response = inference(prompt, local=True)
-    # Display swara response in chat message container
-    with st.chat_message("swara"):
-        st.markdown(response)
-    # Add swara response to chat history
-    st.session_state.messages.append({"role": "assistant", "content": response})
+    with st.chat_message("user"):
+        st.write(prompt)
+
+# New response generation
+if st.session_state.messages[-1]["role"] != "assistant":
+    with st.chat_message("assistant"):
+        with st.spinner("Thinking..."):
+            response = inference(prompt, local=True)
+            st.write(response) 
+    message = {"role": "assistant", "content": response}
+    st.session_state.messages.append(message)
