@@ -26,7 +26,7 @@ class DBStack(Stack):
             credentials=rds.Credentials.from_generated_secret(
                 "postgres",
                 secret_name="RDS_postgres",
-                exclude_characters="`$%'!&*^#@()}{[]\\><?%/",
+                exclude_characters="`\"$%'!&*^#@()}{[]\\>=+<?%/",
             ),
             vpc=vpc,
             # TODO: Change to private when all functionality on aws

@@ -7,7 +7,7 @@ from deploy.sagemaker_llm_stack import SageMakerLLMStack
 from deploy.sagemaker_huggingface_llm_stack import HuggingfaceSagemakerStack
 from deploy.network_stack import VPCNetworkStack
 from deploy.db_stack import DBStack
-
+from deploy.developer_stack import DeveloperStack
 from helpers.model_info import get_sagemaker_uris
 
 # Environment information
@@ -32,6 +32,7 @@ aws_environment = cdk.Environment(region="eu-central-1")
 #     region_name=REGION,
 #)
 
+
 app = cdk.App()
 network_stack = VPCNetworkStack(app, "VPCNetworkStack", env=aws_environment)
 # If sagemaker studio needs to be setup
@@ -42,8 +43,10 @@ network_stack = VPCNetworkStack(app, "VPCNetworkStack", env=aws_environment)
 #     app, "llm-sm-stack", env=aws_environment, model_info=model_information
 #)
 
-llm_stack = HuggingfaceSagemakerStack(app, "llm-hf-sm-stack", env=aws_environment)
-#db_stack = DBStack(app, "db-stack", vpc=network_stack.vpc, env=aws_environment)
+dev_stack = DeveloperStack(app, "dev-machine", vpc=network_stack.vpc, env=aws_environment)
+
+#llm_stack = HuggingfaceSagemakerStack(app, "llm-hf-sm-stack", env=aws_environment)
+db_stack = DBStack(app, "db-stack", vpc=network_stack.vpc, env=aws_environment)
 
 #AppStack(
 #    app,

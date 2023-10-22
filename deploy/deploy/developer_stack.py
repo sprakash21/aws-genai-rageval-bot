@@ -20,6 +20,9 @@ class DeveloperStack(Stack):
         self._dev_sg.add_ingress_rule(
             ec2.Peer.any_ipv4(), ec2.Port.tcp(8501), "Streamlit access"
         )
+        self._dev_sg.add_ingress_rule(
+            ec2.Peer.any_ipv4(), ec2.Port.tcp(22), "ssh access"
+        )
         self.dev_instance = ec2.Instance(
             self,
             "dev-machine",
@@ -35,4 +38,5 @@ class DeveloperStack(Stack):
                     device_name="/dev/sda1", volume=ec2.BlockDeviceVolume.ebs(100)
                 )
             ],
+            key_name=self._key_pair.key_name
         )
