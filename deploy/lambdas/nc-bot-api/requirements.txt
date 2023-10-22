@@ -1,4 +1,14 @@
-langchain==0.0.310
-pgvector==0.2.3
-psycopg2-binary==2.9.9
-tiktoken==0.5.1
+requests==2.31.0
+boto3==1.28.62
+streamlit==1.27.0
+python-dotenv==1.0.0
+pypdf
+langchain
+pgvector
+openai
+psycopg2-binary
+tiktoken
+# Start Embedder on sentences
+sentence_transformers
+unstructured[pdf]
+langchainhub

@@ -1,5 +1,6 @@
 from aws_cdk import (
     Duration,
+    Size,
     Stack,
     aws_lambda as _lambda,
     aws_apigateway as apigw,
@@ -12,7 +13,7 @@ from constructs import Construct
 
 class AppStack(Stack):
     def __init__(
-        self, scope: Construct, construct_id: str, vpc: ec2.IVpc, endpoint, **kwargs
+        self, scope: Construct, construct_id: str, vpc: ec2.IVpc, **kwargs
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
@@ -45,44 +46,79 @@ class AppStack(Stack):
                 ],
             )
         )
+        role.attach_inline_policy(
+            iam.Policy(
+                self,
+                "s3-policy",
+                statements=[
+                    iam.PolicyStatement(
+                        effect=iam.Effect.ALLOW,
+                        actions=["s3:*"],
+                        resources=["arn:aws:s3:::lambda-tests-132111/*"],
+                    )
+                ],
+            )
+        )
 
-        # Defines an AWS Lambda function for code llama
-        lambda_code_llama = _lambda.Function(
+        role.attach_inline_policy(
+            iam.Policy(
+                self,
+                "secrets-policy",
+                statements=[
+                    iam.PolicyStatement(
+                        effect=iam.Effect.ALLOW,
+                        actions=["secretsmanager:GetResourcePolicy",
+                                 "secretsmanager:GetSecretValue",
+                                 "secretsmanager:DescribeSecret",
+                                 "secretsmanager:ListSecretVersionIds"],
+                        resources=["*"],
+                    )
+                ],
+            )
+        )
+        role.attach_inline_policy(
+            iam.Policy(
             self,
-            "lambda_infer_fn",
-            runtime=_lambda.Runtime.PYTHON_3_9,
-            code=_lambda.Code.from_asset("lambdas/code-llama"),
-            handler="app_code_llama.handler",
+            "other-policy",
+            statements=[
+                iam.PolicyStatement(
+                    effect=iam.Effect.ALLOW,
+                    actions=[
+                        "cloudwatch:PutMetricData",
+                        "cloudwatch:GetMetricData",
+                        "cloudwatch:GetMetricStatistics",
+                        "cloudwatch:ListMetrics",
+                        "logs:CreateLogGroup",
+                        "logs:CreateLogStream",
+                        "logs:DescribeLogStreams",
+                        "logs:PutLogEvents",
+                        "logs:GetLogEvents"
+                    ],
+                    resources=["*"],
+                )
+            ],
+            )
+        )
+        self.uploader_lambda = _lambda.DockerImageFunction(
+            scope=self,
+            id="upload-vectordb",
             role=role,
-            timeout=Duration.seconds(900),
-            memory_size=2000,
-            environment={
-                "TOP_K": "50",
-                "TOP_P": "0.6",
-                "TEMPERATURE": "0.9",
-                "MAX_NEW_TOKENS": "512",
-                "REPETATION_PENALITY": "1.03",
-                "SM_ENDPOINT_NAME": endpoint.endpoint_name,
-            },
+            # Function name on AWS
+            function_name="uploadToVectorDB",
+            # Use aws_cdk.aws_lambda.DockerImageCode.from_image_asset to build
+            # a docker image on deployment
+            code=_lambda.DockerImageCode.from_image_asset(
+                # Directory relative to where you execute cdk deploy
+                # contains a Dockerfile with build instructions
+                directory="lambdas/nc-bot-api",
+                cmd=[ "data_upload.lambda_handler" ]
+            ),
+            architecture=_lambda.Architecture.ARM_64,
+            ephemeral_storage_size=Size.gibibytes(10),
+            memory_size=10000,
+            timeout=Duration.minutes(15),
             vpc_subnets=ec2.SubnetSelection(
                 subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
             ),
-            vpc=vpc,
+            vpc=vpc
         )
-
-        # Defines an Amazon API Gateway endpoint for Code Llama
-        self.code_llama_apigw_endpoint = apigw.LambdaRestApi(
-            self, "code_llama_apigw_endpoint", handler=lambda_code_llama
-        )
-
-        # Parameter Store to contain the URL
-        ssm.StringParameter(
-            self,
-            "code_llama_sm_apigw_endpoint",
-            parameter_name="code_llama_apigw_endpoint",
-            string_value=self.code_llama_apigw_endpoint.url,
-        )
-
-    @property
-    def apigw(self) -> apigw.LambdaRestApi.url:
-        return self.code_llama_apigw_endpoint.url

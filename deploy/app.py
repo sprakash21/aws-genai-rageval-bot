@@ -7,6 +7,7 @@ from deploy.sagemaker_llm_stack import SageMakerLLMStack
 from deploy.sagemaker_huggingface_llm_stack import HuggingfaceSagemakerStack
 from deploy.network_stack import VPCNetworkStack
 from deploy.db_stack import DBStack
+from deploy.application_stack import AppStack
 from deploy.developer_stack import DeveloperStack
 from helpers.model_info import get_sagemaker_uris
 
@@ -48,11 +49,9 @@ dev_stack = DeveloperStack(app, "dev-machine", vpc=network_stack.vpc, env=aws_en
 #llm_stack = HuggingfaceSagemakerStack(app, "llm-hf-sm-stack", env=aws_environment)
 db_stack = DBStack(app, "db-stack", vpc=network_stack.vpc, env=aws_environment)
 
-#AppStack(
-#    app,
-#    "llm-app-stack",
-#    env=aws_environment,
-#    vpc=network_stack.vpc,
-#    endpoint=llm_stack.sm_endpoint,
-#)
+AppStack(
+    app,
+    "llm-app-stack",
+    env=aws_environment,
+    vpc=network_stack.vpc)
 app.synth()
