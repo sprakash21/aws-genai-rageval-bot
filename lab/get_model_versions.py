@@ -55,7 +55,7 @@ def get_sagemaker_uris(model_id, model_task_type, instance_type, region_name):
     }
 
 
-TXT2IMG_MODEL_ID = "meta-textgeneration-llama-codellama-34b-instruct"
+TXT2IMG_MODEL_ID = "meta-textgeneration-llama-2-7b-f"
 TXT2IMG_INFERENCE_INSTANCE_TYPE = "ml.g5.24xlarge"
 # textgeneration, llm, textembedding, text2text, txt2img
 # meta-textgeneration-llama-codellama-7b-python

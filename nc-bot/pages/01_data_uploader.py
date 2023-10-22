@@ -20,9 +20,11 @@ for uploaded_file in uploaded_files:
     status = s3_client.put_object(bytes_data, "pdf_data/" + fname)
     if status:
         st.write(f"{uploaded_file.name} is uploaded successfully to S3")
+        # Get the bucket_name from SSM parameters
         bucket_name = os.environ.get("BUCKET_NAME")
         s3_uri = f"https://{bucket_name}.s3.eu-central-1.amazonaws.com/pdf_data/{fname}"
         st.write(f"You can access it from - {s3_uri}")
+        # TODO: Move logic to lambda for processing
         status = process_data(fname=f"pdf_data/{fname}")
         st.write(f"Status - {status}")
         # Pass this to the request for lambda

@@ -19,7 +19,7 @@ def get_connection_str():
         port=int(os.environ.get("PGVECTOR_PORT", "5432")),
         database=os.environ.get("PGVECTOR_DATABASE", "vectordblab"),
         user=os.environ.get("PGVECTOR_USER", "postgres"),
-        password=os.environ.get("PGVECTOR_PASSWORD", "POSTGRES_TEST_123!"),
+        password=os.environ.get("PGVECTOR_PASSWORD", "test"),
     )
     return CONNECTION_STRING
 
@@ -30,7 +30,7 @@ def make_connection():
         port=5432,
         dbname="vectordblab",
         user="postgres",
-        password="POSTGRES_TEST_123!",
+        password="test",
     )
     cur = conn.cursor()
     return cur
@@ -67,7 +67,7 @@ def process_data(fname, test_delete=False):
     COLLECTION_NAME = "time_reporting"
     loader = S3FileLoader(bucket=os.environ.get("BUCKET_NAME"), key=fname)
     text_splitter = RecursiveCharacterTextSplitter(
-        separators=["\n"], chunk_size=1024, chunk_overlap=50
+        separators=["\n"], chunk_size=512, chunk_overlap=50
     )
     documents = loader.load_and_split(text_splitter=text_splitter)
     # TODO: Switch to powerful embeddings like titan, fast-embedding, ada_002 probably

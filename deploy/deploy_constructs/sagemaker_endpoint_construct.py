@@ -1,3 +1,4 @@
+import json
 from aws_cdk import aws_sagemaker as sagemaker, CfnOutput, Environment
 from constructs import Construct
 
@@ -123,6 +124,10 @@ class SageMakerHFEndpointConstruct(Construct):
             "HF_MODEL_ID": huggingface_model,
             "HF_TASK": huggingface_task,
             "HF_API_TOKEN": huggingface_token_id,
+            'MAX_INPUT_LENGTH': json.dumps(2048),  # Max length of input text
+            'MAX_TOTAL_TOKENS': json.dumps(4096),  # Max length of the generation (including input text)
+            'MAX_BATCH_TOTAL_TOKENS': json.dumps(8192),  # Limits the number of tokens that can be processed in parallel during the generation
+            'SM_NUM_GPUS': json.dumps(4) # Multi GPU support
         }
         container = sagemaker.CfnModel.ContainerDefinitionProperty(
             environment=container_environment, image=image_uri
