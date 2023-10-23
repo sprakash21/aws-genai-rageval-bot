@@ -23,7 +23,7 @@ if st.session_state.messages[-1]["role"] != "assistant":
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
             # TODO: Should make a call to lambda
-            response = inference(prompt, local=False)
+            response = inference(prompt, local=True)
             st.write(response)
     message = {"role": "assistant", "content": response}
     st.session_state.messages.append(message)

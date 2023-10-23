@@ -67,7 +67,7 @@ def process_data(fname, test_delete=False):
     COLLECTION_NAME = "time_reporting"
     loader = S3FileLoader(bucket=os.environ.get("BUCKET_NAME"), key=fname)
     text_splitter = RecursiveCharacterTextSplitter(
-        separators=["\n"], chunk_size=512, chunk_overlap=50
+        separators=["\n"], chunk_size=1024, chunk_overlap=50
     )
     documents = loader.load_and_split(text_splitter=text_splitter)
     # TODO: Switch to powerful embeddings like titan, fast-embedding, ada_002 probably

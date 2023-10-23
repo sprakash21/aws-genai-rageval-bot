@@ -86,14 +86,13 @@ def inference(query, local=False):
             top_p=0.9,
             repeat_penalty=1.3,
             repeat_last_n=0,
-            return_full_text=False,
             stop=["</s>"],
         )
         # callback_manager=CallbackManager([StreamingStdOutCallbackHandler()]))
         # Rag pipeline
         # rag_prompt = hub.pull("rlm/rag-prompt")
         rag_prompt = hub.pull("rlm/rag-prompt-llama")
-        retriever = vector_store.as_retriever()
+        retriever = vector_store.as_retriever(k=3)
         # print(rag_prompt)
         rag_chain = (
             {"context": retriever, "question": RunnablePassthrough()}
