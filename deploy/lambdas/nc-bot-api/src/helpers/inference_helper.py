@@ -22,7 +22,7 @@ class Llama2InferenceHelper:
         self.prompt = hub.pull("rlm/rag-prompt-llama")
         self.collection_name = collection_name
         self.endpoint_name = endpoint
-    
+  
     def inference(self, query):
         upload_helper = UploadHelper()
         collection_name = self.collection_name
