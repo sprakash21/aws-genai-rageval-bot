@@ -1,10 +1,11 @@
 import streamlit as st
-from src.helpers.inference import inference
+from src.helpers.inference_helper import Llama2InferenceHelper
 
 st.sidebar.markdown("# Chatbot 💬")
 st.title("Chatbot 💬")
 st.caption("🚀 Swara - A chatbot which is works on answering pdf data")
 st.markdown("## WIP")
+option = st.selectbox("Mode", ("LOCAL", "AWS"))
 if "messages" not in st.session_state:
     st.session_state["messages"] = [
         {"role": "assistant", "content": "How can I help you?"}
@@ -22,8 +23,11 @@ if prompt := st.chat_input("Ask me some Question?"):
 if st.session_state.messages[-1]["role"] != "assistant":
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
-            # TODO: Should make a call to lambda
-            response = inference(prompt, local=True)
+            inference_helper = Llama2InferenceHelper(collection_name="time_reporting")
+            if option == "LOCAL":
+                response = inference_helper.inference_local(prompt)
+            else:
+                response = inference_helper.inference(prompt)
             st.write(response)
     message = {"role": "assistant", "content": response}
     st.session_state.messages.append(message)
