@@ -1,5 +1,6 @@
 requests==2.31.0
 boto3==1.28.62
+cryptography==38.0.4
 streamlit==1.27.0
 python-dotenv==1.0.0
 pypdf
@@ -13,3 +14,5 @@ sentence_transformers
 unstructured[pdf]
 langchainhub
 ragas
+llama_index
+pyOpenSSL
