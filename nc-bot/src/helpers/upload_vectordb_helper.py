@@ -37,11 +37,11 @@ class UploadHelper:
         if self.is_local:
             CONNECTION_STRING = PGVector.connection_string_from_db_params(
                 driver=os.environ.get("PGVECTOR_DRIVER", "psycopg2"),
-                host=os.environ.get("PGVECTOR_HOST", "localhost"),
-                port=int(os.environ.get("PGVECTOR_PORT", "5432")),
-                database=os.environ.get("PGVECTOR_DATABASE", "vectordblab"),
-                user=os.environ.get("PGVECTOR_USER", "postgres"),
-                password=os.environ.get("PGVECTOR_PASSWORD", "test"),
+                host=os.environ.get("PGVECTOR_HOST"),
+                port=int(os.environ.get("PGVECTOR_PORT")),
+                database=os.environ.get("PGVECTOR_DATABASE"),
+                user=os.environ.get("PGVECTOR_USER"),
+                password=os.environ.get("PGVECTOR_PASSWORD")
             )
         else:
             secret_info = self.get_db_secret_info()
@@ -59,11 +59,11 @@ class UploadHelper:
     def make_connection(self):
         if self.is_local:
             conn = psycopg2.connect(
-                host="localhost",
-                port=5432,
-                dbname="vectordblab",
-                user="postgres",
-                password="test",
+                host=os.environ.get("PGVECTOR_HOST"),
+                port=os.environ.get("PGVECTOR_PORT"),
+                dbname=os.environ.get("PGVECTOR_DATABASE"),
+                user=os.environ.get("PGVECTOR_USER"),
+                password=os.environ.get("PGVECTOR_PASSWORD")
         )
         else:
             secret_info = self.get_db_secret_info()
@@ -78,11 +78,6 @@ class UploadHelper:
         cur = conn.cursor()
         return cur
 
-    def setup_db(self, cur):
-        cur.execute("""
-                    CREATE EXTENSION IF NOT EXISTS vector;
-                    """
-        )
 
     def is_existing_collection(self, cur):
         cur.execute(
@@ -108,10 +103,12 @@ class UploadHelper:
     def process_data(self, fname, test_delete=False):
         COLLECTION_NAME = "time_reporting"
         loader = S3FileLoader(bucket=os.environ.get("BUCKET_NAME"), key=fname)
+        # Short vs Long chunk
         text_splitter = RecursiveCharacterTextSplitter(
             separators=["\n"], chunk_size=1024, chunk_overlap=50
         )
         documents = loader.load_and_split(text_splitter=text_splitter)
+
         # TODO: Switch to powerful embeddings like titan, fast-embedding, ada_002 probably
         embedding = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
         curr = self.make_connection()
@@ -136,7 +133,7 @@ class UploadHelper:
                 documents=documents,
                 embedding=embedding,
                 collection_name=COLLECTION_NAME,
-                pre_delete_collection=True,
+                #pre_delete_collection=True,
                 connection_string=self.get_connection_str(),
             )
             return True

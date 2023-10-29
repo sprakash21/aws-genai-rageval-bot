@@ -16,3 +16,6 @@ langchainhub
 ragas
 llama_index
 pyOpenSSL
+SQLAlchemy
+mypy
+plotly
