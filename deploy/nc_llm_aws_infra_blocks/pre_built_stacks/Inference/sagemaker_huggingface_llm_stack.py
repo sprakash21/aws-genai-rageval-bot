@@ -1,23 +1,26 @@
 # Adapted from Huggingface documentation.
 # WIP..
-from aws_cdk import aws_iam as iam, aws_sagemaker as sagemaker, Stack
-from nc_llm_aws_infra_blocks.deploy_constructs.Inference.sagemaker_endpoint_construct import (
+from aws_cdk import Environment, aws_iam as iam, aws_sagemaker as sagemaker, Stack
+from deploy.nc_llm_aws_infra_blocks.deploy_constructs.Inference.hf_sagemaker_endpoint_construct import (
     SageMakerHFEndpointConstruct,
 )
 from constructs import Construct
 
 
 class HuggingfaceSagemakerStack(Stack):
-    def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
+    def __init__(
+        self,
+        scope: Construct,
+        construct_id: str,
+        environment: Environment,
+        gpu_count: int,
+        huggingface_token_id: str,
+        huggingface_model_id: str = "meta-llama/Llama-2-13b-chat-hf",
+        huggingface_task: str = "text-generation",
+        instance_type: str = "ml.g5.12xlarge",
+        **kwargs,
+    ) -> None:
         super().__init__(scope, construct_id, **kwargs)
-        # Context parameters
-        huggingface_model = (
-            self.node.try_get_context("model") or "meta-llama/Llama-2-7b-chat-hf"
-        )
-        # cdk context vars
-        huggingface_task = self.node.try_get_context("task") or "text-generation"
-        instance_type = self.node.try_get_context("instance_type") or "ml.g5.2xlarge"
-        huggingface_token_id = self.node.try_get_context("hf_id") or ""
 
         execution_role = iam.Role(
             self,
@@ -60,14 +63,19 @@ class HuggingfaceSagemakerStack(Stack):
         execution_role.attach_inline_policy(sm_exec_policy)
         execution_role_arn = execution_role.role_arn
 
+        # ToDo: Taha: Parameterize properly like e.g. variant_weight
         self.endpoint = SageMakerHFEndpointConstruct(
             self,
             "SagemakerEndpoint",
-            huggingface_model=huggingface_model,
+            model_name=huggingface_model_id,
             huggingface_task=huggingface_task,
             huggingface_token_id=huggingface_token_id,
-            execution_role_arn=execution_role_arn,
+            huggingface_model_region=str(environment.region),
+            role_arn=execution_role_arn,
             instance_type=instance_type,
+            gpu_count=gpu_count,
+            instance_count=1,
+            variant_weight=1,
             **kwargs,
         )
 
@@ -82,5 +90,5 @@ class HuggingfaceSagemakerStack(Stack):
         )
 
     @property
-    def sm_endpoint(self) -> sagemaker.CfnEndpoint:
+    def sm_endpoint(self) -> SageMakerHFEndpointConstruct:
         return self.endpoint

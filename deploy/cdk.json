@@ -32,6 +32,18 @@
     "@aws-cdk/core:target-partitions": [
       "aws",
       "aws-cn"
-    ]
+    ],
+    "huggingface.token_id":"",
+    "huggingface.llama2.13b": {
+      "model_id":"meta-llama/Llama-2-13b-chat-hf",
+      "task": "text-generation"
+    },
+    "inference_endpoint":{
+      "instance_type": "ml.g5.12xlarge",
+      "instance_count": 1,
+      "gpu_count": 4
+    },
+    "sagemaker_session_profile_name": "default"
+
   }
 }
