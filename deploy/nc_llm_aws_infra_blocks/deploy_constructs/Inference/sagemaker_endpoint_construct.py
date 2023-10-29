@@ -2,8 +2,7 @@ import json
 from aws_cdk import aws_sagemaker as sagemaker, CfnOutput, Environment
 from constructs import Construct
 
-
-from config.hf_smconfig import LATEST_PYTORCH_VERSION, region_dict
+from nc_llm_aws_infra_blocks.library.config.huggingface_smconfig import LATEST_PYTORCH_VERSION, region_dict
 
 
 class SageMakerEndpointConstruct(Construct):

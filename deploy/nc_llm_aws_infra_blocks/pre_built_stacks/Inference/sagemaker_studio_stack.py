@@ -1,7 +1,7 @@
 from constructs import Construct
 from aws_cdk import Stack, aws_ec2 as ec2, aws_iam as iam, CfnOutput
 
-from deploy_constructs.sagemaker_studio_constructs import (
+from nc_llm_aws_infra_blocks.deploy_constructs.Inference.sagemaker_studio_constructs import (
     SagemakerStudioDomainConstruct,
     SagemakerStudioUserConstruct,
 )

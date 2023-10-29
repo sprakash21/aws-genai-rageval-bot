@@ -2,12 +2,26 @@
 
 import aws_cdk as cdk
 
-from deploy.sagemaker_studio_stack import SagemakerStudioStack
-from deploy.sagemaker_llm_stack import SageMakerLLMStack
-from deploy.sagemaker_huggingface_llm_stack import HuggingfaceSagemakerStack
-from deploy.network_stack import VPCNetworkStack
-from deploy.db_stack import DBStack
-from helpers.model_info import get_sagemaker_uris
+from deploy.nc_llm_aws_infra_blocks.pre_built_stacks.Inference.sagemaker_studio_stack import (
+    SagemakerStudioStack,
+)
+from deploy.nc_llm_aws_infra_blocks.pre_built_stacks.Inference.sagemaker_llm_stack import (
+    SageMakerLLMStack,
+)
+from deploy.nc_llm_aws_infra_blocks.pre_built_stacks.Inference.sagemaker_huggingface_llm_stack import (
+    HuggingfaceSagemakerStack,
+)
+from deploy.nc_llm_aws_infra_blocks.pre_built_stacks.supplements.network_stack import (
+    VPCNetworkStack,
+)
+from deploy.nc_llm_aws_infra_blocks.pre_built_stacks.app.db_stack import DBStack
+from deploy.nc_llm_aws_infra_blocks.pre_built_stacks.app.application_stack import (
+    AppStack,
+)
+from deploy.nc_llm_aws_infra_blocks.pre_built_stacks.supplements.developer_stack import (
+    DeveloperStack,
+)
+from deploy.nc_llm_aws_infra_blocks.library.helpers.model_info import get_sagemaker_uris
 
 # Environment information
 aws_environment = cdk.Environment(region="eu-central-1")

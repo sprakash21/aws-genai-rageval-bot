@@ -2,7 +2,7 @@ from constructs import Construct
 from aws_cdk import Stack, aws_iam as iam, aws_ssm as ssm, aws_sagemaker as sagemaker
 
 
-from deploy_constructs.sagemaker_endpoint_construct import SageMakerEndpointConstruct
+from nc_llm_aws_infra_blocks.deploy_constructs.Inference.sagemaker_endpoint_construct import SageMakerEndpointConstruct
 
 
 class SageMakerLLMStack(Stack):
