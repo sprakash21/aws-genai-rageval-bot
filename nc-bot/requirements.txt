@@ -1,3 +1,4 @@
+# pip freeze this for particular version
 requests==2.31.0
 boto3==1.28.62
 cryptography==38.0.4

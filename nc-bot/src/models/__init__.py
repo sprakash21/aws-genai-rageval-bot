@@ -16,7 +16,8 @@ def prepare_connection_str():
     user = os.environ.get('PGVECTOR_USER')
     password = os.environ.get('PGVECTOR_PASSWORD')
     db_name = os.environ.get('PGVECTOR_DATABASE')
-    return f'postgresql+psycopg2://{user}:{password}@localhost:5432/{db_name}'
+    host = os.environ.get('PGVECTOR_HOST')
+    return f'postgresql+psycopg2://{user}:{password}@{host}:5432/{db_name}'
 
 engine = db.create_engine(prepare_connection_str())
 # Creation of the tables
