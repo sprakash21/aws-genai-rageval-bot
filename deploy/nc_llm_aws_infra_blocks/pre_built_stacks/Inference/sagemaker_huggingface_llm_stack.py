@@ -7,6 +7,7 @@ from deploy.nc_llm_aws_infra_blocks.deploy_constructs.Inference.hf_sagemaker_end
 from constructs import Construct
 
 
+# ToDo: Taha: Append project names
 class HuggingfaceSagemakerStack(Stack):
     def __init__(
         self,

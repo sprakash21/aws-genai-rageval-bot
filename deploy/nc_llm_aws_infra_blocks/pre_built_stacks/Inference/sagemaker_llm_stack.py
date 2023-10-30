@@ -7,6 +7,7 @@ from deploy.nc_llm_aws_infra_blocks.deploy_constructs.Inference.aws_sagemaker_en
 )
 
 
+# ToDo: Taha: Append project names
 class SageMakerLLMStack(Stack):
     def __init__(
         self, scope: Construct, construct_id: str, model_info, **kwargs

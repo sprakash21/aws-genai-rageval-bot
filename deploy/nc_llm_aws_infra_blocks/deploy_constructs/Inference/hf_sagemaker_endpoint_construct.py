@@ -24,6 +24,7 @@ def is_gpu_instance(instance_type):
     return True if instance_type.split(".")[1][0].lower() in ["p", "g"] else False
 
 
+# ToDo: Taha: Append project names
 class SageMakerHFEndpointConstruct(BaseSageMakerEndpointConstruct):
     def get_container(self) -> sagemaker.CfnModel.ContainerDefinitionProperty:
         # Construct vars

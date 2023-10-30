@@ -12,6 +12,8 @@ from nc_llm_aws_infra_blocks.library.config.huggingface_smconfig import (
     region_dict,
 )
 
+# ToDo: Taha: Append project names
+
 
 class SageMakerEndpointConstruct(BaseSageMakerEndpointConstruct):
     def __init__(
