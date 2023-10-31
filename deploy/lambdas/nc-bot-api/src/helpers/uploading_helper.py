@@ -2,9 +2,7 @@ import os
 import json
 import psycopg2
 from langchain.document_loaders import S3FileLoader
-from langchain.text_splitter import (
-    RecursiveCharacterTextSplitter
-)
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 import botocore
 import boto3
 from langchain.vectorstores.pgvector import PGVector
@@ -14,22 +12,23 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 class UploadHelper:
     def __init__(self, local=False):
         if local:
-            self.boto3_session = boto3.Session(profile_name=os.environ.get("AWS_PROFILE"))
+            self.boto3_session = boto3.Session(
+                profile_name=os.environ.get("AWS_PROFILE")
+            )
         else:
             self.boto3_session = boto3
-    
+
     def get_db_secret_info(self):
         try:
             client = self.boto3_session.client("secretsmanager")
-            response = client.get_secret_value(
-                SecretId='RDS_postgres'
-            )
-            return json.loads(response['SecretString'])
+            response = client.get_secret_value(SecretId="RDS_postgres")
+            return json.loads(response["SecretString"])
         except botocore.exceptions.ClientError as exc:
-            print('There has been an error while obtaining secret information', exc)
+            print("There has been an error while obtaining secret information", exc)
 
     def get_connection_str(self):
         secret_info = self.get_db_secret_info()
@@ -39,10 +38,9 @@ class UploadHelper:
             port=int(secret_info["port"]),
             database=secret_info["dbname"],
             user=secret_info["username"],
-            password=secret_info["password"]
+            password=secret_info["password"],
         )
         return CONNECTION_STRING
-
 
     def make_connection(self):
         secret_info = self.get_db_secret_info()
@@ -58,7 +56,8 @@ class UploadHelper:
         return cur
 
     def setup_db(self, cur):
-        cur.execute("""
+        cur.execute(
+            """
                     CREATE EXTENSION IF NOT EXISTS vector;
                     """
         )
@@ -70,7 +69,6 @@ class UploadHelper:
         )
         status = cur.fetchone()[0]
         return status
-
 
     def is_file_embedded(self, cur, fname):
         query = """
@@ -121,7 +119,6 @@ class UploadHelper:
             )
             return True
 
-
     def retrieve_document_similarity(self, query):
         COLLECTION_NAME = "time_reporting"
         embedding = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
@@ -130,9 +127,7 @@ class UploadHelper:
             connection_string=self.get_connection_str(),
             embedding_function=embedding,
         )
-        docs_with_score = vector_store.similarity_search_with_score(
-            query
-        )
+        docs_with_score = vector_store.similarity_search_with_score(query)
         for doc, score in docs_with_score:
             print("-" * 80)
             print("Score: ", score)

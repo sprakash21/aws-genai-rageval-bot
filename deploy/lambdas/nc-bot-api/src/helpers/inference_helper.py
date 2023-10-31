@@ -22,7 +22,7 @@ class Llama2InferenceHelper:
         self.prompt = hub.pull("rlm/rag-prompt-llama")
         self.collection_name = collection_name
         self.endpoint_name = endpoint
-  
+
     def inference(self, query):
         upload_helper = UploadHelper()
         collection_name = self.collection_name
@@ -47,7 +47,7 @@ class Llama2InferenceHelper:
                 "repeat_last_n": 0,
                 "max_new_tokens": 512,
                 "stop": ["</s>"],
-                "return_full_text": False
+                "return_full_text": False,
             },
             content_handler=content_handler,
         )

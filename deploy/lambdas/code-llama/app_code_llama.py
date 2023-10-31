@@ -28,12 +28,13 @@ def build_llama2_prompt(messages):
 
     return start_prompt + "".join(conversation) + end_prompt
 
+
 def handler(event, context):
     messages = [
-    {
-        "role": "system",
-        "content": "You're an intelligent, concise coding assistant. Wrap code in ``` for readability. Don't repeat yourself. Use best practice and good coding standards."
-    }
+        {
+            "role": "system",
+            "content": "You're an intelligent, concise coding assistant. Wrap code in ``` for readability. Don't repeat yourself. Use best practice and good coding standards.",
+        }
     ]
     body = json.loads(event["body"])
     prompt = body["prompt"]
@@ -48,7 +49,7 @@ def handler(event, context):
             "top_k": TOP_K,
             "max_new_tokens": MAX_NEW_TOKENS,
             "repetition_penalty": REPETATION_PENALITY,
-            "stop": ["</s>"]
+            "stop": ["</s>"],
         },
     }
 
@@ -60,7 +61,7 @@ def handler(event, context):
 
     model_predictions = json.loads(response["Body"].read())
     print(model_predictions)
-    generated_text = model_predictions[0]["generated_text"][len(instruction):]
+    generated_text = model_predictions[0]["generated_text"][len(instruction) :]
 
     message = {"prompt": prompt, "generated_text": generated_text}
 

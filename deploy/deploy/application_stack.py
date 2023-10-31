@@ -67,10 +67,12 @@ class AppStack(Stack):
                 statements=[
                     iam.PolicyStatement(
                         effect=iam.Effect.ALLOW,
-                        actions=["secretsmanager:GetResourcePolicy",
-                                 "secretsmanager:GetSecretValue",
-                                 "secretsmanager:DescribeSecret",
-                                 "secretsmanager:ListSecretVersionIds"],
+                        actions=[
+                            "secretsmanager:GetResourcePolicy",
+                            "secretsmanager:GetSecretValue",
+                            "secretsmanager:DescribeSecret",
+                            "secretsmanager:ListSecretVersionIds",
+                        ],
                         resources=["*"],
                     )
                 ],
@@ -78,25 +80,25 @@ class AppStack(Stack):
         )
         role.attach_inline_policy(
             iam.Policy(
-            self,
-            "other-policy",
-            statements=[
-                iam.PolicyStatement(
-                    effect=iam.Effect.ALLOW,
-                    actions=[
-                        "cloudwatch:PutMetricData",
-                        "cloudwatch:GetMetricData",
-                        "cloudwatch:GetMetricStatistics",
-                        "cloudwatch:ListMetrics",
-                        "logs:CreateLogGroup",
-                        "logs:CreateLogStream",
-                        "logs:DescribeLogStreams",
-                        "logs:PutLogEvents",
-                        "logs:GetLogEvents"
-                    ],
-                    resources=["*"],
-                )
-            ],
+                self,
+                "other-policy",
+                statements=[
+                    iam.PolicyStatement(
+                        effect=iam.Effect.ALLOW,
+                        actions=[
+                            "cloudwatch:PutMetricData",
+                            "cloudwatch:GetMetricData",
+                            "cloudwatch:GetMetricStatistics",
+                            "cloudwatch:ListMetrics",
+                            "logs:CreateLogGroup",
+                            "logs:CreateLogStream",
+                            "logs:DescribeLogStreams",
+                            "logs:PutLogEvents",
+                            "logs:GetLogEvents",
+                        ],
+                        resources=["*"],
+                    )
+                ],
             )
         )
         self.uploader_lambda = _lambda.DockerImageFunction(
@@ -111,7 +113,7 @@ class AppStack(Stack):
                 # Directory relative to where you execute cdk deploy
                 # contains a Dockerfile with build instructions
                 directory="lambdas/nc-bot-api",
-                cmd=[ "data_upload.lambda_handler" ]
+                cmd=["data_upload.lambda_handler"],
             ),
             architecture=_lambda.Architecture.ARM_64,
             ephemeral_storage_size=Size.gibibytes(10),
@@ -120,5 +122,5 @@ class AppStack(Stack):
             vpc_subnets=ec2.SubnetSelection(
                 subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
             ),
-            vpc=vpc
+            vpc=vpc,
         )

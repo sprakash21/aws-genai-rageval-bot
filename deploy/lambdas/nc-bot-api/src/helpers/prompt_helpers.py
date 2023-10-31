@@ -1,5 +1,6 @@
 from langchain.prompts import PromptTemplate
 
+
 def build_llama2_prompt(messages):
     start_prompt = "<s>[INST] "
     end_prompt = " [/INST]"
@@ -13,6 +14,7 @@ def build_llama2_prompt(messages):
             conversation.append(f" [/INST] {message['content'].strip()}</s><s>[INST] ")
 
     return start_prompt + "".join(conversation) + end_prompt
+
 
 def create_prompt_template():
     template = """
@@ -28,5 +30,7 @@ def create_prompt_template():
     Context: {context} 
     Answer: [/INST]<s>
     """
-    rag_prompt_custom = PromptTemplate(input_variables=['question', 'context'], template=template)
+    rag_prompt_custom = PromptTemplate(
+        input_variables=["question", "context"], template=template
+    )
     return rag_prompt_custom
