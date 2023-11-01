@@ -1,7 +1,8 @@
 Running pgvector on docker and using for vectordb tests
 
 Build:
-docker build -t pgvector_local -f pgvector_dockerfile .
+cd genai-aws/nc-bot
+docker build -t pgvector_local -f pg_vector/Dockerfile .
 
 Run:
 docker run \

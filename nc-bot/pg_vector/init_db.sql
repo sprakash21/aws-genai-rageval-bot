@@ -1,3 +1,3 @@
 CREATE DATABASE vectordblab;
-USE vectordblab;
-CREATE EXENTION IF NOT EXISTS vector;
+\c vectordblab;
+CREATE EXTENSION IF NOT EXISTS vector;

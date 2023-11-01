@@ -25,7 +25,7 @@ class DBStack(Stack):
             # Does not work by updating stack. Best create secret separate and pass it.
             credentials=rds.Credentials.from_generated_secret(
                 "postgres",
-                secret_name="RDS_postgres",
+                secret_name="env/dev/rds_postgres",
                 exclude_characters="`\"$%'!&*^#@()}{[]\\>=+<?%/",
             ),
             vpc=vpc,

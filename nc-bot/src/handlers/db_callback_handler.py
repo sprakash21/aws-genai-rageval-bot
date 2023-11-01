@@ -3,14 +3,14 @@ from datetime import datetime
 from time import time
 from collections import defaultdict
 from typing import List, Dict, Any, DefaultDict, Dict
-from langchain.callbacks.base import BaseCallbackHandler
+from langchain.callbacks.base import BaseCallbackHandler, AsyncCallbackHandler
 from langchain.llms.base import LLMResult
 from sqlalchemy.orm import Session
 from src.models import engine
 from src.models.models import RagScore
 from src.helpers.evaluation_helper import EvalHelper
 
-class DBCallbackHandler(BaseCallbackHandler):
+class DBCallbackHandler(AsyncCallbackHandler):
     """Base callback handler that can be used to handle callbacks from langchain."""
     def __init__(self) -> None:
         self.run_data_llm: DefaultDict[str, Any] = defaultdict(dict)
@@ -21,8 +21,39 @@ class DBCallbackHandler(BaseCallbackHandler):
         question_raw = prompt.split("Context:")[0].split("Question:")[1].strip()
         context_raw = prompt.split("Context:")[1].replace("Answer: [/INST]", "").strip()
         return question_raw, context_raw
+    
+    async def evaluate(self, response_data:dict) -> dict:
+        evaluation_helper = EvalHelper()
+        print("Came here")
+        result = await evaluation_helper.evaluation(run_data=response_data)
+        return result
 
-    def on_llm_start(
+    async def write_score(self, response_data:dict) -> bool:
+        result = await self.evaluate(response_data)
+        if len(result) == 0:
+            print("The evaluation of the result was not successful")
+            return False
+        with Session(engine) as session:
+            rag_score = RagScore(
+                chain_info = {
+                    "question": response_data["question"],
+                    "contexts": response_data["contexts"],
+                    "answer": response_data["output_text"]},
+                model_type=response_data["model_type"],
+                qa_status=response_data["qa_status"],
+                total_duration=response_data["total_duration"],
+                faithfulness=result["faithfulness"],
+                context_precision=result["context_precision"],
+                answer_relevancy=result["answer_relevancy"],
+                harmfulness=result["harmfulness"],
+                time_stamp=datetime.utcnow(),
+            )
+            session.add(rag_score)
+            session.commit()
+            session.close()
+            return True
+
+    async def on_llm_start(
         self, serialized: Dict[str, Any], prompts: List[str], **kwargs: Any
     ) -> Any:
         """Run when LLM starts running."""
@@ -33,7 +64,7 @@ class DBCallbackHandler(BaseCallbackHandler):
         print("on_llm_start Prompt --", prompts)
         print("on_llm_start Seralized --", serialized)
 
-    def on_llm_end(self, response: LLMResult, **kwargs: Any) -> Any:
+    async def on_llm_end(self, response: LLMResult, **kwargs: Any) -> Any:
         """Run when LLM ends running."""
         run_id = kwargs["run_id"]
         try:
@@ -52,16 +83,20 @@ class DBCallbackHandler(BaseCallbackHandler):
         for i, generations in enumerate(response.generations):
             for generation in generations:
                 run_data_llm["total_duration"] = time_from_start_to_end
-                run_data_llm["model_type"] = generation.generation_info["model"]
-                run_data_llm["qa_status"] = generation.generation_info["done"]
+                if hasattr(generations, "generation_info"):
+                    run_data_llm["model_type"] = generation.generation_info["model"]
+                    run_data_llm["qa_status"] = generation.generation_info["done"]
+                else:
+                    run_data_llm["model_type"] = "sagemaker_endpoint"
+                    run_data_llm["qa_status"] = True if (hasattr(generation, "text")) and (len(generation.text) > 0) else False
                 self.run_data_llm[run_id] = run_data_llm
 
-    def on_chain_start(
+    async def on_chain_start(
         self, serialized: Dict[str, Any], inputs: Dict[str, Any], **kwargs: Any
     ) -> None:
         """Print out that we are entering a chain."""
         run_id = kwargs["run_id"]
-
+        print("Chain Started", run_id)
         if isinstance(inputs, dict) and "input_documents" in inputs:
             contexts = []
             for document in inputs["input_documents"]:
@@ -72,41 +107,22 @@ class DBCallbackHandler(BaseCallbackHandler):
             self.run_data_chain[run_id]["contexts"] = contexts
             self.run_data_chain[run_id]["question"] = inputs["question"]
 
-    def on_chain_end(self, outputs: Dict[str, Any], **kwargs: Any) -> None:
+    async def on_chain_end(self, outputs: Dict[str, Any], **kwargs: Any) -> None:
         """Print out that we finished a chain."""
+        print("Chain Ended", kwargs["run_id"])
         if kwargs["run_id"] in self.run_data_chain.keys():
             self.run_data_chain[kwargs["run_id"]]["output_text"] = outputs["output_text"]
-        
             combined_dict = dict()
             for value in self.run_data_llm.values():
                 combined_dict.update(value)
             for value in self.run_data_chain.values():
                 combined_dict.update(value)
-            evaluation_helper = EvalHelper()
-            result = evaluation_helper.evaluation(run_data=combined_dict)
-            print(result)
-            with Session(engine) as session:
-                rag_score = RagScore(
-                    chain_info = {
-                        "question": combined_dict["question"],
-                        "contexts": combined_dict["contexts"],
-                        "answer": combined_dict["output_text"]},
-                    model_type=combined_dict["model_type"],
-                    qa_status=combined_dict["qa_status"],
-                    total_duration=combined_dict["total_duration"],
-                    faithfulness=result["faithfulness"],
-                    context_precision=result["context_precision"],
-                    answer_relevancy=result["answer_relevancy"],
-                    harmfulness=result["harmfulness"],
-                    time_stamp=datetime.utcnow(),
-                )
-                session.add(rag_score)
-                session.commit()
-                session.close()
-
+            
+            rc = await self.write_score(combined_dict)
+            print("The status of the evalation is - ",rc)
         
 
 
-    def on_chain_error(self, error: BaseException, **kwargs: Any) -> None:
+    async def on_chain_error(self, error: BaseException, **kwargs: Any) -> None:
         """Do nothing."""
         pass

@@ -9,31 +9,26 @@ import botocore
 import boto3
 from langchain.vectorstores.pgvector import PGVector
 from langchain.embeddings import HuggingFaceEmbeddings
+from src.helpers.env_utils import get_secret_info
 from dotenv import load_dotenv
 
 
 load_dotenv()
 
 class UploadHelper:
-    def __init__(self, local=False):
-        if local:
-            self.boto3_session = boto3.Session(profile_name=os.environ.get("AWS_PROFILE"))
-            self.is_local = True
-        else:
-            self.boto3_session = boto3
-            self.is_local = False
-    
-    def get_db_secret_info(self):
-        try:
-            client = self.boto3_session.client("secretsmanager")
-            response = client.get_secret_value(
-                SecretId='RDS_postgres'
-            )
-            return json.loads(response['SecretString'])
-        except botocore.exceptions.ClientError as exc:
-            print('There has been an error while obtaining secret information', exc)
+    """Uploads the unstructured pdf data into vectordb
+    """
+    def __init__(self, db_local):
+        self.boto3_session = boto3
+        self.is_local = db_local
+        self.rds_secret_info = get_secret_info(os.environ.get("RDS_SECRET_NAME"))
 
     def get_connection_str(self):
+        """Generates the Connection String required to connect to the Database
+
+        Returns:
+            _type_: _description_
+        """
         if self.is_local:
             CONNECTION_STRING = PGVector.connection_string_from_db_params(
                 driver=os.environ.get("PGVECTOR_DRIVER", "psycopg2"),
@@ -44,14 +39,13 @@ class UploadHelper:
                 password=os.environ.get("PGVECTOR_PASSWORD")
             )
         else:
-            secret_info = self.get_db_secret_info()
             CONNECTION_STRING = PGVector.connection_string_from_db_params(
             driver="psycopg2",
-            host=secret_info["host"],
-            port=int(secret_info["port"]),
-            database=secret_info["dbname"],
-            user=secret_info["username"],
-            password=secret_info["password"]
+            host=self.rds_secret_info["host"],
+            port=int(self.rds_secret_info["port"]),
+            database=self.rds_secret_info["dbname"],
+            user=self.rds_secret_info["username"],
+            password=self.rds_secret_info["password"]
         )
         return CONNECTION_STRING
 
@@ -66,14 +60,12 @@ class UploadHelper:
                 password=os.environ.get("PGVECTOR_PASSWORD")
         )
         else:
-            secret_info = self.get_db_secret_info()
-            print(secret_info)
             conn = psycopg2.connect(
-                host=secret_info["host"],
+                host=self.rds_secret_info["host"],
                 port=5432,
-                dbname=secret_info["dbname"],
-                user=secret_info["username"],
-                password=secret_info["password"],
+                dbname=self.rds_secret_info["dbname"],
+                user=self.rds_secret_info["username"],
+                password=self.rds_secret_info["password"],
             )
         cur = conn.cursor()
         return cur
@@ -101,6 +93,17 @@ class UploadHelper:
         return False
 
     def process_data(self, fname, test_delete=False):
+        """This function performs the required processing of the data for the given input
+        file and puts that into the database.
+
+        Args:
+            fname (str): File name store in S3
+            test_delete (bool, optional): _description_. Defaults to False.
+
+        Returns:
+            bool: Success or Failure of the process
+        """
+        # Fixed collection and can be extended.
         COLLECTION_NAME = "time_reporting"
         loader = S3FileLoader(bucket=os.environ.get("BUCKET_NAME"), key=fname)
         # Short vs Long chunk
@@ -116,6 +119,7 @@ class UploadHelper:
             s3_fname = f"s3://{os.environ.get('BUCKET_NAME')}/{fname}"
             if self.is_file_embedded(curr, s3_fname):
                 print("Same PDF data is being uploaded and it will not be uploaded")
+                curr.close()
                 return False
             else:
                 # Extend vectorstore.
@@ -125,7 +129,7 @@ class UploadHelper:
                     embedding_function=embedding,
                 )
                 store.add_documents(documents)
-
+                curr.close()
                 return True
         else:
             # Create new set of document store
@@ -136,10 +140,15 @@ class UploadHelper:
                 #pre_delete_collection=True,
                 connection_string=self.get_connection_str(),
             )
+            curr.close()
             return True
 
 
     def retrieve_document_similarity(self, query):
+        """Retreive similar documents to the query using similarity search of the embeddings
+        Args:
+            query (str): The query or question asked by user.
+        """
         COLLECTION_NAME = "time_reporting"
         embedding = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
         vector_store = PGVector(

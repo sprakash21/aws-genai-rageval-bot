@@ -9,9 +9,7 @@ logger = get_logger(__name__)
 
 class S3FileUpload:
     def __init__(self):
-        self.client = boto3.Session(profile_name=os.environ.get("AWS_PROFILE")).client(
-            "s3"
-        )
+        self.client = boto3.client("s3")
         self.bucket = os.environ.get("BUCKET_NAME")
 
     def get_object(self, key: str):
