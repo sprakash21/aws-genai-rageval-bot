@@ -29,4 +29,6 @@ for uploaded_file in uploaded_files:
         db_local = get_db_type()
         upload_helper = UploadHelper(db_local=db_local)
         status = upload_helper.process_data(fname=f"pdf_data/{fname}")
-        st.write(f"A {status} status obtained from the successful upload of the pdf into vectordb")
+        st.write(
+            f"A {status} status obtained from the successful upload of the pdf into vectordb"
+        )

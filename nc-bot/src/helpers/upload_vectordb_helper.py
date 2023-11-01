@@ -2,9 +2,7 @@ import os
 import json
 import psycopg2
 from langchain.document_loaders import S3FileLoader
-from langchain.text_splitter import (
-    RecursiveCharacterTextSplitter
-)
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 import botocore
 import boto3
 from langchain.vectorstores.pgvector import PGVector
@@ -15,9 +13,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 class UploadHelper:
     """Uploads the unstructured pdf data into vectordb
     """
+
     def __init__(self, db_local):
         self.boto3_session = boto3
         self.is_local = db_local
@@ -36,19 +36,18 @@ class UploadHelper:
                 port=int(os.environ.get("PGVECTOR_PORT")),
                 database=os.environ.get("PGVECTOR_DATABASE"),
                 user=os.environ.get("PGVECTOR_USER"),
-                password=os.environ.get("PGVECTOR_PASSWORD")
+                password=os.environ.get("PGVECTOR_PASSWORD"),
             )
         else:
             CONNECTION_STRING = PGVector.connection_string_from_db_params(
-            driver="psycopg2",
-            host=self.rds_secret_info["host"],
-            port=int(self.rds_secret_info["port"]),
-            database=self.rds_secret_info["dbname"],
-            user=self.rds_secret_info["username"],
-            password=self.rds_secret_info["password"]
-        )
+                driver="psycopg2",
+                host=self.rds_secret_info["host"],
+                port=int(self.rds_secret_info["port"]),
+                database=self.rds_secret_info["dbname"],
+                user=self.rds_secret_info["username"],
+                password=self.rds_secret_info["password"],
+            )
         return CONNECTION_STRING
-
 
     def make_connection(self):
         if self.is_local:
@@ -57,8 +56,8 @@ class UploadHelper:
                 port=os.environ.get("PGVECTOR_PORT"),
                 dbname=os.environ.get("PGVECTOR_DATABASE"),
                 user=os.environ.get("PGVECTOR_USER"),
-                password=os.environ.get("PGVECTOR_PASSWORD")
-        )
+                password=os.environ.get("PGVECTOR_PASSWORD"),
+            )
         else:
             conn = psycopg2.connect(
                 host=self.rds_secret_info["host"],
@@ -70,7 +69,6 @@ class UploadHelper:
         cur = conn.cursor()
         return cur
 
-
     def is_existing_collection(self, cur):
         cur.execute(
             "select exists(select * from information_schema.tables where table_name=%s)",
@@ -78,7 +76,6 @@ class UploadHelper:
         )
         status = cur.fetchone()[0]
         return status
-
 
     def is_file_embedded(self, cur, fname):
         query = """
@@ -137,12 +134,11 @@ class UploadHelper:
                 documents=documents,
                 embedding=embedding,
                 collection_name=COLLECTION_NAME,
-                #pre_delete_collection=True,
+                # pre_delete_collection=True,
                 connection_string=self.get_connection_str(),
             )
             curr.close()
             return True
-
 
     def retrieve_document_similarity(self, query):
         """Retreive similar documents to the query using similarity search of the embeddings
@@ -156,9 +152,7 @@ class UploadHelper:
             connection_string=self.get_connection_str(),
             embedding_function=embedding,
         )
-        docs_with_score = vector_store.similarity_search_with_score(
-            query
-        )
+        docs_with_score = vector_store.similarity_search_with_score(query)
         for doc, score in docs_with_score:
             print("-" * 80)
             print("Score: ", score)

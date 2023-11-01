@@ -5,6 +5,7 @@ from src.models.models import RagScore
 from src.helpers.evaluation_helper import EvalHelper
 import pandas as pd
 
+
 class RagMonitorQuery:
     def __init__(self, session: Session):
         self.session = session
@@ -25,11 +26,11 @@ class RagMonitorQuery:
                 RagScore.model_type,
                 RagScore.qa_status,
                 RagScore.harmfulness,
-                RagScore.time_stamp
+                RagScore.time_stamp,
             )
             .filter(RagScore.time_stamp >= since)
         )
-        
+
         results_df = pd.read_sql(query.statement, engine)
         return results_df
 
@@ -49,7 +50,7 @@ class RagMonitorQuery:
                 RagScore.model_type,
                 RagScore.qa_status,
                 RagScore.harmfulness,
-                RagScore.time_stamp
+                RagScore.time_stamp,
             )
             .filter(RagScore.time_stamp >= since)
         )
@@ -72,7 +73,7 @@ class RagMonitorQuery:
                 RagScore.model_type,
                 RagScore.qa_status,
                 RagScore.harmfulness,
-                RagScore.time_stamp
+                RagScore.time_stamp,
             )
             .filter(RagScore.time_stamp >= since)
         )
@@ -95,7 +96,7 @@ class RagMonitorQuery:
                 RagScore.model_type,
                 RagScore.qa_status,
                 RagScore.harmfulness,
-                RagScore.time_stamp
+                RagScore.time_stamp,
             )
             .filter(RagScore.time_stamp >= since)
         )

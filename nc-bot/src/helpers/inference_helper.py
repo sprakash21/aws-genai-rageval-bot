@@ -25,7 +25,9 @@ class Llama2InferenceHelper:
     def __init__(self, collection_name) -> None:
         self.prompt = hub.pull("rlm/rag-prompt-llama")
         self.collection_name = collection_name
-        self.sg_endpoint_name = get_ssm_parameter_value(os.environ.get("SG_ENDPOINT_NAME"))
+        self.sg_endpoint_name = get_ssm_parameter_value(
+            os.environ.get("SG_ENDPOINT_NAME")
+        )
         self.db_type = get_db_type()
 
     def inference_local(self, query):
@@ -55,8 +57,10 @@ class Llama2InferenceHelper:
             # callbacks=[DBCallbackHandler()]
         )
         # Explore k
-        retriever = vector_store.as_retriever(search_type="mmr", search_kwargs={'k': 5, 'fetch_k': 20})
-        #retriever = vector_store.as_retriever()
+        retriever = vector_store.as_retriever(
+            search_type="mmr", search_kwargs={"k": 5, "fetch_k": 20}
+        )
+        # retriever = vector_store.as_retriever()
         # RetrievalQA
         qa_chain = RetrievalQA.from_chain_type(
             llm,
@@ -64,11 +68,9 @@ class Llama2InferenceHelper:
             chain_type_kwargs={"prompt": rag_prompt},
             verbose=True,
             input_key="question",
-            return_source_documents=True
+            return_source_documents=True,
         )
-        result = qa_chain(
-            {"question": query},callbacks=[DBCallbackHandler()]
-        )
+        result = qa_chain({"question": query}, callbacks=[DBCallbackHandler()])
         print(result.keys())
         print(result["source_documents"])
         return result["result"]
@@ -104,7 +106,7 @@ class Llama2InferenceHelper:
                     "repeat_last_n": 0,
                     "max_new_tokens": 512,
                     "stop": ["</s>"],
-                    "return_full_text": False
+                    "return_full_text": False,
                 },
                 content_handler=content_handler,
             )
@@ -117,11 +119,9 @@ class Llama2InferenceHelper:
                 chain_type_kwargs={"prompt": rag_prompt},
                 verbose=True,
                 return_source_documents=True,
-                input_key="question"
+                input_key="question",
             )
-            result = qa_chain(
-                {"question": query},callbacks=[DBCallbackHandler()]
-            )
+            result = qa_chain({"question": query}, callbacks=[DBCallbackHandler()])
             print("Results-----", result.keys())
             return result
         except Exception as e:

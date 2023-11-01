@@ -30,6 +30,8 @@ def prepare_source_docs(docs):
             mk_txt += f"<a href={s3_uri}>{fname.split('/')[-1]}</a><br>"
     mk_txt += f"</details>"
     return mk_txt
+
+
 # New response generation
 if st.session_state.messages[-1]["role"] != "assistant":
     with st.chat_message("assistant"):
