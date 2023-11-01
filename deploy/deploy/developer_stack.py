@@ -38,5 +38,5 @@ class DeveloperStack(Stack):
                     device_name="/dev/sda1", volume=ec2.BlockDeviceVolume.ebs(100)
                 )
             ],
-            key_name=self._key_pair.key_name
+            key_name=self._key_pair.key_name,
         )

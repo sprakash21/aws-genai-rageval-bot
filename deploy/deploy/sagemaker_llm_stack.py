@@ -1,10 +1,5 @@
 from constructs import Construct
-from aws_cdk import (
-    Stack,
-    aws_iam as iam,
-    aws_ssm as ssm,
-    aws_sagemaker as sagemaker
-)
+from aws_cdk import Stack, aws_iam as iam, aws_ssm as ssm, aws_sagemaker as sagemaker
 
 
 from deploy_constructs.sagemaker_endpoint_construct import SageMakerEndpointConstruct
@@ -57,7 +52,11 @@ class SageMakerLLMStack(Stack):
             "sm-ecr-policy",
             statements=[
                 iam.PolicyStatement(
-                    effect=iam.Effect.ALLOW, actions=["ecr:*",], resources=["*"]
+                    effect=iam.Effect.ALLOW,
+                    actions=[
+                        "ecr:*",
+                    ],
+                    resources=["*"],
                 )
             ],
         )

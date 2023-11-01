@@ -30,9 +30,7 @@ class DBStack(Stack):
             ),
             vpc=vpc,
             # TODO: Change to private when all functionality on aws
-            vpc_subnets=ec2.SubnetSelection(
-                subnet_type=ec2.SubnetType.PUBLIC
-            ),
+            vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PUBLIC),
             ca_certificate=rds.CaCertificate.RDS_CA_RDS2048_G1,
             max_allocated_storage=200,
             cloudwatch_logs_exports=["postgresql"],
