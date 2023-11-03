@@ -10,11 +10,11 @@ class HuggingfaceSagemakerStack(Stack):
         super().__init__(scope, construct_id, **kwargs)
         # Context parameters
         huggingface_model = (
-            self.node.try_get_context("model") or "meta-llama/Llama-2-13b-chat-hf"
+            self.node.try_get_context("model") or "TheBloke/Llama-2-13B-GPTQ" # "meta-llama/Llama-2-13b-chat-hf"
         )
         # cdk context vars
         huggingface_task = self.node.try_get_context("task") or "text-generation"
-        instance_type = self.node.try_get_context("instance_type") or "ml.g5.12xlarge"
+        instance_type = self.node.try_get_context("instance_type") or "ml.g5.2xlarge"
         huggingface_token_id = self.node.try_get_context("hf_id") or ""
 
         execution_role = iam.Role(
