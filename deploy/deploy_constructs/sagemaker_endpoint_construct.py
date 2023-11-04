@@ -132,7 +132,8 @@ class SageMakerHFEndpointConstruct(Construct):
                 8192
             ),  # Limits the number of tokens that can be processed in parallel during the generation
             "SM_NUM_GPUS": json.dumps(1),  # Single GPU support
-            'HF_MODEL_QUANTIZE' : 'gptq',
+            # Quantization
+            #'HF_MODEL_QUANTIZE' : 'gptq',
         }
         container = sagemaker.CfnModel.ContainerDefinitionProperty(
             environment=container_environment, image=image_uri

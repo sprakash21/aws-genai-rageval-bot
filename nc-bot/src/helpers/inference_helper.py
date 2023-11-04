@@ -102,7 +102,7 @@ class Llama2InferenceHelper:
                     "temperature": 0.5,
                     "top_k": 30,
                     "top_p": 0.9,
-                    "repeat_penalty": 1.3,
+                    "repetition_penalty": 1.3,
                     "repeat_last_n": 0,
                     "max_new_tokens": 512,
                     "stop": ["</s>"],
