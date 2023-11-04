@@ -81,7 +81,7 @@ class SageMakerEndpointConstruct(Construct):
 
 # Task is now default to text-generation.
 def get_image_uri(
-    region=None, pytorch_version=LATEST_PYTORCH_VERSION, tgi_version="0.8.2"
+    region=None, pytorch_version=LATEST_PYTORCH_VERSION, tgi_version="1.1.0"
 ):
     repository = f"{region_dict[region]}.dkr.ecr.{region}.amazonaws.com/huggingface-pytorch-tgi-inference"
     tag = f"{pytorch_version}-tgi{tgi_version}-gpu-py39-cu118-ubuntu20.04"
@@ -131,7 +131,9 @@ class SageMakerHFEndpointConstruct(Construct):
             "MAX_BATCH_TOTAL_TOKENS": json.dumps(
                 8192
             ),  # Limits the number of tokens that can be processed in parallel during the generation
-            "SM_NUM_GPUS": json.dumps(4),  # Multi GPU support
+            "SM_NUM_GPUS": json.dumps(1),  # Single GPU support
+            # Quantization
+            #'HF_MODEL_QUANTIZE' : 'gptq',
         }
         container = sagemaker.CfnModel.ContainerDefinitionProperty(
             environment=container_environment, image=image_uri

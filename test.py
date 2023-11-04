@@ -90,7 +90,7 @@ General Rules"""})
     payload = json.dumps(payload).encode("utf-8")
 
     response = runtime.invoke_endpoint(
-        EndpointName="endpoint-meta-llama--Llama-2-13b-chat-hf", ContentType="application/json", Body=payload
+        EndpointName="endpoint-TheBloke--Llama-2-13B-GPTQ", ContentType="application/json", Body=payload
     )
 
     model_predictions = json.loads(response["Body"].read())
