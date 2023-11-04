@@ -1,6 +1,6 @@
 # Adapted from Huggingface documentation.
 # WIP..
-from aws_cdk import aws_iam as iam, aws_sagemaker as sagemaker, Stack
+from aws_cdk import aws_iam as iam, aws_ssm as ssm, aws_sagemaker as sagemaker, Stack
 from deploy_constructs.sagemaker_endpoint_construct import SageMakerHFEndpointConstruct
 from constructs import Construct
 
@@ -70,7 +70,14 @@ class HuggingfaceSagemakerStack(Stack):
         )
 
         self.endpoint.node.add_dependency(sm_exec_policy)
-
+        
+        model_name = huggingface_model.split("/")[-1]
+        ssm.StringParameter(
+            self,
+            "sm_endpoint",
+            parameter_name=f"/env/dev/sagemaker/{model_name}",
+            string_value=self.endpoint.endpoint_name,
+        )
     @property
     def sm_endpoint(self) -> sagemaker.CfnEndpoint:
         return self.endpoint

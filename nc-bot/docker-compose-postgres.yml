@@ -1,0 +1,24 @@
+services:
+  postgres:
+    container_name: pgvector_container
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      PGDATA: /var/lib/postgresql/data
+    build:
+      context: .
+      dockerfile: pg_vector/Dockerfile
+    volumes:
+       - db:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - backend-network
+    restart: unless-stopped
+
+networks:
+  backend-network:
+
+volumes:
+    db:
+      driver: local

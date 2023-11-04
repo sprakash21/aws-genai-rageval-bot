@@ -6,7 +6,7 @@ from sagemaker import model_uris
 from sagemaker.jumpstart.notebook_utils import list_jumpstart_models
 from sagemaker import jumpstart
 
-boto3_session = boto3.Session(profile_name="nc-admin")
+boto3_session = boto3.Session()
 session = sagemaker.Session(boto_session=boto3_session)
 
 
