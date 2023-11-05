@@ -1,0 +1,60 @@
+# Adapted from Huggingface documentation.
+# WIP..
+from enum import Enum
+from typing import Text
+from aws_cdk import Environment, aws_iam as iam, aws_sagemaker as sagemaker, Stack
+from deploy.nc_llm_aws_infra_blocks.deploy_constructs.Inference.hf_sagemaker_endpoint_construct import (
+    HuggingFaceSagemakerEndpointConstruct,
+)
+from constructs import Construct
+from deploy.nc_llm_aws_infra_blocks.library.base.base_construct import BaseConstruct
+
+from deploy.nc_llm_aws_infra_blocks.library.base.base_enum import BaseEnum
+
+
+# an enum class representing huggingface task types
+class HuggingFaceTaskType(BaseEnum):
+    TextGeneration = "text-generation"
+
+
+# ToDo: Taha: Append project names
+class HuggingFaceSageMakerEndpointStack(Stack):
+    def __init__(
+        self,
+        scope: Construct,
+        construct_id: str,
+        project_prefix: str,
+        deploy_stage: str,
+        deploy_region: str,
+        environment: Environment,
+        execution_role_arn: str,
+        gpu_count: int,
+        huggingface_token_id: str,
+        huggingface_model_id: str = "meta-llama/Llama-2-13b-chat-hf",
+        huggingface_task: HuggingFaceTaskType = HuggingFaceTaskType.TextGeneration,
+        instance_type: str = "ml.g5.12xlarge",
+        instance_count: int = 1,
+        initial_variant_weight: float = 1,
+    ) -> None:
+        super().__init__(scope, construct_id)
+
+        # ToDo: Taha: Parameterize properly like e.g. variant_weight
+        self.endpoint = HuggingFaceSagemakerEndpointConstruct(
+            self,
+            "sagemaker-huggingface-endpoint",
+            model_name=huggingface_model_id,
+            project_prefix=project_prefix,
+            deploy_stage=deploy_stage,
+            deploy_region=deploy_region,
+            huggingface_task=huggingface_task,
+            huggingface_token_id=huggingface_token_id,
+            role_arn=execution_role_arn,
+            instance_type=instance_type,
+            gpu_count=gpu_count,
+            instance_count=instance_count,
+            variant_weight=initial_variant_weight,
+        )
+
+    @property
+    def sm_endpoint(self) -> HuggingFaceSagemakerEndpointConstruct:
+        return self.endpoint

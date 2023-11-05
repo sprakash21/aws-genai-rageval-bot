@@ -2,15 +2,19 @@
 
 from platform import node
 import aws_cdk as cdk
+from deploy.nc_llm_aws_infra_blocks.pre_built_stacks.Inference.sagemaker_hugging_face.hf_sagemaker_role_stack import (
+    HuggingFaceTaskType,
+)
 
 from deploy.nc_llm_aws_infra_blocks.pre_built_stacks.Inference.sagemaker_studio_stack import (
     SagemakerStudioStack,
 )
-from deploy.nc_llm_aws_infra_blocks.pre_built_stacks.Inference.sagemaker_llm_stack import (
-    SageMakerLLMStack,
+from deploy.nc_llm_aws_infra_blocks.pre_built_stacks.Inference.sagemaker_aws.aws_sagemaker_endpoint_stack import (
+    AwsSagemakerEndpointStack,
 )
-from deploy.nc_llm_aws_infra_blocks.pre_built_stacks.Inference.sagemaker_huggingface_llm_stack import (
-    HuggingfaceSagemakerStack,
+from deploy.nc_llm_aws_infra_blocks.pre_built_stacks.Inference.sagemaker_hugging_face import (
+    HuggingFaceSageMakerRoleStack,
+    HuggingFaceSageMakerEndpointStack,
 )
 from deploy.nc_llm_aws_infra_blocks.pre_built_stacks.supplements.network_stack import (
     VPCNetworkStack,
@@ -63,21 +67,31 @@ gpu_count = inference_endpoint["gpu_count"]
 # SagemakerStudioStack(app, "deploy", vpc=network_stack.vpc)
 # If sagemaker llm app deployment and endpoint with lambda + apigw needs to be setup
 
+llm_hf_execution_role_stack = HuggingFaceSageMakerRoleStack(
+    app,
+    "sagemaker-hf-execution-role-stack",
+)
 
-llm_stack = HuggingfaceSagemakerStack(
+llama2_inference_stack = HuggingFaceSageMakerEndpointStack(
     app,
     "llm-hf-sm-stack",
-    env=aws_environment,
+    project_prefix="llm",
+    deploy_stage="dev",
+    deploy_region="eu-central-1",
     huggingface_model_id=huggingface_model_id,
-    huggingface_task=huggingface_task,
+    huggingface_task=HuggingFaceTaskType.from_string("text-generation"),
     huggingface_token_id=hugging_face_token,
     instance_type=instance_type,
     instance_count=instance_count,
     gpu_count=gpu_count,
     environment=aws_environment,
+    execution_role_arn=llm_hf_execution_role_stack.execution_role_arn,
 )
 
-network_stack = VPCNetworkStack(app, "vpc-network-stack", env=aws_environment)
+
+llama2_inference_stack.node.add_dependency(llm_hf_execution_role_stack)
+
+# network_stack = VPCNetworkStack(app, "vpc-network-stack", env=aws_environment)
 
 
 # ToDo: Taha: Convert to construct and put into Application Stack.
@@ -86,6 +100,7 @@ network_stack = VPCNetworkStack(app, "vpc-network-stack", env=aws_environment)
 # )
 
 
-db_stack = DBStack(app, "db-stack", vpc=network_stack.vpc, env=aws_environment)
+# db_stack = DBStack(app, "db-stack", vpc=network_stack.vpc, env=aws_environment)
 
+# AppStack(app, "llm-app-stack", env=aws_environment, vpc=network_stack.vpc)
 app.synth()

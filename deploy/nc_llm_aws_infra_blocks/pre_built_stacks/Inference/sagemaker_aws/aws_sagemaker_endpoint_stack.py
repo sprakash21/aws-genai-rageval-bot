@@ -3,16 +3,23 @@ from aws_cdk import Stack, aws_iam as iam, aws_ssm as ssm, aws_sagemaker as sage
 
 
 from deploy.nc_llm_aws_infra_blocks.deploy_constructs.Inference.aws_sagemaker_endpoint_construct import (
-    SageMakerEndpointConstruct,
+    AwsSagemakerEndpointConstruct,
 )
 
 
 # ToDo: Taha: Append project names
-class SageMakerLLMStack(Stack):
+class AwsSagemakerEndpointStack(Stack):
     def __init__(
-        self, scope: Construct, construct_id: str, model_info, **kwargs
+        self,
+        scope: Construct,
+        construct_id: str,
+        project_prefix: str,
+        deploy_stage: str,
+        deploy_region: str,
+        model_info,
+        **kwargs
     ) -> None:
-        super().__init__(scope, construct_id, **kwargs)
+        super().__init__(scope, construct_id)
         role = iam.Role(
             self,
             "llm-sagemaker-policy",
@@ -69,10 +76,12 @@ class SageMakerLLMStack(Stack):
         role.attach_inline_policy(ecr_policy)
 
         # ToDo: Taha: Parameterize properly like e.g. variant_weight, internalize environment etc
-        self.endpoint = SageMakerEndpointConstruct(
+        self.endpoint = AwsSagemakerEndpointConstruct(
             self,
             "llm_textgeneration",
-            project_prefix="GenAI-Demo",
+            project_prefix=project_prefix,
+            deploy_stage=deploy_stage,
+            deploy_region=deploy_region,
             role_arn=role.role_arn,
             model_name="meta-textgen-stack",
             model_bucket_name=model_info["model_bucket_name"],
@@ -96,5 +105,5 @@ class SageMakerLLMStack(Stack):
         )
 
     @property
-    def sm_endpoint(self) -> SageMakerEndpointConstruct:
+    def sm_endpoint(self) -> AwsSagemakerEndpointConstruct:
         return self.endpoint

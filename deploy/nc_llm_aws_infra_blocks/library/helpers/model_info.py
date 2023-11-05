@@ -24,7 +24,7 @@ def get_sagemaker_model_info(
     profile_name,
     model_version="*",
     scope="inference",
-):
+) -> SageMakerModelInfo:
     FILTER = f"task == {model_task_type}"
     boto3_session = boto3.Session(profile_name=profile_name, region_name=region_name)
     session = sagemaker.Session(boto_session=boto3_session)
