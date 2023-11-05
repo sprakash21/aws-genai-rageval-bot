@@ -2,7 +2,7 @@ from abc import abstractmethod
 from typing import Union
 from aws_cdk import aws_sagemaker as sagemaker, CfnOutput
 from constructs import Construct
-from deploy.nc_llm_aws_infra_blocks.library.base.base_construct import BaseConstruct
+from nc_llm_aws_infra_blocks.library.base.base_construct import BaseConstruct
 
 
 class BaseSageMakerEndpointConstruct(BaseConstruct):
@@ -14,9 +14,9 @@ class BaseSageMakerEndpointConstruct(BaseConstruct):
         raise NotImplementedError()
 
     @abstractmethod
-    def get_variant_name(self) -> str:
+    def get_model_clean_name(self) -> str:
         """Abstract method to get variant name."""
-        return self.model_name
+        return self.model_name.replace("/", "-")
 
     def post_processing(self) -> None:
         """Placeholder for post processing tasks."""
@@ -60,7 +60,7 @@ class BaseSageMakerEndpointConstruct(BaseConstruct):
             production_variants=[
                 sagemaker.CfnEndpointConfig.ProductionVariantProperty(
                     model_name=self.model.attr_model_name,
-                    variant_name=self.get_variant_name(),
+                    variant_name=self.get_model_clean_name(),
                     initial_variant_weight=initial_variant_weight,
                     initial_instance_count=instance_count,
                     instance_type=instance_type,
@@ -71,7 +71,7 @@ class BaseSageMakerEndpointConstruct(BaseConstruct):
         self.endpoint = sagemaker.CfnEndpoint(
             self,
             f"hf-sagemaker-endpoint",
-            endpoint_name=f"{self.resource_prefix}-endpoint",
+            endpoint_name=f"{self.resource_prefix}-{self.get_model_clean_name()}",
             endpoint_config_name=self.endpoint_config.attr_endpoint_config_name,
         )
 

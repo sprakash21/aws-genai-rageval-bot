@@ -1,6 +1,5 @@
-from hf_sagemaker_endpoint_stack import (
+from .hf_sagemaker_endpoint_stack import (
     HuggingFaceSageMakerEndpointStack,
-    HuggingFaceTaskType,
 )
 
-from hf_sagemaker_role_stack import HuggingFaceSageMakerRoleStack
+from .hf_sagemaker_role_stack import HuggingFaceSageMakerRoleStack

@@ -167,3 +167,5 @@ terraform.tfstate.backup
 .vscode
 test.txt
 *.pdf
+
+**/cdk.out/**

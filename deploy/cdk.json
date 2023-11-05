@@ -44,9 +44,8 @@
       "gpu_count": 4
     },
     "sagemaker_session_profile_name": "default",
-    "project_prefix": "",
-    "deploy_stage": "",
-    "sagemaker_session_override_profile": "",
-    "deploy_region": "eu-central-1"
+    "project_prefix": "taha",
+    "deploy_stage": "dev",
+    "deploy_region": "eu-west-1"
   }
 }

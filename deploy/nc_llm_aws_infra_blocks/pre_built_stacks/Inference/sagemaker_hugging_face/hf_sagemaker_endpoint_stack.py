@@ -3,18 +3,13 @@
 from enum import Enum
 from typing import Text
 from aws_cdk import Environment, aws_iam as iam, aws_sagemaker as sagemaker, Stack
-from deploy.nc_llm_aws_infra_blocks.deploy_constructs.Inference.hf_sagemaker_endpoint_construct import (
+from nc_llm_aws_infra_blocks.deploy_constructs.inference.hf_sagemaker_endpoint_construct import (
+    HuggingFaceTaskType,
+)
+from nc_llm_aws_infra_blocks.deploy_constructs.inference.hf_sagemaker_endpoint_construct import (
     HuggingFaceSagemakerEndpointConstruct,
 )
 from constructs import Construct
-from deploy.nc_llm_aws_infra_blocks.library.base.base_construct import BaseConstruct
-
-from deploy.nc_llm_aws_infra_blocks.library.base.base_enum import BaseEnum
-
-
-# an enum class representing huggingface task types
-class HuggingFaceTaskType(BaseEnum):
-    TextGeneration = "text-generation"
 
 
 # ToDo: Taha: Append project names
@@ -35,13 +30,14 @@ class HuggingFaceSageMakerEndpointStack(Stack):
         instance_type: str = "ml.g5.12xlarge",
         instance_count: int = 1,
         initial_variant_weight: float = 1,
+        **kwargs
     ) -> None:
-        super().__init__(scope, construct_id)
+        super().__init__(scope, construct_id, **kwargs)
 
         # ToDo: Taha: Parameterize properly like e.g. variant_weight
         self.endpoint = HuggingFaceSagemakerEndpointConstruct(
             self,
-            "sagemaker-huggingface-endpoint",
+            "sm-hf-ep",
             model_name=huggingface_model_id,
             project_prefix=project_prefix,
             deploy_stage=deploy_stage,

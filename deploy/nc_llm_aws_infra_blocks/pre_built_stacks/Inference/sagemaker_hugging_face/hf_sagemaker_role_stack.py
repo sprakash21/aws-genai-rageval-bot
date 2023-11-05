@@ -3,13 +3,13 @@
 from enum import Enum
 from typing import Text
 from aws_cdk import aws_iam as iam, aws_sagemaker as sagemaker, Stack
-from deploy.nc_llm_aws_infra_blocks.deploy_constructs.Inference.hf_sagemaker_endpoint_construct import (
+from nc_llm_aws_infra_blocks.deploy_constructs.inference.hf_sagemaker_endpoint_construct import (
     HuggingFaceSagemakerEndpointConstruct,
 )
 from constructs import Construct
-from deploy.nc_llm_aws_infra_blocks.library.base.base_construct import BaseConstruct
+from nc_llm_aws_infra_blocks.library.base.base_construct import BaseConstruct
 
-from deploy.nc_llm_aws_infra_blocks.library.base.base_enum import BaseEnum
+from nc_llm_aws_infra_blocks.library.base.base_enum import BaseEnum
 
 
 # an enum class representing huggingface task types
@@ -19,15 +19,8 @@ class HuggingFaceTaskType(BaseEnum):
 
 # ToDo: Taha: Append project names
 class HuggingFaceSageMakerRoleStack(Stack):
-    def __init__(
-        self,
-        scope: Construct,
-        construct_id: str,
-    ) -> None:
-        super().__init__(
-            scope,
-            construct_id,
-        )
+    def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
+        super().__init__(scope, construct_id, **kwargs)
 
         execution_role = iam.Role(
             self,

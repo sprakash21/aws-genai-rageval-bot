@@ -4,7 +4,7 @@ from typing import Type, TypeVar, Generic
 T = TypeVar("T", bound="BaseEnumGeneric")
 
 
-class BaseEnum(Enum, Generic[T]):
+class BaseEnum(Enum):
     @classmethod
     def from_string(cls: Type[T], str_value: str) -> T:
         for member in cls:

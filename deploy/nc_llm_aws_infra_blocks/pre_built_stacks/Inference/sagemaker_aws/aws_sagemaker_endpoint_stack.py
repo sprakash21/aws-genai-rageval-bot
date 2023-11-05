@@ -2,7 +2,7 @@ from constructs import Construct
 from aws_cdk import Stack, aws_iam as iam, aws_ssm as ssm, aws_sagemaker as sagemaker
 
 
-from deploy.nc_llm_aws_infra_blocks.deploy_constructs.Inference.aws_sagemaker_endpoint_construct import (
+from nc_llm_aws_infra_blocks.deploy_constructs.inference.aws_sagemaker_endpoint_construct import (
     AwsSagemakerEndpointConstruct,
 )
 
@@ -19,7 +19,7 @@ class AwsSagemakerEndpointStack(Stack):
         model_info,
         **kwargs
     ) -> None:
-        super().__init__(scope, construct_id)
+        super().__init__(scope, construct_id, **kwargs)
         role = iam.Role(
             self,
             "llm-sagemaker-policy",

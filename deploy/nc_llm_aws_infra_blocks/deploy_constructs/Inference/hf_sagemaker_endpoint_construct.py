@@ -1,11 +1,9 @@
 from aws_cdk import aws_sagemaker as sagemaker
-from deploy.nc_llm_aws_infra_blocks.deploy_constructs.Inference.base_sagemaker_endpoint_construct import (
+from nc_llm_aws_infra_blocks.library.base.base_enum import BaseEnum
+from nc_llm_aws_infra_blocks.deploy_constructs.inference.base_sagemaker_endpoint_construct import (
     BaseSageMakerEndpointConstruct,
 )
 from constructs import Construct
-from deploy.nc_llm_aws_infra_blocks.pre_built_stacks.Inference.sagemaker_hugging_face.hf_sagemaker_endpoint_stack import (
-    HuggingFaceTaskType,
-)
 from nc_llm_aws_infra_blocks.library.config.huggingface_smconfig import (
     DEFAULT_PYTORCH_VERSION,
     region_dict,
@@ -17,6 +15,11 @@ def get_image_uri(region, pytorch_version=DEFAULT_PYTORCH_VERSION, tgi_version="
     repository = f"{region_dict[region]}.dkr.ecr.{region}.amazonaws.com/huggingface-pytorch-tgi-inference"
     tag = f"{pytorch_version}-tgi{tgi_version}-gpu-py39-cu118-ubuntu20.04"
     return f"{repository}:{tag}"
+
+
+# an enum class representing huggingface task types
+class HuggingFaceTaskType(BaseEnum):
+    TextGeneration = "text-generation"
 
 
 # ToDo: Taha: Append project names
@@ -39,6 +42,9 @@ class HuggingFaceSagemakerEndpointConstruct(BaseSageMakerEndpointConstruct):
         huggingface_token_id: str,
         gpu_count: int,
     ) -> None:
+        self.huggingface_task = huggingface_task
+        self.huggingface_token_id = huggingface_token_id
+        self.gpu_count = gpu_count
         """Initialize the SageMakerHFEndpointConstruct class."""
         super().__init__(
             scope,
@@ -52,10 +58,6 @@ class HuggingFaceSagemakerEndpointConstruct(BaseSageMakerEndpointConstruct):
             model_name,
             variant_weight,
         )
-
-        self.huggingface_task = huggingface_task
-        self.huggingface_token_id = huggingface_token_id
-        self.gpu_count = gpu_count
 
     def get_container(self) -> sagemaker.CfnModel.ContainerDefinitionProperty:
         """Get container definition for the SageMaker Hugging Face endpoint."""
