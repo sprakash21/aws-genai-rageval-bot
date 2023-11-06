@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
 from os import name
-from platform import node
+from platform import node, python_revision
 import aws_cdk as cdk
 from aws_cdk import aws_ec2 as ec2
+from build_and_deploy_pipeline import PipelineStack
+
 from nc_llm_aws_infra_blocks.pre_built_stacks.app.application_stack import (
     SimpleRagAppStack,
 )
@@ -35,6 +37,8 @@ from nc_llm_aws_infra_blocks.library.helpers.model_info import (
     get_sagemaker_model_info,
 )
 
+from deploy_stage import ApplicationDeploymentBuilder
+
 # Environment information
 
 
@@ -52,72 +56,45 @@ deploy_region = app.node.get_context("deploy_region")
 
 huggingface_model_id = chat_bot_inference_model["model_id"]
 huggingface_task = chat_bot_inference_model["task"]
+pytorch_version = chat_bot_inference_model.get("pytorch_version")
+repository_override = chat_bot_inference_model.get("repository_override")
+image_tag_override = chat_bot_inference_model.get("image_tag_override")
+
 instance_type = inference_endpoint["instance_type"]
 instance_count = inference_endpoint["instance_count"]
 gpu_count = inference_endpoint["gpu_count"]
 
+
 aws_environment = cdk.Environment(region=deploy_region)
 
-
-# TXTGEN_MODEL_ID = "meta-textgeneration-llama-2-7b-f"
-# TXTGEN_INFERENCE_INSTANCE_TYPE = "ml.g5.2xlarge"
-# TXTGEN_MODEL_TASK_TYPE = "textgeneration"
-# REGION = "eu-central-1"
-# model_information = get_sagemaker_model_info(
-#     model_id=TXTGEN_MODEL_ID,
-#     model_task_type=TXTGEN_MODEL_TASK_TYPE,
-#     instance_type=TXTGEN_INFERENCE_INSTANCE_TYPE,
-#     region_name=aws_environment.region,
-#     profile_name=sagemaker_session_profile_name,
-# )
-# llm_stack = SageMakerLLMStack(
-#     app, "llm-sm-stack", env=aws_environment, model_info=model_information
-# )
-
-# If sagemaker studio needs to be setup
-# SagemakerStudioStack(app, "deploy", vpc=network_stack.vpc)
-# If sagemaker llm app deployment and endpoint with lambda + apigw needs to be setup
-
-llm_hf_execution_role_stack = HuggingFaceSageMakerRoleStack(
-    app,
-    f"{project_prefix}-{deploy_stage}-hf-execution-role",
-    env=aws_environment,
-)
-
-llama2_inference_stack = HuggingFaceSageMakerEndpointStack(
-    app,
-    f"{project_prefix}-{deploy_stage}-hf-sagemaker-llama2-endpoint",
+app_deployment_builder = ApplicationDeploymentBuilder(
     project_prefix=project_prefix,
     deploy_stage=deploy_stage,
     deploy_region=deploy_region,
+    hugging_face_token=hugging_face_token,
     huggingface_model_id=huggingface_model_id,
-    huggingface_task=HuggingFaceTaskType.from_string("text-generation"),
-    huggingface_token_id=hugging_face_token,
+    huggingface_task=HuggingFaceTaskType.from_string(huggingface_task),
+    env=aws_environment,
     instance_type=instance_type,
     instance_count=instance_count,
     gpu_count=gpu_count,
-    environment=aws_environment,
-    execution_role_arn=llm_hf_execution_role_stack.execution_role_arn,
-    env=aws_environment,
+    image_tag_override=image_tag_override,
+    pytorch_version=pytorch_version,
+    repository_override=repository_override,
 )
 
+app_deployment_builder.build(app)
 
-llama2_inference_stack.node.add_dependency(llm_hf_execution_role_stack)
+# PipelineStack(
+#     app,
+#     f"{project_prefix}-{deploy_stage}-pipeline",
+#     project_prefix=project_prefix,
+#     deploy_stage=deploy_stage,
+#     docker_image_name="llama2-13b-chatbot",
+#     code_commit_repo_name="llama2-13b-chatbot",
+#     app_deployment_builder=app_deployment_builder,
+#     env=aws_environment,
+# )
 
-network_stack = VPCNetworkStack(
-    app,
-    f"{project_prefix}-{deploy_stage}-vpc",
-    deploy_stage=deploy_stage,
-    project_prefix=project_prefix,
-    env=aws_environment,
-)
-
-
-swara_bot_app_stack = SimpleRagAppStack(
-    app,
-    f"{project_prefix}-{deploy_stage}-swara-bot-app",
-    env=aws_environment,
-    vpc=network_stack.vpc,
-)
 
 app.synth()

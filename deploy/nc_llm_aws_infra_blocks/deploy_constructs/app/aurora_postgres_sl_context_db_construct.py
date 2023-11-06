@@ -9,7 +9,7 @@ from constructs import Construct
 from nc_llm_aws_infra_blocks.library.base.base_construct import BaseConstruct
 
 
-class AuroraPostgresSlContextDb(Construct):
+class AuroraPostgresSlContextDb(BaseConstruct):
     def __init__(
         self, scope: Construct, construct_id: str, vpc: ec2.IVpc, **kwargs
     ) -> None:
@@ -26,7 +26,7 @@ class AuroraPostgresSlContextDb(Construct):
         # Aurora Serverless cluster
         self.cluster = ServerlessCluster(
             self,
-            f"{construct_id}-context-db",
+            f"{self.resource_prefix}-db",
             engine=DatabaseClusterEngine.aurora_postgres(
                 version=AuroraPostgresEngineVersion.VER_13_4
             ),
@@ -43,7 +43,7 @@ class AuroraPostgresSlContextDb(Construct):
             ),
             credentials=rds.Credentials.from_generated_secret(
                 "postgres",
-                secret_name=f"{construct_id}-context-db-secret",
+                secret_name=f"{self.resource_prefix}-db-secrets",
                 exclude_characters="`\"$%'!&*^#@()}{[]\\>=+<?%/",
             ),
         )

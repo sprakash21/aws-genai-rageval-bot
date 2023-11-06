@@ -1,7 +1,7 @@
 # Adapted from Huggingface documentation.
 # WIP..
 from enum import Enum
-from typing import Text
+from typing import Text, Union
 from aws_cdk import Environment, aws_iam as iam, aws_sagemaker as sagemaker, Stack
 from nc_llm_aws_infra_blocks.deploy_constructs.inference.hf_sagemaker_endpoint_construct import (
     HuggingFaceTaskType,
@@ -21,7 +21,6 @@ class HuggingFaceSageMakerEndpointStack(Stack):
         project_prefix: str,
         deploy_stage: str,
         deploy_region: str,
-        environment: Environment,
         execution_role_arn: str,
         gpu_count: int,
         huggingface_token_id: str,
@@ -30,6 +29,9 @@ class HuggingFaceSageMakerEndpointStack(Stack):
         instance_type: str = "ml.g5.12xlarge",
         instance_count: int = 1,
         initial_variant_weight: float = 1,
+        pytorch_version: Union[str, None] = None,
+        repository_override: Union[str, None] = None,
+        image_tag_override: Union[str, None] = None,
         **kwargs
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)
@@ -49,6 +51,9 @@ class HuggingFaceSageMakerEndpointStack(Stack):
             gpu_count=gpu_count,
             instance_count=instance_count,
             variant_weight=initial_variant_weight,
+            pytorch_version=pytorch_version,
+            repository_override=repository_override,
+            image_tag_override=image_tag_override,
         )
 
     @property

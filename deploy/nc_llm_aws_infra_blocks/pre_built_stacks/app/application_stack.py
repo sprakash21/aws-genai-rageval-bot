@@ -17,12 +17,22 @@ from nc_llm_aws_infra_blocks.deploy_constructs.app.aurora_postgres_sl_context_db
 
 class SimpleRagAppStack(Stack):
     def __init__(
-        self, scope: Construct, construct_id: str, vpc: ec2.IVpc, **kwargs
+        self,
+        scope: Construct,
+        construct_id: str,
+        vpc: ec2.IVpc,
+        project_prefix: str,
+        deploy_stage: str,
+        deploy_region: str,
+        **kwargs
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         context_db = AuroraPostgresSlContextDb(
             self,
-            "context-db",
+            "eh-context",
             vpc=vpc,
+            deploy_region=deploy_region,
+            project_prefix=project_prefix,
+            deploy_stage=deploy_stage,
         )

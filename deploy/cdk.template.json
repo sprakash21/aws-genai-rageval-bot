@@ -36,7 +36,10 @@
     "huggingface.token_id":"",
     "huggingface.llama2.13b": {
       "model_id":"meta-llama/Llama-2-7b-chat-hf",
-      "task": "text-generation"
+      "task": "text-generation",
+      "repository": "......",
+      "image_tag": ".......",
+      "pytorch_version": "......."
     },
     "inference_endpoint":{
       "instance_type": "ml.g5.2xlarge",
@@ -46,8 +49,6 @@
     "sagemaker_session_profile_name": "default",
     "project_prefix": "taha",
     "deploy_stage": "dev",
-    "deploy_region": "eu-west-1",
-    "codecommit_repo_name": "swara",
-    "branch": "main"
+    "deploy_region": "eu-west-1"
   }
 }

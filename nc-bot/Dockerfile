@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y \
 COPY ./src /app/src
 COPY ./pages /app/pages
 # Remove this when on AWS. Should come from Secrets Manager and be read from it.
-COPY .env /app/.env
+# COPY .env /app/.env
 COPY chatbot.py /app/chatbot.py
 COPY requirements.txt /app/requirements.txt
 

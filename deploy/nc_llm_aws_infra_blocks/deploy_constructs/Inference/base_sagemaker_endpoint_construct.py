@@ -2,6 +2,9 @@ from abc import abstractmethod
 from typing import Union
 from aws_cdk import aws_sagemaker as sagemaker, CfnOutput
 from constructs import Construct
+from nc_llm_aws_infra_blocks.library.config.huggingface_smconfig import (
+    DEFAULT_PYTORCH_VERSION,
+)
 from nc_llm_aws_infra_blocks.library.base.base_construct import BaseConstruct
 
 

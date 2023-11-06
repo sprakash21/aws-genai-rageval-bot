@@ -1,3 +1,4 @@
+from typing import Union
 from aws_cdk import aws_sagemaker as sagemaker
 from nc_llm_aws_infra_blocks.library.base.base_enum import BaseEnum
 from nc_llm_aws_infra_blocks.deploy_constructs.inference.base_sagemaker_endpoint_construct import (
@@ -8,13 +9,6 @@ from nc_llm_aws_infra_blocks.library.config.huggingface_smconfig import (
     DEFAULT_PYTORCH_VERSION,
     region_dict,
 )
-
-
-# ToDo: Taha: Task is not Text Generation only, what to do here?
-def get_image_uri(region, pytorch_version=DEFAULT_PYTORCH_VERSION, tgi_version="0.8.2"):
-    repository = f"{region_dict[region]}.dkr.ecr.{region}.amazonaws.com/huggingface-pytorch-tgi-inference"
-    tag = f"{pytorch_version}-tgi{tgi_version}-gpu-py39-cu118-ubuntu20.04"
-    return f"{repository}:{tag}"
 
 
 # an enum class representing huggingface task types
@@ -41,10 +35,17 @@ class HuggingFaceSagemakerEndpointConstruct(BaseSageMakerEndpointConstruct):
         huggingface_task: HuggingFaceTaskType,
         huggingface_token_id: str,
         gpu_count: int,
+        pytorch_version: Union[str, None] = None,
+        repository_override: Union[str, None] = None,
+        image_tag_override: Union[str, None] = None,
+        **kwargs,
     ) -> None:
         self.huggingface_task = huggingface_task
         self.huggingface_token_id = huggingface_token_id
         self.gpu_count = gpu_count
+        self.pytorch_version = pytorch_version
+        self.repository_override = repository_override
+        self.image_tag_override = image_tag_override
         """Initialize the SageMakerHFEndpointConstruct class."""
         super().__init__(
             scope,
@@ -57,6 +58,7 @@ class HuggingFaceSagemakerEndpointConstruct(BaseSageMakerEndpointConstruct):
             instance_type,
             model_name,
             variant_weight,
+            **kwargs,
         )
 
     def get_container(self) -> sagemaker.CfnModel.ContainerDefinitionProperty:
@@ -79,9 +81,22 @@ class HuggingFaceSagemakerEndpointConstruct(BaseSageMakerEndpointConstruct):
             "SM_NUM_GPUS": str(self.gpu_count),
         }
 
-    def _get_image_uri(self) -> str:
-        """Private helper method to get image URI for container."""
-        return get_image_uri(region=self.deploy_region)
+    def _get_image_uri(self, tgi_version="0.8.2") -> str:
+        if self.pytorch_version:
+            pytorch_version = self.pytorch_version
+        else:
+            pytorch_version = DEFAULT_PYTORCH_VERSION
+
+        if self.repository_override:
+            repository = self.repository_override
+        else:
+            repository = f"{region_dict[self.deploy_region]}.dkr.ecr.{self.deploy_region}.amazonaws.com/huggingface-pytorch-tgi-inference"
+
+        if self.image_tag_override:
+            tag = self.image_tag_override
+        else:
+            tag = f"{pytorch_version}-tgi{tgi_version}-gpu-py39-cu118-ubuntu20.04"
+        return f"{repository}:{tag}"
 
     def post_processing(self) -> None:
         super().post_processing()

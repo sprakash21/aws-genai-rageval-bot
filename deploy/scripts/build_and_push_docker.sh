@@ -31,9 +31,11 @@ color_blue "Logging into ECR..."
 # Get the ECR login password
 aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com
 
+aws ecr create-repository --repository-name $REPO_NAME --region $REGION
+
 color_blue "Building Docker image: $REPO_NAME from Dockerfile: $DOCKERFILE_PATH"
 # Build the Docker image
-docker build -t $REPO_NAME -f $DOCKERFILE_PATH .
+docker build -t $REPO_NAME -f $DOCKERFILE_PATH ../../nc-bot/
 
 color_blue "Tagging Docker image as: $REPO_NAME:$IMAGE_TAG"
 # Tag the image for ECR

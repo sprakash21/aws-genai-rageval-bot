@@ -7,8 +7,10 @@ from aws_cdk import (
 
 from constructs import Construct
 
+from nc_llm_aws_infra_blocks.library.base.base_construct import BaseConstruct
 
-class EcsWithLoadBalancer(Construct):
+
+class EcsWithLoadBalancer(BaseConstruct):
     def __init__(
         self,
         scope: Construct,
@@ -16,6 +18,7 @@ class EcsWithLoadBalancer(Construct):
         vpc: ec2.IVpc,
         vcpus: int,
         container_memory: int,
+        application_name: str,
         **kwargs
     ) -> None:
         super().__init__(scope, id, **kwargs)
@@ -44,7 +47,7 @@ class EcsWithLoadBalancer(Construct):
             image=ecs.ContainerImage.from_registry("amazon/amazon-ecs-sample"),
             memory_limit_mib=container_memory,
             cpu=vcpus,
-            logging=ecs.LogDrivers.aws_logs(stream_prefix="ecs-fargate-sample-app"),
+            logging=ecs.LogDrivers.aws_logs(stream_prefix=f"{}"),
         )
 
         # Here you might want to add a container to the task definition
@@ -61,4 +64,4 @@ class EcsWithLoadBalancer(Construct):
         )
 
         # Attach the service to the ALB
-        listener.add_targets("ecs-targets", port=80, targets=[fargate_service])
+        listener.add_targets("ecs-targets", port=8501, targets=[fargate_service])

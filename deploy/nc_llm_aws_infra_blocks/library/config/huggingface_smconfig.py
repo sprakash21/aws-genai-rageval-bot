@@ -1,5 +1,5 @@
 # Documentation: https://github.com/aws/deep-learning-containers/blob/master/available_images.md
-LATEST_PYTORCH_VERSION = "2.0.1"
+DEFAULT_PYTORCH_VERSION = "2.0.0"
 
 region_dict = {
     "af-south-1": "626614931356",
