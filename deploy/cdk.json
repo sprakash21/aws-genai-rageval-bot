@@ -35,13 +35,13 @@
     ],
     "huggingface.token_id":"",
     "huggingface.llama2.13b": {
-      "model_id":"meta-llama/Llama-2-13b-chat-hf",
+      "model_id":"meta-llama/Llama-2-7b-chat-hf",
       "task": "text-generation"
     },
     "inference_endpoint":{
-      "instance_type": "ml.g5.12xlarge",
+      "instance_type": "ml.g5.2xlarge",
       "instance_count": 1,
-      "gpu_count": 4
+      "gpu_count": 1
     },
     "sagemaker_session_profile_name": "default",
     "project_prefix": "taha",

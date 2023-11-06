@@ -120,14 +120,4 @@ swara_bot_app_stack = SimpleRagAppStack(
     vpc=network_stack.vpc,
 )
 
-
-# ToDo: Taha: Convert to construct and put into Application Stack.
-# dev_stack = DeveloperStack(
-#     app, "dev-machine", vpc=network_stack.vpc, env=aws_environment
-# )
-
-
-# db_stack = DBStack(app, "db-stack", vpc=network_stack.vpc, env=aws_environment)
-
-# AppStack(app, "llm-app-stack", env=aws_environment, vpc=network_stack.vpc)
 app.synth()
