@@ -3,13 +3,20 @@ from constructs import Construct
 
 
 class VPCNetworkStack(Stack):
-    def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
+    def __init__(
+        self,
+        scope: Construct,
+        construct_id: str,
+        project_prefix: str,
+        deploy_stage: str,
+        **kwargs,
+    ) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         self.output_vpc = ec2.Vpc(
             self,
             "VPC",
-            vpc_name="nc-genai-vpc",
+            vpc_name=f"{project_prefix}-{deploy_stage}-genai-vpc",
             nat_gateways=1,
             ip_addresses=ec2.IpAddresses.cidr("10.0.0.0/16"),
             max_azs=2,

@@ -2,12 +2,22 @@ from constructs import Construct
 from aws_cdk import Stack, aws_iam as iam, aws_ssm as ssm, aws_sagemaker as sagemaker
 
 
-from deploy_constructs.sagemaker_endpoint_construct import SageMakerEndpointConstruct
+from nc_llm_aws_infra_blocks.deploy_constructs.inference.aws_sagemaker_endpoint_construct import (
+    AwsSagemakerEndpointConstruct,
+)
 
 
-class SageMakerLLMStack(Stack):
+# ToDo: Taha: Append project names
+class AwsSagemakerEndpointStack(Stack):
     def __init__(
-        self, scope: Construct, construct_id: str, model_info, **kwargs
+        self,
+        scope: Construct,
+        construct_id: str,
+        project_prefix: str,
+        deploy_stage: str,
+        deploy_region: str,
+        model_info,
+        **kwargs
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)
         role = iam.Role(
@@ -65,26 +75,22 @@ class SageMakerLLMStack(Stack):
         role.attach_inline_policy(logs_policy)
         role.attach_inline_policy(ecr_policy)
 
-        self.endpoint = SageMakerEndpointConstruct(
+        # ToDo: Taha: Parameterize properly like e.g. variant_weight, internalize environment etc
+        self.endpoint = AwsSagemakerEndpointConstruct(
             self,
             "llm_textgeneration",
-            project_prefix="GenAI-Demo",
+            project_prefix=project_prefix,
+            deploy_stage=deploy_stage,
+            deploy_region=deploy_region,
             role_arn=role.role_arn,
             model_name="meta-textgen-stack",
             model_bucket_name=model_info["model_bucket_name"],
             model_bucket_key=model_info["model_bucket_key"],
             model_docker_image=model_info["model_docker_image"],
-            variant_name="AllTraffic",
             variant_weight=1,
             instance_count=1,
             instance_type=model_info["instance_type"],
-            environment={
-                "SAGEMAKER_ENV": "1",
-                "SAGEMAKER_MODEL_SERVER_TIMEOUT": "3600",
-                "SAGEMAKER_MODEL_SERVER_WORKERS": "1",
-                "SAGEMAKER_REGION": model_info["region_name"],
-            },
-            deploy_enable=True,
+            sagemaker_region=model_info["region_name"],
         )
 
         self.endpoint.node.add_dependency(sts_policy)
@@ -95,9 +101,9 @@ class SageMakerLLMStack(Stack):
             self,
             "sm_endpoint",
             parameter_name="sm_endpoint",
-            string_value=self.endpoint.endpoint_name,
+            string_value=self.endpoint.attr_endpoint_name,
         )
 
     @property
-    def sm_endpoint(self) -> sagemaker.CfnEndpoint:
+    def sm_endpoint(self) -> AwsSagemakerEndpointConstruct:
         return self.endpoint
