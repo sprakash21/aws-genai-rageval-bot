@@ -33,8 +33,8 @@
       "aws",
       "aws-cn"
     ],
-
-
+    "huggingface.token_id":"",
+    "openai_api_key": "",
     "huggingface.llama2.13b": {
       "model_id":"meta-llama/Llama-2-7b-chat-hf",
       "task": "text-generation"
@@ -54,6 +54,8 @@
     "use_bedrock": "true",
     "deploy_pipeline": false,
     "codecommit_repo_name": null,
-    "branch": null
+    "branch": null,
+    "app_container_vcpus": 4096,
+    "app_container_memory": 8192
   }
 }

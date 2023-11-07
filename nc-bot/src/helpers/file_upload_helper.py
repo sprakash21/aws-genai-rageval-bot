@@ -100,7 +100,6 @@ class S3FileUpload:
         """
         try:
             self.client.put_object(
-                ACL="public-read",
                 Bucket=self.bucket,
                 Body=f_body,
                 ContentType="application/pdf",

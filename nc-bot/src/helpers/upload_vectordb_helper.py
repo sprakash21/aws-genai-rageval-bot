@@ -101,7 +101,10 @@ class UploadHelper:
         """
         # Fixed collection and can be extended.
         COLLECTION_NAME = "time_reporting"
-        loader = S3FileLoader(bucket=os.environ.get("BUCKET_NAME"), key=fname)
+        loader = S3FileLoader(
+            bucket=os.environ.get("BUCKET_NAME"),
+            key=fname,
+        )
         # Short vs Long chunk
         text_splitter = RecursiveCharacterTextSplitter(
             separators=["\n"], chunk_size=1024, chunk_overlap=50

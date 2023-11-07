@@ -1,15 +1,12 @@
-from aws_cdk import (
-    Duration,
-    aws_rds as rds,
-    Stack,
-    aws_ec2 as ec2,
-    SecretsManagerSecretOptions,
-)
+from aws_cdk import Duration
+from aws_cdk import aws_ec2 as ec2
+from aws_cdk import aws_rds as rds
 from aws_cdk.aws_rds import (
-    ServerlessCluster,
-    DatabaseClusterEngine,
     AuroraPostgresEngineVersion,
+    DatabaseClusterEngine,
+    ServerlessCluster,
     ServerlessScalingOptions,
+    ServerlessV2ClusterInstanceProps,
 )
 from constructs import Construct
 from nc_llm_aws_infra_blocks.library.base.base_construct import BaseConstruct
@@ -36,25 +33,23 @@ class AuroraPostgresSlContextDb(BaseConstruct):
             exclude_characters="`\"$%'!&*^#@()}{[]\\>=+<?%/",
         )
 
-        # Aurora Serverless cluster
-        self.cluster = ServerlessCluster(
+        self.cluster = rds.DatabaseCluster(
             self,
             f"{self.resource_prefix}-db",
-            engine=DatabaseClusterEngine.aurora_postgres(
-                version=AuroraPostgresEngineVersion.VER_13_4
-            ),
+            writer=rds.ClusterInstance.serverless_v2("writer"),
+            readers=[
+                rds.ClusterInstance.serverless_v2("reader1", scale_with_writer=True)
+            ],
             vpc=vpc,
-            security_groups=[self._db_sg],
-            scaling=ServerlessScalingOptions(
-                auto_pause=Duration.minutes(10),
-                min_capacity=rds.AuroraCapacityUnit.ACU_2,
-                max_capacity=rds.AuroraCapacityUnit.ACU_8,
-            ),
+            credentials=self.credentials,
             default_database_name="context_db",
+            security_groups=[self._db_sg],
             vpc_subnets=ec2.SubnetSelection(
                 subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
             ),
-            credentials=self.credentials,
+            engine=DatabaseClusterEngine.aurora_postgres(
+                version=AuroraPostgresEngineVersion.of("13.11", "13")
+            ),
         )
 
     @property

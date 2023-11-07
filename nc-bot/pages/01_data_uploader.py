@@ -23,8 +23,12 @@ for uploaded_file in uploaded_files:
         st.write(f"{uploaded_file.name} is uploaded successfully to S3")
         # Get the bucket_name from SSM parameters
         bucket_name = os.environ.get("BUCKET_NAME")
-        s3_uri = f"https://{bucket_name}.s3.eu-central-1.amazonaws.com/pdf_data/{fname}"
-        st.write(f"You can access it from - {s3_uri}")
+        presigned_source_url = s3_client.generate_presigned_url(
+            "get_object",
+            Params={"Bucket": bucket_name, "Key": f"pdf_data/{fname}"},
+            ExpiresIn=600,
+        )
+        st.write(f"You can access it from - {presigned_source_url}")
         # Set to true only for using local database.
         db_local = get_db_type()
         upload_helper = UploadHelper(db_local=db_local)

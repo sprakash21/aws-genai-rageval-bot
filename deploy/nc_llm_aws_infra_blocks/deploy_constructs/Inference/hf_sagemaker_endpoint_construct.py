@@ -1,10 +1,11 @@
 from typing import Union
+
 from aws_cdk import aws_sagemaker as sagemaker
-from nc_llm_aws_infra_blocks.library.base.base_enum import BaseEnum
+from constructs import Construct
 from nc_llm_aws_infra_blocks.deploy_constructs.inference.base_sagemaker_endpoint_construct import (
     BaseSageMakerEndpointConstruct,
 )
-from constructs import Construct
+from nc_llm_aws_infra_blocks.library.base.base_enum import BaseEnum
 from nc_llm_aws_infra_blocks.library.config.huggingface_smconfig import (
     DEFAULT_PYTORCH_VERSION,
     region_dict,

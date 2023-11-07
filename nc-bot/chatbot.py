@@ -1,3 +1,4 @@
+import boto3
 import streamlit as st
 import src.models as db_models
 from src.helpers.inference_helper import Llama2InferenceHelper
@@ -25,12 +26,22 @@ def prepare_source_docs(docs):
     temp_list = list()
     for doc in docs:
         if hasattr(doc, "metadata"):
-            fname = doc.metadata["source"]
-            if fname not in temp_list:
-                temp_list.append(fname)
-                bucket_name = fname.split("/")[2]
-                s3_uri = f"https://{bucket_name}.s3.eu-central-1.amazonaws.com/{'/'.join(fname.split('/')[3:])}"
-                mk_txt += f"<a href={s3_uri}>{fname.split('/')[-1]}</a><br>"
+            source_s3_full_uri = doc.metadata["source"]
+            if source_s3_full_uri not in temp_list:
+                temp_list.append(source_s3_full_uri)
+                bucket_name = source_s3_full_uri.split("/")[2]
+
+                s3_client = boto3.client("s3")
+
+                s3_file_key = "/".join(source_s3_full_uri.split("/")[3:])
+
+                presigned_source_url = s3_client.generate_presigned_url(
+                    "get_object",
+                    Params={"Bucket": bucket_name, "Key": s3_file_key},
+                    ExpiresIn=600,
+                )
+
+                mk_txt += f"<a href={presigned_source_url}>{s3_file_key}</a><br>"
     mk_txt += f"</details>"
     return mk_txt
 
@@ -44,5 +55,8 @@ if st.session_state.messages[-1]["role"] != "assistant":
             st.write(response["result"], unsafe_allow_html=True)
             source_docs = prepare_source_docs(response["source_documents"])
             st.write(source_docs, unsafe_allow_html=True)
-    message = {"role": "assistant", "content": response["result"] + "<br>" + source_docs}
+    message = {
+        "role": "assistant",
+        "content": response["result"] + "<br>" + source_docs,
+    }
     st.session_state.messages.append(message)

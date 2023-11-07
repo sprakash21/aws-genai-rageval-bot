@@ -1,8 +1,7 @@
+from typing import Union
+
 from aws_cdk import Stack
-
 from aws_cdk import aws_ec2 as ec2
-
-
 from aws_cdk import aws_ssm as ssm
 from constructs import Construct
 from nc_llm_aws_infra_blocks.deploy_constructs.app.aurora_postgres_sl_context_db_construct import (
@@ -29,6 +28,8 @@ class SimpleRagAppStack(Stack):
         sagemaker_endpoint_name: ssm.CfnParameter,
         openai_api_key: str,
         use_bedrock: bool,
+        container_vcpus: Union[int, float],
+        container_memory: int,
         **kwargs
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)
@@ -46,8 +47,8 @@ class SimpleRagAppStack(Stack):
             self,
             "ecs-app",
             vpc=vpc,
-            vcpus=1024,
-            container_memory=2048,
+            vcpus=container_vcpus,
+            container_memory=container_memory,
             application_name=application_name,
             ecr_repository_name=ecr_repository_name,
             ecr_image_tag=ecr_image_tag,

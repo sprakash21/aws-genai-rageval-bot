@@ -1,14 +1,9 @@
 # Adapted from Huggingface documentation.
 # WIP..
-from enum import Enum
-from typing import Text
-from aws_cdk import aws_iam as iam, aws_sagemaker as sagemaker, Stack
-from nc_llm_aws_infra_blocks.deploy_constructs.inference.hf_sagemaker_endpoint_construct import (
-    HuggingFaceSagemakerEndpointConstruct,
-)
-from constructs import Construct
-from nc_llm_aws_infra_blocks.library.base.base_construct import BaseConstruct
 
+from aws_cdk import Stack
+from aws_cdk import aws_iam as iam
+from constructs import Construct
 from nc_llm_aws_infra_blocks.library.base.base_enum import BaseEnum
 
 

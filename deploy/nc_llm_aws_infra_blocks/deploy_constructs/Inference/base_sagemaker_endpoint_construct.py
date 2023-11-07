@@ -1,11 +1,14 @@
 from abc import abstractmethod
 from typing import Union
-from aws_cdk import aws_sagemaker as sagemaker, CfnOutput, aws_ssm
+
+from aws_cdk import CfnOutput
+from aws_cdk import aws_sagemaker as sagemaker
+from aws_cdk import aws_ssm
 from constructs import Construct
+from nc_llm_aws_infra_blocks.library.base.base_construct import BaseConstruct
 from nc_llm_aws_infra_blocks.library.config.huggingface_smconfig import (
     DEFAULT_PYTORCH_VERSION,
 )
-from nc_llm_aws_infra_blocks.library.base.base_construct import BaseConstruct
 
 
 class BaseSageMakerEndpointConstruct(BaseConstruct):
@@ -16,7 +19,6 @@ class BaseSageMakerEndpointConstruct(BaseConstruct):
         """Abstract method to get container definition."""
         raise NotImplementedError()
 
-    @abstractmethod
     def get_model_clean_name(self) -> str:
         """Abstract method to get variant name."""
         return self.model_name.replace("/", "-")

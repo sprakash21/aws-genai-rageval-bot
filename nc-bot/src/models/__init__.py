@@ -3,17 +3,10 @@ import sqlalchemy as db
 from src.models.models import Base
 from src.config.app_config import get_db_type
 from src.helpers.env_utils import get_secret_info_json
+from sqlalchemy import text
 from dotenv import load_dotenv
 
 load_dotenv()
-
-
-def setup_db(cur):
-    cur.execute(
-        """
-                CREATE EXTENSION IF NOT EXISTS vector;
-                """
-    )
 
 
 def prepare_connection_str(db_local=False):
@@ -34,4 +27,11 @@ def prepare_connection_str(db_local=False):
 db_local = get_db_type()
 engine = db.create_engine(prepare_connection_str(db_local))
 # Creation of the tables
+with engine.connect() as cur:
+    try:
+        cur.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
+        cur.commit()
+        print("Vector extension created")
+    except Exception as e:
+        print(e)
 Base.metadata.create_all(engine)

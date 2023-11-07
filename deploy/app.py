@@ -49,6 +49,8 @@ deploy_stage = app.node.get_context("deploy_stage")
 deploy_region = app.node.get_context("deploy_region")
 openai_api_key = app.node.get_context("openai_api_key")
 use_bedrock = app.node.get_context("use_bedrock")
+app_container_vcpus = app.node.get_context("app_container_vcpus")
+app_container_memory = app.node.get_context("app_container_memory")
 
 
 ecr_repo = app.node.try_get_context("ecr_repo")
@@ -91,6 +93,8 @@ app_deployment_builder = ApplicationDeploymentBuilder(
     application_name=project_prefix,
     openai_api_key=openai_api_key,
     use_bedrock=use_bedrock,
+    app_container_memory=app_container_memory,
+    app_container_vcpus=app_container_vcpus,
 )
 
 if not deploy_pipeline:

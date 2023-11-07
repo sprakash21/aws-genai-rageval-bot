@@ -96,7 +96,7 @@ class Llama2InferenceHelper:
                 raise AssertionError("Sagemaker Endpoint Name is not set")
             llm = SagemakerEndpoint(
                 endpoint_name=self.sg_endpoint_name,
-                region_name=os.environ.get("AWS_REGION"),
+                region_name="os.environ.get("AWS_REGION")",
                 model_kwargs={
                     "do_sample": True,
                     "temperature": 0.5,

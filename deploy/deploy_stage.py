@@ -55,6 +55,8 @@ class ApplicationDeploymentBuilder:
         pytorch_version: Union[str, None] = None,
         repository_override: Union[str, None] = None,
         image_tag_override: Union[str, None] = None,
+        app_container_vcpus: Union[int, float] = 1,
+        app_container_memory: int = 2048,
     ):
         self.project_prefix = project_prefix
         self.deploy_stage = deploy_stage
@@ -75,6 +77,8 @@ class ApplicationDeploymentBuilder:
         self.application_name = application_name
         self.openai_api_key = openai_api_key
         self.use_bedrock = use_bedrock
+        self.app_container_vcpus = app_container_vcpus
+        self.app_container_memory = app_container_memory
 
     def build(self, scope):
         llm_hf_execution_role_stack = HuggingFaceSageMakerRoleStack(
@@ -125,6 +129,8 @@ class ApplicationDeploymentBuilder:
             sagemaker_endpoint_name=llama2_inference_stack.hf_endpoint.ssm_parameter_endpoint_name,
             openai_api_key=self.openai_api_key,
             use_bedrock=self.use_bedrock,
+            container_vcpus=self.app_container_vcpus,
+            container_memory=self.app_container_memory,
         )
 
 

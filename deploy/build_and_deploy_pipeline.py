@@ -1,22 +1,10 @@
-from typing import Union
-from aws_cdk import (
-    Environment,
-    Stack,
-    aws_ecr as ecr,
-    aws_codebuild as codebuild,
-    aws_codepipeline as codepipeline,
-    aws_codepipeline_actions as codepipeline_actions,
-    aws_codecommit as codecommit,
-)
-from nc_llm_aws_infra_blocks.deploy_constructs.inference.hf_sagemaker_endpoint_construct import (
-    HuggingFaceTaskType,
-)
-from aws_cdk.pipelines import CodePipeline, CodePipelineSource, ShellStep, CodeBuildStep
-
-
-from deploy_stage import ApplicationDeployStage, ApplicationDeploymentBuilder
-
+from aws_cdk import Stack
+from aws_cdk import aws_codebuild as codebuild
+from aws_cdk import aws_codecommit as codecommit
+from aws_cdk import aws_ecr as ecr
+from aws_cdk.pipelines import CodeBuildStep, CodePipeline, CodePipelineSource, ShellStep
 from constructs import Construct
+from deploy_stage import ApplicationDeploymentBuilder, ApplicationDeployStage
 
 
 class PipelineStack(Stack):
@@ -90,6 +78,10 @@ class PipelineStack(Stack):
                 f"docker push {repo.repository_uri}:latest",
                 "echo Done!",
             ],
+            build_environment=codebuild.BuildEnvironment(
+                privileged=True,
+                build_image=codebuild.LinuxBuildImage.STANDARD_4_0,
+            ),
         )
 
         app_deployment.add_pre(code_build_step)

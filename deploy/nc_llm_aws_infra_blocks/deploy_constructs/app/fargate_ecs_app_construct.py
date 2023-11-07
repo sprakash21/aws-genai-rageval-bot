@@ -1,3 +1,5 @@
+from typing import Union
+
 import aws_cdk
 from aws_cdk import SecretValue
 from aws_cdk import aws_ec2 as ec2
@@ -16,7 +18,7 @@ class EcsWithLoadBalancer(BaseConstruct):
         scope: Construct,
         id: str,
         vpc: ec2.IVpc,
-        vcpus: int,
+        vcpus: Union[int, float],
         container_memory: int,
         application_name: str,
         ecr_repository_name: str,
@@ -82,7 +84,7 @@ class EcsWithLoadBalancer(BaseConstruct):
             ),
             port_mappings=[ecs.PortMapping(container_port=8501)],
             environment={
-                "SG_ENDPOINT_NAME": sagemaker_endpoint_name.name,
+                "SG_ENDPOINT_NAME": str(sagemaker_endpoint_name.name),
                 "RDS_SECRET_NAME": db_secret.secret_name,
                 "OPENAI_API_KEY_NAME": secret_name,
                 "BUCKET_NAME": bucket_name,
@@ -132,6 +134,12 @@ class EcsWithLoadBalancer(BaseConstruct):
                     resources=[
                         f"arn:aws:ssm:{self.deploy_region}:*:parameter{sagemaker_endpoint_name.name}"
                     ],
+                ),
+                aws_iam.PolicyStatement(
+                    actions=[
+                        "bedrock:*",
+                    ],
+                    resources=[f"*"],
                 ),
             ],
         )
