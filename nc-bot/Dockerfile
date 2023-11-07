@@ -26,9 +26,6 @@ COPY ./pages /app/pages
 # COPY .env /app/.env
 COPY chatbot.py /app/chatbot.py
 
-RUN pip install langchain==0.0.314
-RUN pip install ragas==0.0.17
-
 EXPOSE 8501
 
 HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/health

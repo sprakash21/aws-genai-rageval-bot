@@ -5,7 +5,7 @@ cryptography==38.0.4
 streamlit==1.27.0
 python-dotenv==1.0.0
 pypdf
-langchain
+langchain==0.0.314
 pgvector
 openai
 psycopg2-binary
@@ -14,7 +14,7 @@ tiktoken
 sentence_transformers
 unstructured[pdf]
 langchainhub
-ragas
+ragas==0.0.17
 llama_index
 pyOpenSSL
 SQLAlchemy
