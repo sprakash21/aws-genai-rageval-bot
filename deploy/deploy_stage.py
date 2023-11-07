@@ -12,9 +12,7 @@ from nc_llm_aws_infra_blocks.pre_built_stacks.inference.sagemaker_hugging_face.h
     HuggingFaceTaskType,
 )
 
-from nc_llm_aws_infra_blocks.pre_built_stacks.inference.sagemaker_studio_stack import (
-    SagemakerStudioStack,
-)
+
 from nc_llm_aws_infra_blocks.pre_built_stacks.inference.sagemaker_aws.aws_sagemaker_endpoint_stack import (
     AwsSagemakerEndpointStack,
 )
@@ -29,9 +27,7 @@ from nc_llm_aws_infra_blocks.pre_built_stacks.supplements.network_stack import (
 from nc_llm_aws_infra_blocks.pre_built_stacks.app.application_stack import (
     SimpleRagAppStack,
 )
-from nc_llm_aws_infra_blocks.pre_built_stacks.supplements.developer_stack import (
-    DeveloperStack,
-)
+
 from nc_llm_aws_infra_blocks.library.helpers.model_info import (
     get_sagemaker_model_info,
 )
@@ -50,6 +46,12 @@ class ApplicationDeploymentBuilder:
         instance_type: str,
         instance_count: int,
         gpu_count: int,
+        ecr_repository_name: str,
+        ecr_image_tag: str,
+        ecr_url: str,
+        application_name: str,
+        openai_api_key: str,
+        use_bedrock: bool,
         pytorch_version: Union[str, None] = None,
         repository_override: Union[str, None] = None,
         image_tag_override: Union[str, None] = None,
@@ -67,6 +69,12 @@ class ApplicationDeploymentBuilder:
         self.pytorch_version = pytorch_version
         self.repository_override = repository_override
         self.image_tag_override = image_tag_override
+        self.ecr_repository_name = ecr_repository_name
+        self.ecr_image_tag = ecr_image_tag
+        self.ecr_url = ecr_url
+        self.application_name = application_name
+        self.openai_api_key = openai_api_key
+        self.use_bedrock = use_bedrock
 
     def build(self, scope):
         llm_hf_execution_role_stack = HuggingFaceSageMakerRoleStack(
@@ -110,6 +118,13 @@ class ApplicationDeploymentBuilder:
             deploy_stage=self.deploy_stage,
             deploy_region=self.deploy_region,
             project_prefix=self.project_prefix,
+            application_name=self.application_name,
+            ecr_repository_name=self.ecr_repository_name,
+            ecr_image_tag=self.ecr_image_tag,
+            ecr_url=self.ecr_url,
+            sagemaker_endpoint_name=llama2_inference_stack.hf_endpoint.ssm_parameter_endpoint_name,
+            openai_api_key=self.openai_api_key,
+            use_bedrock=self.use_bedrock,
         )
 
 

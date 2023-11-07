@@ -13,9 +13,6 @@ from nc_llm_aws_infra_blocks.pre_built_stacks.inference.sagemaker_hugging_face.h
     HuggingFaceTaskType,
 )
 
-from nc_llm_aws_infra_blocks.pre_built_stacks.inference.sagemaker_studio_stack import (
-    SagemakerStudioStack,
-)
 from nc_llm_aws_infra_blocks.pre_built_stacks.inference.sagemaker_aws.aws_sagemaker_endpoint_stack import (
     AwsSagemakerEndpointStack,
 )
@@ -30,9 +27,7 @@ from nc_llm_aws_infra_blocks.pre_built_stacks.supplements.network_stack import (
 from nc_llm_aws_infra_blocks.pre_built_stacks.app.application_stack import (
     SimpleRagAppStack,
 )
-from nc_llm_aws_infra_blocks.pre_built_stacks.supplements.developer_stack import (
-    DeveloperStack,
-)
+
 from nc_llm_aws_infra_blocks.library.helpers.model_info import (
     get_sagemaker_model_info,
 )
@@ -52,6 +47,15 @@ sagemaker_session_profile_name = app.node.get_context("sagemaker_session_profile
 project_prefix = app.node.get_context("project_prefix")
 deploy_stage = app.node.get_context("deploy_stage")
 deploy_region = app.node.get_context("deploy_region")
+openai_api_key = app.node.get_context("openai_api_key")
+use_bedrock = app.node.get_context("use_bedrock")
+
+
+ecr_repo = app.node.try_get_context("ecr_repo")
+ecr_tag = app.node.try_get_context("ecr_image_tag")
+ecr_url = app.node.try_get_context("ecr_url")
+
+deploy_pipeline = app.node.try_get_context("deploy_pipeline")
 
 
 huggingface_model_id = chat_bot_inference_model["model_id"]
@@ -81,20 +85,27 @@ app_deployment_builder = ApplicationDeploymentBuilder(
     image_tag_override=image_tag_override,
     pytorch_version=pytorch_version,
     repository_override=repository_override,
+    ecr_image_tag=ecr_tag,
+    ecr_repository_name=ecr_repo,
+    ecr_url=ecr_url,
+    application_name=project_prefix,
+    openai_api_key=openai_api_key,
+    use_bedrock=use_bedrock,
 )
 
-app_deployment_builder.build(app)
-
-# PipelineStack(
-#     app,
-#     f"{project_prefix}-{deploy_stage}-pipeline",
-#     project_prefix=project_prefix,
-#     deploy_stage=deploy_stage,
-#     docker_image_name="llama2-13b-chatbot",
-#     code_commit_repo_name="llama2-13b-chatbot",
-#     app_deployment_builder=app_deployment_builder,
-#     env=aws_environment,
-# )
+if not deploy_pipeline:
+    app_deployment_builder.build(app)
+else:
+    PipelineStack(
+        app,
+        f"{project_prefix}-{deploy_stage}-pipeline",
+        project_prefix=project_prefix,
+        deploy_stage=deploy_stage,
+        docker_image_name="llama2-13b-chatbot",
+        code_commit_repo_name="llama2-13b-chatbot",
+        app_deployment_builder=app_deployment_builder,
+        env=aws_environment,
+    )
 
 
 app.synth()

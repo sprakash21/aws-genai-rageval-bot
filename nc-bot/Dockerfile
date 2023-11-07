@@ -12,16 +12,16 @@ RUN apt-get update && apt-get install -y \
     git \
     && rm -rf /var/lib/apt/lists/*
 
+COPY requirements.txt /app/requirements.txt
+
+RUN pip3 install --no-cache-dir -r requirements.txt
+
 # All folders copy
 COPY ./src /app/src
 COPY ./pages /app/pages
 # Remove this when on AWS. Should come from Secrets Manager and be read from it.
 # COPY .env /app/.env
 COPY chatbot.py /app/chatbot.py
-COPY requirements.txt /app/requirements.txt
-
-
-RUN pip3 install --no-cache-dir -r requirements.txt
 
 EXPOSE 8501
 

@@ -9,3 +9,6 @@ build-bot-local:
 
 run-bot-local:
 	docker-compose -f docker-compose.yml up nc-bot
+
+build-and-push:
+	./scripts/build_and_push_docker.sh

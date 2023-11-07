@@ -1,4 +1,10 @@
-from aws_cdk import Duration, aws_rds as rds, Stack, aws_ec2 as ec2
+from aws_cdk import (
+    Duration,
+    aws_rds as rds,
+    Stack,
+    aws_ec2 as ec2,
+    SecretsManagerSecretOptions,
+)
 from aws_cdk.aws_rds import (
     ServerlessCluster,
     DatabaseClusterEngine,
@@ -23,6 +29,13 @@ class AuroraPostgresSlContextDb(BaseConstruct):
             "Ec2 connecting to Aurora Serverless",
         )
 
+        self.secret_name = f"{self.resource_prefix}-db-secrets"
+        self.credentials = rds.Credentials.from_generated_secret(
+            "postgres",
+            secret_name=self.secret_name,
+            exclude_characters="`\"$%'!&*^#@()}{[]\\>=+<?%/",
+        )
+
         # Aurora Serverless cluster
         self.cluster = ServerlessCluster(
             self,
@@ -39,14 +52,14 @@ class AuroraPostgresSlContextDb(BaseConstruct):
             ),
             default_database_name="context_db",
             vpc_subnets=ec2.SubnetSelection(
-                subnet_type=ec2.SubnetType.PRIVATE_WITH_NAT
+                subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
             ),
-            credentials=rds.Credentials.from_generated_secret(
-                "postgres",
-                secret_name=f"{self.resource_prefix}-db-secrets",
-                exclude_characters="`\"$%'!&*^#@()}{[]\\>=+<?%/",
-            ),
+            credentials=self.credentials,
         )
+
+    @property
+    def db_secret_name(self) -> str:
+        return self.secret_name
 
     @property
     def db_secret(self):

@@ -1,17 +1,15 @@
-from aws_cdk import (
-    Duration,
-    Size,
-    Stack,
-    aws_lambda as _lambda,
-    aws_apigateway as apigw,
-    aws_ec2 as ec2,
-    aws_iam as iam,
-    aws_ssm as ssm,
-)
-from constructs import Construct
+from aws_cdk import Stack
 
+from aws_cdk import aws_ec2 as ec2
+
+
+from aws_cdk import aws_ssm as ssm
+from constructs import Construct
 from nc_llm_aws_infra_blocks.deploy_constructs.app.aurora_postgres_sl_context_db_construct import (
     AuroraPostgresSlContextDb,
+)
+from nc_llm_aws_infra_blocks.deploy_constructs.app.fargate_ecs_app_construct import (
+    EcsWithLoadBalancer,
 )
 
 
@@ -24,6 +22,13 @@ class SimpleRagAppStack(Stack):
         project_prefix: str,
         deploy_stage: str,
         deploy_region: str,
+        application_name: str,
+        ecr_repository_name: str,
+        ecr_image_tag: str,
+        ecr_url: str,
+        sagemaker_endpoint_name: ssm.CfnParameter,
+        openai_api_key: str,
+        use_bedrock: bool,
         **kwargs
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)
@@ -35,4 +40,23 @@ class SimpleRagAppStack(Stack):
             deploy_region=deploy_region,
             project_prefix=project_prefix,
             deploy_stage=deploy_stage,
+        )
+
+        app_ecr_stack = EcsWithLoadBalancer(
+            self,
+            "ecs-app",
+            vpc=vpc,
+            vcpus=1024,
+            container_memory=2048,
+            application_name=application_name,
+            ecr_repository_name=ecr_repository_name,
+            ecr_image_tag=ecr_image_tag,
+            ecr_url=ecr_url,
+            project_prefix=project_prefix,
+            deploy_stage=deploy_stage,
+            deploy_region=deploy_region,
+            sagemaker_endpoint_name=sagemaker_endpoint_name,
+            openai_api_key=openai_api_key,
+            use_bedrock=use_bedrock,
+            db_secret=context_db.db_secret,
         )

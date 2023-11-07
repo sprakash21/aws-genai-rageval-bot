@@ -2,7 +2,7 @@ import os
 import sqlalchemy as db
 from src.models.models import Base
 from src.config.app_config import get_db_type
-from src.helpers.env_utils import get_secret_info
+from src.helpers.env_utils import get_secret_info_json
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -23,7 +23,7 @@ def prepare_connection_str(db_local=False):
         db_name = os.environ.get("PGVECTOR_DATABASE")
         host = os.environ.get("PGVECTOR_HOST")
     else:
-        rds_secret_info = get_secret_info(os.environ.get("RDS_SECRET_NAME"))
+        rds_secret_info = get_secret_info_json(os.environ.get("RDS_SECRET_NAME"))
         host = rds_secret_info["host"]
         db_name = rds_secret_info["dbname"]
         user = rds_secret_info["username"]

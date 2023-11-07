@@ -37,7 +37,7 @@ class HuggingFaceSageMakerEndpointStack(Stack):
         super().__init__(scope, construct_id, **kwargs)
 
         # ToDo: Taha: Parameterize properly like e.g. variant_weight
-        self.endpoint = HuggingFaceSagemakerEndpointConstruct(
+        self.hf_endpoint = HuggingFaceSagemakerEndpointConstruct(
             self,
             "sm-hf-ep",
             model_name=huggingface_model_id,
@@ -55,7 +55,3 @@ class HuggingFaceSageMakerEndpointStack(Stack):
             repository_override=repository_override,
             image_tag_override=image_tag_override,
         )
-
-    @property
-    def sm_endpoint(self) -> HuggingFaceSagemakerEndpointConstruct:
-        return self.endpoint

@@ -7,7 +7,7 @@ import botocore
 import boto3
 from langchain.vectorstores.pgvector import PGVector
 from langchain.embeddings import HuggingFaceEmbeddings
-from src.helpers.env_utils import get_secret_info
+from src.helpers.env_utils import get_secret_info_json
 from dotenv import load_dotenv
 
 
@@ -15,13 +15,12 @@ load_dotenv()
 
 
 class UploadHelper:
-    """Uploads the unstructured pdf data into vectordb
-    """
+    """Uploads the unstructured pdf data into vectordb"""
 
     def __init__(self, db_local):
         self.boto3_session = boto3
         self.is_local = db_local
-        self.rds_secret_info = get_secret_info(os.environ.get("RDS_SECRET_NAME"))
+        self.rds_secret_info = get_secret_info_json(os.environ.get("RDS_SECRET_NAME"))
 
     def get_connection_str(self):
         """Generates the Connection String required to connect to the Database

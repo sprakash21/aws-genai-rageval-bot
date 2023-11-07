@@ -35,7 +35,7 @@ aws ecr create-repository --repository-name $REPO_NAME --region $REGION
 
 color_blue "Building Docker image: $REPO_NAME from Dockerfile: $DOCKERFILE_PATH"
 # Build the Docker image
-docker build -t $REPO_NAME -f $DOCKERFILE_PATH ../../nc-bot/
+docker build -t $REPO_NAME -f $DOCKERFILE_PATH ../
 
 color_blue "Tagging Docker image as: $REPO_NAME:$IMAGE_TAG"
 # Tag the image for ECR

@@ -1,5 +1,5 @@
 import os
-from src.helpers.env_utils import get_secret_info
+from src.helpers.env_utils import get_secret_info_json, get_secret_info
 from datasets import Dataset
 from ragas.metrics import (
     answer_relevancy,
@@ -29,9 +29,7 @@ class EvalHelper:
         self.openai_api_version = "2023-07-01-preview"
         self.openai_base = "https://oai-int-azg-we-001.openai.azure.com/"
         self.openai_deployment_name = "dep-gpt-35-turbo"
-        self.openai_key = get_secret_info(os.environ.get("OPENAI_API_KEY_NAME"))[
-            "token"
-        ]
+        self.openai_key = get_secret_info(os.environ.get("OPENAI_API_KEY_NAME"))
 
     async def create_dataset(self, run_data):
         """_summary_
@@ -51,7 +49,7 @@ class EvalHelper:
         return Dataset.from_dict(data_dict)
 
     async def evaluation(self, run_data):
-        """Performs evaluation using chatgpt as judge for the answer generated from 
+        """Performs evaluation using chatgpt as judge for the answer generated from
         LLM like llama2. Note: The judge can be any judge. We here use ChatGPT.
 
         Args:

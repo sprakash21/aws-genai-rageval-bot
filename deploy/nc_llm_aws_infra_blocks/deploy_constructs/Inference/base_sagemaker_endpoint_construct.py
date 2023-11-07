@@ -1,6 +1,6 @@
 from abc import abstractmethod
 from typing import Union
-from aws_cdk import aws_sagemaker as sagemaker, CfnOutput
+from aws_cdk import aws_sagemaker as sagemaker, CfnOutput, aws_ssm
 from constructs import Construct
 from nc_llm_aws_infra_blocks.library.config.huggingface_smconfig import (
     DEFAULT_PYTORCH_VERSION,
@@ -78,6 +78,14 @@ class BaseSageMakerEndpointConstruct(BaseConstruct):
             endpoint_config_name=self.endpoint_config.attr_endpoint_config_name,
         )
 
+        self._ssm_parameter_endpoint_name = aws_ssm.CfnParameter(
+            self,
+            f"hf-sagemaker-endpoint-name",
+            name=f"/{self.project_prefix}/{self.deploy_stage}/sagemaker-endpoint-name",
+            value=str(self.endpoint.endpoint_name),
+            type="String",
+        )
+
         CfnOutput(
             scope=self,
             id=f"{self.resource_prefix}-EndpointOutput",
@@ -93,3 +101,7 @@ class BaseSageMakerEndpointConstruct(BaseConstruct):
     @property
     def endpoint_name(self) -> Union[str, None]:
         return self.endpoint.endpoint_name
+
+    @property
+    def ssm_parameter_endpoint_name(self) -> aws_ssm.CfnParameter:
+        return self._ssm_parameter_endpoint_name
