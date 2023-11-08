@@ -6,8 +6,9 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 import botocore
 import boto3
 from langchain.vectorstores.pgvector import PGVector
-from langchain.embeddings import HuggingFaceEmbeddings
+from langchain.embeddings import HuggingFaceEmbeddings, BedrockEmbeddings
 from src.helpers.env_utils import get_secret_info_json
+from src.config.app_config import get_embedding_model
 from dotenv import load_dotenv
 
 
@@ -20,6 +21,7 @@ class UploadHelper:
     def __init__(self, db_local):
         self.boto3_session = boto3
         self.is_local = db_local
+        self.use_bedrock = True if os.environ.get("USE_BEDROCK") == "true" else False
         self.rds_secret_info = get_secret_info_json(os.environ.get("RDS_SECRET_NAME"))
 
     def get_connection_str(self):
@@ -100,19 +102,15 @@ class UploadHelper:
             bool: Success or Failure of the process
         """
         # Fixed collection and can be extended.
-        COLLECTION_NAME = "time_reporting"
-        loader = S3FileLoader(
-            bucket=os.environ.get("BUCKET_NAME"),
-            key=fname,
-        )
+        COLLECTION_NAME = "llm_collection"
+        loader = S3FileLoader(bucket=os.environ.get("BUCKET_NAME"), key=fname)
         # Short vs Long chunk
         text_splitter = RecursiveCharacterTextSplitter(
             separators=["\n"], chunk_size=1024, chunk_overlap=50
         )
         documents = loader.load_and_split(text_splitter=text_splitter)
-
-        # TODO: Switch to powerful embeddings like titan, fast-embedding, ada_002 probably
-        embedding = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+        # Obtain the embeddings for the documents.
+        embedding = get_embedding_model(self.use_bedrock)
         curr = self.make_connection()
         if self.is_existing_collection(curr) and test_delete is False:
             s3_fname = f"s3://{os.environ.get('BUCKET_NAME')}/{fname}"

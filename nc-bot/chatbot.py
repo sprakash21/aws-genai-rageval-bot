@@ -5,8 +5,7 @@ from src.helpers.inference_helper import Llama2InferenceHelper
 
 st.sidebar.markdown("# Chatbot 💬")
 st.title("Chatbot 💬")
-st.caption("🚀 Swara - A chatbot which is works on answering pdf data")
-st.markdown("## WIP")
+st.caption("🚀 RAGTrack - A chatbot which is works on answering on your pdf data")
 if "messages" not in st.session_state:
     st.session_state["messages"] = [
         {"role": "assistant", "content": "How can I help you?"}
@@ -50,7 +49,8 @@ def prepare_source_docs(docs):
 if st.session_state.messages[-1]["role"] != "assistant":
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
-            inference_helper = Llama2InferenceHelper(collection_name="time_reporting")
+            # A collection name is fixed for the application and can be extended
+            inference_helper = Llama2InferenceHelper(collection_name="llm_collection")
             response = inference_helper.inference(prompt)
             st.write(response["result"], unsafe_allow_html=True)
             source_docs = prepare_source_docs(response["source_documents"])

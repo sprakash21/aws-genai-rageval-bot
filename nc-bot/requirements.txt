@@ -1,13 +1,14 @@
 # pip freeze this for particular version
 requests==2.31.0
-boto3==1.28.62
+boto3>=1.28.62
+botocore>=1.31.57
 cryptography==38.0.4
 streamlit==1.27.0
 python-dotenv==1.0.0
 pypdf
 langchain==0.0.314
 pgvector
-openai
+openai==0.28.1
 psycopg2-binary
 tiktoken
 # Start Embedder on sentences

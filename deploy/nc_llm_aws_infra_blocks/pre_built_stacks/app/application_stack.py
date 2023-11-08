@@ -28,6 +28,7 @@ class SimpleRagAppStack(Stack):
         sagemaker_endpoint_name: ssm.CfnParameter,
         openai_api_key: str,
         use_bedrock: bool,
+        bedrock_region: str,
         container_vcpus: Union[int, float],
         container_memory: int,
         **kwargs
@@ -59,5 +60,6 @@ class SimpleRagAppStack(Stack):
             sagemaker_endpoint_name=sagemaker_endpoint_name,
             openai_api_key=openai_api_key,
             use_bedrock=use_bedrock,
+            bedrock_region=bedrock_region,
             db_secret=context_db.db_secret,
         )

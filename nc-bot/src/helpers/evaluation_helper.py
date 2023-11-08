@@ -1,5 +1,7 @@
 import os
-from src.helpers.env_utils import get_secret_info_json, get_secret_info
+from src.helpers.env_utils import get_secret_info
+from src.config.bedrock_client import get_bedrock_client
+from src.config.app_config import get_embedding_model
 from datasets import Dataset
 from ragas.metrics import (
     answer_relevancy,
@@ -10,7 +12,7 @@ import asyncio
 from ragas.metrics.critique import harmfulness
 from ragas import evaluate
 from langchain.chat_models import AzureChatOpenAI
-from langchain.embeddings import HuggingFaceEmbeddings
+from langchain.embeddings import HuggingFaceEmbeddings, BedrockEmbeddings
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -29,6 +31,7 @@ class EvalHelper:
         self.openai_api_version = "2023-07-01-preview"
         self.openai_base = "https://oai-int-azg-we-001.openai.azure.com/"
         self.openai_deployment_name = "dep-gpt-35-turbo"
+        self.use_bedrock = True if os.environ.get("USE_BEDROCK") == "true" else False
         self.openai_key = get_secret_info(os.environ.get("OPENAI_API_KEY_NAME"))
 
     async def create_dataset(self, run_data):
@@ -74,14 +77,14 @@ class EvalHelper:
             )
             context_precision.llm = azure_model
             faithfulness.llm = azure_model
-            answer_relevancy.embeddings = HuggingFaceEmbeddings(
-                model_name="all-MiniLM-L6-v2"
-            )
+            embedding = get_embedding_model(self.use_bedrock)
+
+            answer_relevancy.embeddings = embedding
+            harmfulness.embeddings = embedding
+
             answer_relevancy.llm = azure_model
             harmfulness.llm = azure_model
-            harmfulness.embeddings = HuggingFaceEmbeddings(
-                model_name="all-MiniLM-L6-v2"
-            )
+
             print("Came here -- Evaluation Starting...")
             result = evaluate(
                 dataset=data,

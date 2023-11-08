@@ -1,19 +1,19 @@
 import os
 from langchain import hub
 from langchain.vectorstores.pgvector import PGVector
-from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.llms.sagemaker_endpoint import SagemakerEndpoint
-from src.handlers.db_callback_handler import DBCallbackHandler
+from langchain.embeddings import HuggingFaceEmbeddings
 import langchain
-
-langchain.debug = False
+from langchain.chains import RetrievalQA
 # LLM
 from langchain.llms.ollama import Ollama
-from src.config.app_config import get_db_type
+from src.handlers.db_callback_handler import DBCallbackHandler
+from src.config.app_config import get_db_type, get_embedding_model
 from src.handlers.content_handler import ContentHandler
-from langchain.chains import RetrievalQA
 from src.helpers.upload_vectordb_helper import UploadHelper
 from src.helpers.env_utils import get_ssm_parameter_value
+
+langchain.debug = False
 
 
 class Llama2InferenceHelper:
@@ -29,6 +29,7 @@ class Llama2InferenceHelper:
             os.environ.get("SG_ENDPOINT_NAME")
         )
         self.db_type = get_db_type()
+        self.use_bedrock = True if os.environ.get("USE_BEDROCK") == "true" else False
 
     def inference_local(self, query):
         """
@@ -82,7 +83,7 @@ class Llama2InferenceHelper:
         try:
             upload_helper = UploadHelper(db_local=self.db_type)
             collection_name = self.collection_name
-            embedding = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+            embedding = get_embedding_model(self.use_bedrock)
             vector_store = PGVector(
                 collection_name=collection_name,
                 connection_string=upload_helper.get_connection_str(),

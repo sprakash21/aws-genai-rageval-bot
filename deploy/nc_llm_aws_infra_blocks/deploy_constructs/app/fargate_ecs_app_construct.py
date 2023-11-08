@@ -27,6 +27,7 @@ class EcsWithLoadBalancer(BaseConstruct):
         sagemaker_endpoint_name: aws_ssm.CfnParameter,
         openai_api_key: str,
         use_bedrock: bool,
+        bedrock_region: str,
         db_secret: aws_secretsmanager.ISecret,
         **kwargs,
     ) -> None:
@@ -89,7 +90,8 @@ class EcsWithLoadBalancer(BaseConstruct):
                 "OPENAI_API_KEY_NAME": secret_name,
                 "BUCKET_NAME": bucket_name,
                 "USE_BEDROCK": str(use_bedrock),
-                "IS_DB_LOCAL": "False",
+                "IS_DB_LOCAL": "false",
+                "BEDROCK_REGION": bedrock_region,
             },
         )
 
