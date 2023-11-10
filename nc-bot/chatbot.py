@@ -17,7 +17,7 @@ for msg in st.session_state.messages:
 if prompt := st.chat_input("Ask me some Question?"):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
-        st.write(prompt)
+        st.write(prompt, unsafe_allow_html=True)
 
 
 def prepare_source_docs(docs):

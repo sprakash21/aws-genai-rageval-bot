@@ -9,7 +9,7 @@ def get_db_type():
     db_local = False
     is_db_local = os.environ.get("IS_DB_LOCAL")
     if is_db_local == "true":
-        DB_LOCAL = True
+        db_local = True
     return db_local
 
 def get_embedding_model(use_bedrock):

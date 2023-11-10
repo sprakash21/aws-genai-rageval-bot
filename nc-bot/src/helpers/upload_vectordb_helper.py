@@ -22,8 +22,14 @@ class UploadHelper:
         self.boto3_session = boto3
         self.is_local = db_local
         self.use_bedrock = True if os.environ.get("USE_BEDROCK") == "true" else False
-        self.rds_secret_info = get_secret_info_json(os.environ.get("RDS_SECRET_NAME"))
+        self.rds_secret_info = self.get_rds_info(self.is_local)
 
+    def get_rds_info(self, is_local):
+        if not is_local:
+            return get_secret_info_json(os.environ.get("RDS_SECRET_NAME"))
+        else:
+            return {}
+    
     def get_connection_str(self):
         """Generates the Connection String required to connect to the Database
 

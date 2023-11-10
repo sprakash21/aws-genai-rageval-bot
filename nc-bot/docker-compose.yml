@@ -2,6 +2,7 @@ networks:
   backend-network:
 services:
   nc-bot:
+    platform: linux/amd64
     container_name: nc-bot-app
     restart: always
     build:
@@ -14,4 +15,11 @@ services:
       - ~/.aws:/root/.aws:ro
     networks:
       - backend-network
-  
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 8000M
+        reservations:
+          cpus: '2.0'
+          memory: 8000M

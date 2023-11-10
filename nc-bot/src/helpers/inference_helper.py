@@ -25,11 +25,17 @@ class Llama2InferenceHelper:
     def __init__(self, collection_name) -> None:
         self.prompt = hub.pull("rlm/rag-prompt-llama")
         self.collection_name = collection_name
-        self.sg_endpoint_name = get_ssm_parameter_value(
-            os.environ.get("SG_ENDPOINT_NAME")
-        )
         self.db_type = get_db_type()
+        self.sg_endpoint_name = self.get_sg_endpoint(self.db_type)
         self.use_bedrock = True if os.environ.get("USE_BEDROCK") == "true" else False
+    
+    def get_sg_endpoint(self, is_db_local):
+        if not is_db_local:
+            return get_ssm_parameter_value(
+                os.environ.get("SG_ENDPOINT_NAME")
+            )
+        else:
+            return ""
 
     def inference_local(self, query):
         """
@@ -74,7 +80,7 @@ class Llama2InferenceHelper:
         result = qa_chain({"question": query}, callbacks=[DBCallbackHandler()])
         print(result.keys())
         print(result["source_documents"])
-        return result["result"]
+        return result
 
     def inference(self, query):
         """
