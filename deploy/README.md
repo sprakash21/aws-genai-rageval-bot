@@ -21,13 +21,13 @@ Below is a detailed description of each parameter:
 - `huggingface.token_id`: The token ID for Hugging Face, required for authentication and accessing Hugging Face models.
 
 - `huggingface.llama2.13b`: Configuration settings specific to the Hugging Face 'llama2.13b' model used by the application.
-  - `model_id`: The specific model identifier as recognized by Hugging Face. This ID is used to fetch the correct model.
-  - `task`: The type of task for which the model is optimized, as defined by Hugging Face. This could be text generation, classification, etc.
+    - `model_id`: The specific model identifier as recognized by Hugging Face. This ID is used to fetch the correct model.
+    - `task`: The type of task for which the model is optimized, as defined by Hugging Face. This could be text generation, classification, etc.
 
 - `inference_endpoint`: Settings for the SageMaker inference endpoint, which is the AWS service used to deploy machine learning models for inference.
-  - `instance_type`: Specifies the type of instance (e.g., computational power, memory) used for the SageMaker inference endpoint. This determines the capacity and performance of the inference service.
-  - `instance_count`: The number of instances to deploy for the inference endpoint. A higher count can offer improved performance and handle higher request volumes.
-  - `gpu_count`: The number of GPUs assigned to each instance. This is particularly important for computation-intensive models and can significantly affect inference performance.
+    - `instance_type`: Specifies the type of instance (e.g., computational power, memory) used for the SageMaker inference endpoint. This determines the capacity and performance of the inference service.
+    - `instance_count`: The number of instances to deploy for the inference endpoint. A higher count can offer improved performance and handle higher request volumes.
+    - `gpu_count`: The number of GPUs assigned to each instance. This is particularly important for computation-intensive models and can significantly affect inference performance.
 
 - `openai_api_key`: The API key for OpenAI, utilized for quality evaluation.
 - `sagemaker_session_profile_name`: (Optional) A configured AWS profile name for setting up SageMaker sessions with boto3. Defaults to the default AWS profile on the machine if not specified.
@@ -43,15 +43,15 @@ Below is a detailed description of each parameter:
 - `app_container_vcpus`: The number of virtual CPUs allocated for the ECS task running the application.
 - `app_container_memory`: The memory allocation (in MB) for the ECS task running the application.
 - `app_params`: Application-specific parameters.
-  - `INFER_LOCAL`: Should be "false" for non-local development.
-  - `DB_LOCAL`: Should be "false" for non-local development.
-  - `EMBEDDING_COLLECTION_NAME`: The collection name for embeddings; can be any static string.
-  - `OPENAI_API_TYPE`: The type of OpenAI API key being used.
-  - `OPENAI_API_VERSION`: The version of the OpenAI API.
-  - `OPENAI_API_BASE`: The base URL for the OpenAI API.
-  - `OPENAI_DEPLOYMENT_NAME`: The specific deployment name for the OpenAI API key.
-  - `USE_BEDROCK`: Boolean to indicate if Bedrock is used for embeddings.
-  - `BEDROCK_REGION`: Specifies the AWS region for Bedrock if it's used.
+    - `INFER_LOCAL`: Should be "false" for non-local development.
+    - `DB_LOCAL`: Should be "false" for non-local development.
+    - `EMBEDDING_COLLECTION_NAME`: The collection name for embeddings; can be any   static string.
+    - `OPENAI_API_TYPE`: The type of OpenAI API key being used.
+    - `OPENAI_API_VERSION`: The version of the OpenAI API.
+    - `OPENAI_API_BASE`: The base URL for the OpenAI API.
+    - `OPENAI_DEPLOYMENT_NAME`: The specific deployment name for the OpenAI API key.
+    - `USE_BEDROCK`: Boolean to indicate if Bedrock is used for embeddings.
+    - `BEDROCK_REGION`: Specifies the AWS region for Bedrock if it's used.
 
 
 ## Deployment Steps in Sandbox AWS Environment
