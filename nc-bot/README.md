@@ -10,7 +10,7 @@ nc-bot
 |----- pages
 |----- pg_vector
 |----- scripts
-|----- src
+|----- rag_application_framework
         |----- config
         |----- helpers
         |----- models
@@ -24,7 +24,7 @@ nc-bot
 |----- .env.template
 ```
 
-The project is structure as shown above. The important modules are the src/handlers/db_callback_handler.py which includes the callback handling of the RAG pipeline to perform the evaluation and saving the scores in the RagScore Table. The helpers module contain all the necessary helpers for ingestion, inference, and evaluation.  
+The project is structure as shown above. The important modules are the rag_application_framework/handlers/ragas_evaluation_and_db_logging_callback_handler.py which includes the callback handling of the RAG pipeline to perform the evaluation and saving the scores in the RagScore Table. The helpers module contain all the necessary helpers for ingestion, inference, and evaluation.  
 
 ## Chatbot Home Page
 <TODO: Add the home page>
@@ -45,9 +45,9 @@ First setup the .env required for the application. In order to do so, perform th
 | PGVECTOR_PASSWORD   | pwd         | set a password                                                                                |
 | PGVECTOR_PORT       | 5432        | 5432                                                                                          |
 | PGVECTOR_HOST       | postgres    | localhost?                                                                                    |
-| SG_ENDPOINT_NAME    | ssm_param   | Optional: SSM parameter store name for Sagemaker endpoint created from CDK if using Sagemaker |
-| RDS_SECRET_NAME     | SecretName  | Optional: RDS Secret name for created from CDK if using RDS and IS_LOCAL_DB is false          |
-| OPENAI_API_KEY_NAME | token       | Required to use evaluation of the RAG pipeline using ragas                                    |
+| SAGEMAKER_ENDPOINT_SSM_PARAM_NAME    | ssm_param   | Optional: SSM parameter store name for Sagemaker endpoint created from CDK if using Sagemaker |
+| RDS_POSTRGRES_CREDENTIALS_SECRET_NAME     | SecretName  | Optional: RDS Secret name for created from CDK if using RDS and IS_LOCAL_DB is false          |
+| OPENAI_API_KEY_SECRET_NAME | token       | Required to use evaluation of the RAG pipeline using ragas                                    |
 | BUCKET_NAME         | bucket_name | S3 bucket name to be created to store the pdf data and reference                              |
 | USE_BEDROCK         | true,false  | Either to use aws titan embeddings or not                                                     |
 | BEDROCK_REGION      | region      | Region of the aws bedrock model                                                               |

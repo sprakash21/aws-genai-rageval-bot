@@ -51,8 +51,7 @@ class ApplicationDeploymentBuilder:
         ecr_url: str,
         application_name: str,
         openai_api_key: str,
-        use_bedrock: bool,
-        bedrock_region: str,
+        app_params: dict[str, str],
         pytorch_version: Union[str, None] = None,
         repository_override: Union[str, None] = None,
         image_tag_override: Union[str, None] = None,
@@ -76,11 +75,10 @@ class ApplicationDeploymentBuilder:
         self.ecr_image_tag = ecr_image_tag
         self.ecr_url = ecr_url
         self.application_name = application_name
-        self.openai_api_key = openai_api_key
-        self.use_bedrock = use_bedrock
-        self.bedrock_region = bedrock_region
+        self.app_params = app_params
         self.app_container_vcpus = app_container_vcpus
         self.app_container_memory = app_container_memory
+        self.openai_api_key = openai_api_key
 
     def build(self, scope):
         llm_hf_execution_role_stack = HuggingFaceSageMakerRoleStack(
@@ -130,8 +128,7 @@ class ApplicationDeploymentBuilder:
             ecr_url=self.ecr_url,
             sagemaker_endpoint_name=llama2_inference_stack.hf_endpoint.ssm_parameter_endpoint_name,
             openai_api_key=self.openai_api_key,
-            use_bedrock=self.use_bedrock,
-            bedrock_region=self.bedrock_region,
+            app_params=self.app_params,
             container_vcpus=self.app_container_vcpus,
             container_memory=self.app_container_memory,
         )

@@ -1,7 +1,74 @@
-import boto3
+from typing import List
+from rag_application_framework.aws.sagemaker_runtime_api import SagemakerRuntimeApi
+import os
+import sqlalchemy
 import streamlit as st
-import src.models as db_models
-from src.helpers.inference_helper import Llama2InferenceHelper
+from rag_application_framework.aws.aws_client_factory import AwsClientFactory
+from rag_application_framework.aws.aws_session_factory import AwsSessionFactory
+from rag_application_framework.aws.s3_api import S3Api
+from rag_application_framework.config.app_config_factory import AppConfigFactory
+from rag_application_framework.db.embeddings_database import EmbeddingsDatabase
+from rag_application_framework.db.models import inititalize
+from rag_application_framework.db.psycopg_connection_factory import (
+    PsycopgConnectionFactory,
+)
+from rag_application_framework.modules.chat.bot_rag_pipeline import (
+    BotRagPipeline,
+    SourceDocument,
+)
+
+app_config = AppConfigFactory.build_from_env()
+db_connection_factory = PsycopgConnectionFactory(
+    host=app_config.db_config.host,
+    port=app_config.db_config.port,
+    username=app_config.db_config.user,
+    password=app_config.db_config.password,
+    database_name=app_config.db_config.database,
+)
+
+embeddings_db = EmbeddingsDatabase(
+    vector_db=db_connection_factory,
+    collection_name=app_config.embedding_config.collection_name,
+    embeddings=app_config.embedding_config.embeddings,
+)
+
+boto3_session = None
+sagemaker_runtime_api = None
+s3_api = None
+
+if not app_config.inference_config.local:
+    boto3_session = AwsSessionFactory.create_session_from_config(app_config.aws_config)
+    sagemaker_runtime_api = AwsClientFactory.build_from_boto_session(
+        boto3_session,
+        SagemakerRuntimeApi,
+    )
+
+
+if app_config.file_store_config.is_s3:
+    boto3_session = AwsSessionFactory.create_session_from_config(app_config.aws_config)
+    s3_api = AwsClientFactory.build_from_boto_session(
+        boto3_session,
+        S3Api,
+    )
+
+
+engine = sqlalchemy.create_engine(
+    db_connection_factory.get_connection_str(), pool_pre_ping=True
+)
+
+inititalize(engine)
+
+bot_rag_pipeline = BotRagPipeline(
+    openai_config=app_config.openai_config,
+    embeddings_config=app_config.embedding_config,
+    engine=engine,
+    file_store_config=app_config.file_store_config,
+    inference_config=app_config.inference_config,
+    db_factory=db_connection_factory,
+    sagemaker_runtime_api=sagemaker_runtime_api,
+    s3_api=s3_api,
+)
+
 
 st.sidebar.markdown("# Chatbot 💬")
 st.title("Chatbot 💬")
@@ -20,27 +87,13 @@ if prompt := st.chat_input("Ask me some Question?"):
         st.write(prompt, unsafe_allow_html=True)
 
 
-def prepare_source_docs(docs):
+def prepare_source_docs(docs: List[SourceDocument]):
     mk_txt = "<details style='border:1px dotted'><summary><span style='color:DodgerBlue;'>I Referenced following documents for generation:</span>: </summary><br>"
     temp_list = list()
     for doc in docs:
-        if hasattr(doc, "metadata"):
-            source_s3_full_uri = doc.metadata["source"]
-            if source_s3_full_uri not in temp_list:
-                temp_list.append(source_s3_full_uri)
-                bucket_name = source_s3_full_uri.split("/")[2]
-
-                s3_client = boto3.client("s3")
-
-                s3_file_key = "/".join(source_s3_full_uri.split("/")[3:])
-
-                presigned_source_url = s3_client.generate_presigned_url(
-                    "get_object",
-                    Params={"Bucket": bucket_name, "Key": s3_file_key},
-                    ExpiresIn=600,
-                )
-
-                mk_txt += f"<a href={presigned_source_url}>{s3_file_key}</a><br>"
+        if doc.url not in temp_list:
+            temp_list.append(doc.url)
+            mk_txt += f'<a href="{doc.url}">{doc.display_key}</a><br>'
     mk_txt += f"</details>"
     return mk_txt
 
@@ -50,8 +103,7 @@ if st.session_state.messages[-1]["role"] != "assistant":
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
             # A collection name is fixed for the application and can be extended
-            inference_helper = Llama2InferenceHelper(collection_name="llm_collection")
-            response = inference_helper.inference(prompt)
+            response = bot_rag_pipeline.infer(prompt)
             st.write(response["result"], unsafe_allow_html=True)
             source_docs = prepare_source_docs(response["source_documents"])
             st.write(source_docs, unsafe_allow_html=True)

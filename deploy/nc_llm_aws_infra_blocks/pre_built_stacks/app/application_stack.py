@@ -1,5 +1,7 @@
 from typing import Union
 
+from altair import param
+
 from aws_cdk import Stack
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk import aws_ssm as ssm
@@ -27,8 +29,7 @@ class SimpleRagAppStack(Stack):
         ecr_url: str,
         sagemaker_endpoint_name: ssm.CfnParameter,
         openai_api_key: str,
-        use_bedrock: bool,
-        bedrock_region: str,
+        app_params: dict[str, str],
         container_vcpus: Union[int, float],
         container_memory: int,
         **kwargs
@@ -59,7 +60,6 @@ class SimpleRagAppStack(Stack):
             deploy_region=deploy_region,
             sagemaker_endpoint_name=sagemaker_endpoint_name,
             openai_api_key=openai_api_key,
-            use_bedrock=use_bedrock,
-            bedrock_region=bedrock_region,
+            app_params=app_params,
             db_secret=context_db.db_secret,
         )

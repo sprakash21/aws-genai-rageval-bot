@@ -1,0 +1,197 @@
+import os
+from typing import Optional
+
+from botocore.config import Config
+from boto3 import Session
+from rag_application_framework.aws.aws_session_factory import AwsSessionFactory
+from rag_application_framework.aws.aws_client_factory import AwsClientFactory
+from rag_application_framework.aws.bedrock_runtime_api import BedrockRuntimeApi
+from rag_application_framework.aws.secretsmanager_api import SecretsManagerApi
+from rag_application_framework.aws.ssm_api import SsmApi
+from rag_application_framework.config.app_config import (
+    AppConfig,
+    AwsConfig,
+    DbConfig,
+    EmbeddingConfig,
+    FileStoreConfig,
+    InferenceConfig,
+    OpenAIConfig,
+)
+from rag_application_framework.ml.embeddings.langchain_embeddings_factory import (
+    LangchainEmbeddingsFactory,
+)
+
+
+class AppConfigFactory:
+    _boto3_session: Optional[Session] = None
+    region_name = os.environ.get("AWS_REGION")
+    profile_name = os.environ.get("AWS_PROFILE")
+    aws_config = AwsConfig(
+        region_name=region_name,
+        profile_name=profile_name,
+    )
+    aws_session = AwsSessionFactory.create_session_from_config(aws_config)
+
+    @staticmethod
+    def build_from_env():
+        openai_config = AppConfigFactory.get_open_ai_config()
+
+        db_config = AppConfigFactory.get_db_config()
+
+        embedding_config = AppConfigFactory.get_embedding_config()
+
+        inference_config = AppConfigFactory.get_inference_config()
+
+        file_store_config = AppConfigFactory.get_file_store_config()
+
+        return AppConfig(
+            db_config=db_config,
+            embedding_config=embedding_config,
+            openai_config=openai_config,
+            aws_config=AppConfigFactory.aws_config,
+            inference_config=inference_config,
+            file_store_config=file_store_config,
+        )
+
+    @staticmethod
+    def get_file_store_config() -> FileStoreConfig:
+        bucket_name = os.environ.get("BUCKET_NAME")
+
+        if bucket_name:
+            file_store_config = FileStoreConfig(
+                is_s3=True,
+                storage_bucket_name=bucket_name,
+            )
+        else:
+            file_store_config = FileStoreConfig(
+                is_s3=False,
+                storage_path=os.path.abspath(os.environ["LOCAL_STORAGE_PATH"]),
+            )
+
+        return file_store_config
+
+    @staticmethod
+    def get_inference_config() -> InferenceConfig:
+        infer_local = os.environ.get("INFER_LOCAL", "false").lower() == "true"
+        if infer_local:
+            inference_config = InferenceConfig(
+                local=True,
+            )
+        else:
+            sagemaker_endpoint = os.environ.get("SAGEMAKER_ENDPOINT")
+            if not sagemaker_endpoint:
+                ssm_client = AwsClientFactory.build_from_boto_session(
+                    AppConfigFactory.aws_session,
+                    SsmApi,
+                )
+                sagemaker_endpoint = ssm_client.get_parameter(
+                    name=os.environ["SAGEMAKER_ENDPOINT_SSM_PARAM_NAME"],
+                )
+                if not sagemaker_endpoint:
+                    raise ValueError("Sagemaker endpoint not found in SSM")
+
+            inference_config = InferenceConfig(
+                sagemaker_endpoint=sagemaker_endpoint,
+                local=False,
+            )
+
+        return inference_config
+
+    @staticmethod
+    def get_embedding_config() -> EmbeddingConfig:
+        use_bedrock = os.environ["USE_BEDROCK"].lower() == "true"
+        collection_name = os.environ["EMBEDDING_COLLECTION_NAME"]
+
+        if use_bedrock:
+            aws_config = AppConfigFactory.aws_config
+            bedrock_region = os.environ.get("BEDROCK_REGION", aws_config.region_name)
+            bedrock_profile = os.environ.get("BEDROCK_PROFILE", aws_config.profile_name)
+            aws_session = AwsSessionFactory.create_session_from_config(
+                config=AwsConfig(
+                    region_name=bedrock_region,
+                    profile_name=bedrock_profile,
+                )
+            )
+            bedrock_api = AwsClientFactory.build_from_boto_session(
+                aws_session,
+                BedrockRuntimeApi,
+                client_config=Config(region_name=bedrock_region),
+            )
+            embeddings = LangchainEmbeddingsFactory.get_bedrock_embeddings(
+                bedrock_client=bedrock_api.client,
+            )
+        else:
+            embeddings = LangchainEmbeddingsFactory.get_huggingface_embeddings()
+            bedrock_region = None
+            bedrock_profile = None
+
+        return EmbeddingConfig(
+            collection_name=collection_name,
+            embeddings=embeddings,
+            use_bedrock=use_bedrock,
+            bedrock_region=bedrock_region,
+            bedrock_profile=bedrock_profile,
+        )
+
+    @staticmethod
+    def get_db_config() -> DbConfig:
+        db_local = os.environ["DB_LOCAL"].lower() == "true"
+        if db_local:
+            db_config = DbConfig(
+                database=os.environ["PGVECTOR_DATABASE"],
+                user=os.environ["PGVECTOR_USER"],
+                password=os.environ["PGVECTOR_PASSWORD"],
+                port=int(os.environ["PGVECTOR_PORT"]),
+                host=os.environ["PGVECTOR_HOST"],
+            )
+        else:
+            secretsmanager_client = AwsClientFactory.build_from_boto_session(
+                AppConfigFactory.aws_session,
+                SecretsManagerApi,
+            )
+
+            rds_secret_dict = secretsmanager_client.get_secret_dict(
+                secret_name=os.environ["RDS_SECRET_NAME"],
+            )
+
+            if not rds_secret_dict:
+                raise ValueError("RDS secret not found in Secrets Manager")
+
+            db_config = DbConfig(
+                database=rds_secret_dict["dbname"],
+                user=rds_secret_dict["username"],
+                password=rds_secret_dict["password"],
+                port=int(rds_secret_dict["port"]),
+                host=rds_secret_dict["host"],
+            )
+
+        return db_config
+
+    @staticmethod
+    def get_open_ai_config() -> OpenAIConfig:
+        if os.environ.get("OPENAI_API_KEY"):
+            api_key = api_key = os.environ["OPENAI_API_KEY"]
+        else:
+            openai_key_secret_name = os.environ["OPENAI_API_KEY_SECRET_NAME"]
+
+            secretsmanager_client = AwsClientFactory.build_from_boto_session(
+                AppConfigFactory.aws_session,
+                SecretsManagerApi,
+            )
+            api_key = secretsmanager_client.get_secret_value(openai_key_secret_name)
+            if not api_key:
+                raise ValueError("OpenAI API key not found in Secrets Manager")
+
+        api_type = os.environ["OPENAI_API_TYPE"]
+        api_version = os.environ["OPENAI_API_VERSION"]
+        api_base = os.environ["OPENAI_API_BASE"]
+        deployment_name = os.environ["OPENAI_DEPLOYMENT_NAME"]
+
+        openai_config = OpenAIConfig(
+            api_key=api_key,
+            api_type=api_type,
+            api_version=api_version,
+            api_base=api_base,
+            deployment_name=deployment_name,
+        )
+        return openai_config

@@ -1,0 +1,22 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "NC Bot",
+            "type": "python",
+            "request": "launch",
+            "module": "streamlit",
+            "args": [
+                "run", "chatbot.py"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}/nc-bot",
+            "envFile": "${workspaceFolder}/nc-bot/.env.local_db.local_embedding.local_inference.local_filestore",
+            "python": "${command:python.interpreterPath}"
+        }
+    ]
+}

@@ -1,11 +1,30 @@
-import streamlit as st
 import plotly.express as px
-import pandas as pd
-import os
-import warnings
-from src.models import engine
+import streamlit as st
+from rag_application_framework.config.app_config_factory import AppConfigFactory
+from rag_application_framework.db.models import inititalize
+from rag_application_framework.db.psycopg_connection_factory import (
+    PsycopgConnectionFactory,
+)
+from rag_application_framework.modules.rag_monitor_query.rag_monitor_query import (
+    RagMonitorQuery,
+)
+from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
-from src.helpers.rag_monitor_helper import RagMonitorQuery
+
+app_config = AppConfigFactory.build_from_env()
+db_config = app_config.db_config
+
+factory = PsycopgConnectionFactory(
+    host=db_config.host,
+    port=db_config.port,
+    username=db_config.user,
+    password=db_config.password,
+    database_name=db_config.database,
+)
+
+engine = create_engine(factory.get_connection_str())
+inititalize(engine)
+
 
 col1, col2 = st.columns(2)
 st.sidebar.header("Choose your filter: ")
@@ -13,7 +32,7 @@ st.sidebar.header("Choose your filter: ")
 filter_option = st.sidebar.selectbox(
     "Select your filter", ("1-hour", "24-hour", "2-day", "7-day")
 )
-rag_monitor_query = RagMonitorQuery(session=Session(engine))
+rag_monitor_query = RagMonitorQuery(session=Session(engine), engine=engine)
 print("Filter Option Choosen", filter_option)
 filtered_data = rag_monitor_query.get_rag_scores(filter_option)
 

@@ -25,9 +25,8 @@ class EcsWithLoadBalancer(BaseConstruct):
         ecr_image_tag: str,
         ecr_url: str,
         sagemaker_endpoint_name: aws_ssm.CfnParameter,
+        app_params: dict[str, str],
         openai_api_key: str,
-        use_bedrock: bool,
-        bedrock_region: str,
         db_secret: aws_secretsmanager.ISecret,
         **kwargs,
     ) -> None:
@@ -85,13 +84,11 @@ class EcsWithLoadBalancer(BaseConstruct):
             ),
             port_mappings=[ecs.PortMapping(container_port=8501)],
             environment={
-                "SG_ENDPOINT_NAME": str(sagemaker_endpoint_name.name),
+                "SAGEMAKER_ENDPOINT_SSM_PARAM_NAME": str(sagemaker_endpoint_name.name),
                 "RDS_SECRET_NAME": db_secret.secret_name,
-                "OPENAI_API_KEY_NAME": secret_name,
+                "OPENAI_API_KEY_SECRET_NAME": secret_name,
                 "BUCKET_NAME": bucket_name,
-                "USE_BEDROCK": str(use_bedrock),
-                "IS_DB_LOCAL": "false",
-                "BEDROCK_REGION": bedrock_region,
+                **app_params,
             },
         )
 
@@ -120,6 +117,7 @@ class EcsWithLoadBalancer(BaseConstruct):
                         "s3:ListBucket",
                         "s3:GetObject",
                         "s3:PutObject",
+                        "s3:DeleteObject",
                     ],
                     resources=[bucket.bucket_arn, f"{bucket.bucket_arn}/*"],
                 ),

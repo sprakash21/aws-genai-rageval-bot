@@ -47,11 +47,10 @@ sagemaker_session_profile_name = app.node.get_context("sagemaker_session_profile
 project_prefix = app.node.get_context("project_prefix")
 deploy_stage = app.node.get_context("deploy_stage")
 deploy_region = app.node.get_context("deploy_region")
-openai_api_key = app.node.get_context("openai_api_key")
-use_bedrock = app.node.get_context("use_bedrock")
-bedrock_region = app.node.get_context("bedrock_region")
 app_container_vcpus = app.node.get_context("app_container_vcpus")
 app_container_memory = app.node.get_context("app_container_memory")
+openai_api_key = app.node.get_context("openai_api_key")
+app_params: dict[str, str] = app.node.get_context("app_params")
 
 
 ecr_repo = app.node.try_get_context("ecr_repo")
@@ -92,11 +91,10 @@ app_deployment_builder = ApplicationDeploymentBuilder(
     ecr_repository_name=ecr_repo,
     ecr_url=ecr_url,
     application_name=project_prefix,
-    openai_api_key=openai_api_key,
-    use_bedrock=use_bedrock,
-    bedrock_region=bedrock_region,
+    app_params=app_params,
     app_container_memory=app_container_memory,
     app_container_vcpus=app_container_vcpus,
+    openai_api_key=openai_api_key,
 )
 
 if not deploy_pipeline:

@@ -36,19 +36,36 @@
     "huggingface.token_id":"",
     "huggingface.llama2.13b": {
       "model_id":"meta-llama/Llama-2-7b-chat-hf",
-      "task": "text-generation",
-      "repository": "......",
-      "image_tag": ".......",
-      "pytorch_version": "......."
+      "task": "text-generation"
     },
     "inference_endpoint":{
       "instance_type": "ml.g5.2xlarge",
       "instance_count": 1,
       "gpu_count": 1
     },
+    "openai_api_key": "",
     "sagemaker_session_profile_name": "default",
-    "project_prefix": "taha",
+    "project_prefix": "swara",
     "deploy_stage": "dev",
-    "deploy_region": "eu-west-1"
+    "deploy_region": "eu-west-1",
+    "ecr_repo": "swara-bot",
+    "ecr_image_tag": "app-0.0.1",
+    "ecr_url": "214181320558.dkr.ecr.eu-west-1.amazonaws.com",
+    "deploy_pipeline": false,
+    "codecommit_repo_name": null,
+    "branch": null,
+    "app_container_vcpus": 1024,
+    "app_container_memory": 2048,
+    "app_params": {
+      "INFER_LOCAL": "false",
+      "DB_LOCAL": "false",
+      "EMBEDDING_COLLECTION_NAME": "llm_collection",
+      "OPENAI_API_TYPE": "azure",
+      "OPENAI_API_VERSION": "2023-07-01-preview",
+      "OPENAI_API_BASE": "https://oai-int-azg-we-001.openai.azure.com/",
+      "OPENAI_DEPLOYMENT_NAME": "dep-gpt-35-turbo",
+      "USE_BEDROCK": "true",
+      "BEDROCK_REGION": "eu-central-1"
+    }
   }
 }

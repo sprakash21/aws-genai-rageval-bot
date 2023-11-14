@@ -1,8 +1,8 @@
 build-pgvector-local:
-	docker-compose -f docker-compose-postgres.yml build
+	docker-compose -f docker-compose.yml build postgres
 
 run-pgvector-local:
-	docker-compose -f docker-compose-postgres.yml up
+	docker-compose -f docker-compose.yml up postgres
 
 build-bot-local:
 	docker-compose -f docker-compose.yml build nc-bot

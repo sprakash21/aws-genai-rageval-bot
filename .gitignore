@@ -121,6 +121,7 @@ celerybeat.pid
 
 # Environments
 .env
+nc-bot/.env.*
 .venv
 env/
 venv/
@@ -164,8 +165,15 @@ cython_debug/
 terraform.tfstate
 terraform.tfstate.backup
 .DS_Store
-.vscode
+.vscode/**
+!.vscode/launch.template.json
+
 test.txt
 *.pdf
 
 **/cdk.out/**
+
+nc-bot/context_data/**
+deploy/cdk.json
+
+#.vscode folder except .vscode/settings.json
