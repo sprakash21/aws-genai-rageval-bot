@@ -6,14 +6,15 @@ cryptography==38.0.4
 streamlit==1.27.0
 python-dotenv==1.0.0
 pypdf
-langchain==0.0.314
+#langchain==0.0.314
+langchain==0.0.335
 pgvector
 openai==0.28.1
 psycopg2-binary
 tiktoken
 # Start Embedder on sentences
 sentence_transformers
-unstructured[pdf]
+unstructured[pdf,docx]
 langchainhub
 ragas==0.0.17
 llama_index

@@ -1,7 +1,7 @@
 from typing import Union
 
 import aws_cdk
-from aws_cdk import SecretValue
+from aws_cdk import CfnParameter, SecretValue
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk import aws_ecs as ecs
 from aws_cdk import aws_elasticloadbalancingv2 as elbv2
@@ -24,7 +24,7 @@ class EcsWithLoadBalancer(BaseConstruct):
         ecr_repository_name: str,
         ecr_image_tag: str,
         ecr_url: str,
-        sagemaker_endpoint_name: aws_ssm.CfnParameter,
+        sagemaker_endpoint_name: Union[CfnParameter, None],
         app_params: dict[str, str],
         openai_api_key: str,
         db_secret: aws_secretsmanager.ISecret,
@@ -41,7 +41,7 @@ class EcsWithLoadBalancer(BaseConstruct):
         )
 
         # Create an S3 Bucket using cdk
-        bucket_name = f"{self.resource_prefix}-bucket"
+        bucket_name = f"{self.resource_prefix}-{self.deploy_region}-bucket"
 
         bucket = s3.Bucket(
             self,
@@ -72,6 +72,18 @@ class EcsWithLoadBalancer(BaseConstruct):
 
         db_secret.grant_read(task_def.task_role)
 
+        app_env = {
+            "RDS_SECRET_NAME": db_secret.secret_name,
+            "OPENAI_API_KEY_SECRET_NAME": secret_name,
+            "BUCKET_NAME": bucket_name,
+            **app_params,
+        }
+
+        if sagemaker_endpoint_name:
+            app_env["SAGEMAKER_ENDPOINT_SSM_PARAM_NAME"] = str(
+                sagemaker_endpoint_name.name
+            )
+
         task_def.add_container(
             "fargate-app-container",
             image=ecs.ContainerImage.from_registry(
@@ -83,13 +95,7 @@ class EcsWithLoadBalancer(BaseConstruct):
                 stream_prefix=f"{self.resource_prefix}-app-container-logs"
             ),
             port_mappings=[ecs.PortMapping(container_port=8501)],
-            environment={
-                "SAGEMAKER_ENDPOINT_SSM_PARAM_NAME": str(sagemaker_endpoint_name.name),
-                "RDS_SECRET_NAME": db_secret.secret_name,
-                "OPENAI_API_KEY_SECRET_NAME": secret_name,
-                "BUCKET_NAME": bucket_name,
-                **app_params,
-            },
+            environment=app_env,
         )
 
         policy_execution = aws_iam.Policy(
@@ -123,10 +129,23 @@ class EcsWithLoadBalancer(BaseConstruct):
                 ),
                 aws_iam.PolicyStatement(
                     actions=[
+                        "bedrock:*",
+                    ],
+                    resources=[f"*"],
+                ),
+            ],
+        )
+
+        if sagemaker_endpoint_name:
+            policy_task.add_statements(
+                aws_iam.PolicyStatement(
+                    actions=[
                         "sagemaker:*",
                     ],
                     resources=[f"*"],
                 ),
+            )
+            policy_task.add_statements(
                 aws_iam.PolicyStatement(
                     actions=[
                         "ssm:GetParameter",
@@ -135,14 +154,7 @@ class EcsWithLoadBalancer(BaseConstruct):
                         f"arn:aws:ssm:{self.deploy_region}:*:parameter{sagemaker_endpoint_name.name}"
                     ],
                 ),
-                aws_iam.PolicyStatement(
-                    actions=[
-                        "bedrock:*",
-                    ],
-                    resources=[f"*"],
-                ),
-            ],
-        )
+            )
 
         task_def.task_role.attach_inline_policy(policy_task)
         task_def.obtain_execution_role().attach_inline_policy(policy_execution)

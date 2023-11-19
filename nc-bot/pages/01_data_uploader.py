@@ -68,7 +68,7 @@ btn = st.button("Refresh Database", on_click=clear_db_show_toast)
 
 
 uploaded_files = st.file_uploader(
-    "Choose a PDF File", accept_multiple_files=True, type=["pdf"]
+    "Choose a PDF File", accept_multiple_files=True, type=["pdf", "txt", "docx"]
 )
 
 for uploaded_file in uploaded_files:

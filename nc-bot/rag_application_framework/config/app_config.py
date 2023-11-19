@@ -1,7 +1,8 @@
 from dataclasses import dataclass
-from typing import Optional, Union
-
+from typing import Optional, Union, Literal
+from rag_application_framework.config.app_enums import InferenceEngine
 from langchain.embeddings import BedrockEmbeddings, HuggingFaceEmbeddings
+from botocore.client import BaseClient
 
 
 @dataclass
@@ -39,8 +40,10 @@ class AwsConfig:
 
 @dataclass
 class InferenceConfig:
-    local: bool
+    inference_engine: InferenceEngine
     sagemaker_endpoint: Optional[str] = None
+    bedrock_client: Optional[BaseClient] = None
+    bedrock_model_id: Optional[str] = None
 
 
 @dataclass
@@ -54,7 +57,7 @@ class FileStoreConfig:
 class AppConfig:
     db_config: DbConfig
     embedding_config: EmbeddingConfig
-    openai_config: OpenAIConfig
     aws_config: AwsConfig
     inference_config: InferenceConfig
     file_store_config: FileStoreConfig
+    openai_config: Optional[OpenAIConfig] = None

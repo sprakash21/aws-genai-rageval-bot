@@ -1,7 +1,6 @@
 version: '3.8' # or whatever version you're using
 
 services:
-
   nc-bot:
     platform: linux/amd64
     container_name: nc-bot-app

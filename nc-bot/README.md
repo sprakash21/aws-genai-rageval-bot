@@ -49,8 +49,8 @@ First setup the .env required for the application. In order to do so, perform th
 | RDS_POSTRGRES_CREDENTIALS_SECRET_NAME     | SecretName  | Optional: RDS Secret name for created from CDK if using RDS and IS_LOCAL_DB is false          |
 | OPENAI_API_KEY_SECRET_NAME | token       | Required to use evaluation of the RAG pipeline using ragas                                    |
 | BUCKET_NAME         | bucket_name | S3 bucket name to be created to store the pdf data and reference                              |
-| USE_BEDROCK         | true,false  | Either to use aws titan embeddings or not                                                     |
-| BEDROCK_REGION      | region      | Region of the aws bedrock model                                                               |
+| USE_BEDROCK_EMBEDDINGS         | true,false  | Either to use aws titan embeddings or not                                                     |
+| BEDROCK_EMBEDDINGS_REGION      | region      | Region of the aws bedrock model                                                               |
 
 2. Create the virtual environment with `python3 -m venv .venv` and install the pip requirements with `pip install -r requirements.txt`  
 

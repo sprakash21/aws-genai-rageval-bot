@@ -32,7 +32,9 @@ class FilesUploaderBase:
             separators=["\n"], chunk_size=1024, chunk_overlap=50
         )
 
-        documents = file_loader.load_and_split(text_splitter=text_splitter)
+        documents = file_loader.load_and_split(
+            text_splitter=text_splitter,
+        )
 
         self.embeddings_database.save_as_embedding(
             documents=documents,

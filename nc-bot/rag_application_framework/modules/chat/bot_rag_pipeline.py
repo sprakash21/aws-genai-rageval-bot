@@ -1,12 +1,10 @@
-import os
-from typing import List, Optional
+from typing import List, Optional, Union
 from langchain import hub
 from langchain.chains import RetrievalQA
 from langchain.llms.ollama import Ollama
 from langchain.llms.sagemaker_endpoint import SagemakerEndpoint
 from langchain.vectorstores.pgvector import PGVector
-from numpy import source
-from sympy import O
+from rag_application_framework.langchain.bedrock import Bedrock
 from rag_application_framework.aws.sagemaker_runtime_api import SagemakerRuntimeApi
 from rag_application_framework.config.app_config import (
     EmbeddingConfig,
@@ -46,16 +44,19 @@ class BotRagPipeline:
 
     def __init__(
         self,
-        openai_config: OpenAIConfig,
         embeddings_config: EmbeddingConfig,
         engine: Engine,
         inference_config: InferenceConfig,
         file_store_config: FileStoreConfig,
         db_factory: PsycopgConnectionFactory,
+        openai_config: Union[OpenAIConfig, None],
         sagemaker_runtime_api: Optional[SagemakerRuntimeApi] = None,
         s3_api: Optional[S3Api] = None,
     ) -> None:
-        if not inference_config.local and not sagemaker_runtime_api:
+        if (
+            inference_config.inference_engine.name.lower() == "sagemaker"
+            and not sagemaker_runtime_api
+        ):
             raise ValueError(
                 "SagemakerRuntimeApi must be provided when running in local mode"
             )
@@ -74,10 +75,42 @@ class BotRagPipeline:
         """
         Perform inference using the Llama2 LLM locally using the query and the vectordb
         """
-        if self.inference_config.local:
-            result = self._inference_local(query)
-        else:
-            result = self._inference_with_sagemaker_endpoint(query)
+        vector_store = PGVector(
+            collection_name=self.embeddings_config.collection_name,
+            connection_string=self.db_factory.get_connection_str(),
+            embedding_function=self.embeddings_config.embeddings,
+        )
+
+        callback_handlers = []
+
+        if self.openai_config:
+            callback_handlers.append(
+                RagasEvaluationAndDbLoggingCallbackHandler(
+                    openai_config=self.openai_config,
+                    embeddings_config=self.embeddings_config,
+                    engine=self.engine,
+                )
+            )
+
+        retriever = vector_store.as_retriever(
+            search_type="mmr", search_kwargs={"k": 5, "fetch_k": 20}
+        )
+
+        llm = self._get_llm()
+
+        qa_chain = RetrievalQA.from_chain_type(
+            llm,
+            retriever=retriever,
+            chain_type_kwargs={"prompt": self.prompt},
+            verbose=True,
+            input_key="question",
+            return_source_documents=True,
+        )
+
+        result = qa_chain({"question": query}, callbacks=callback_handlers)
+
+        logger.info(f"Result: {result}")
+
         if self.file_store_config.is_s3:
             result["source_documents"] = self._prepare_source_documents_s3(
                 result["source_documents"]
@@ -88,32 +121,17 @@ class BotRagPipeline:
             )
         return result
 
-    def _inference_local(self, query):
+    def _get_local_llm(self) -> Ollama:
         """
         Perform inference using the Llama2 LLM locally using the query and the vectordb
         """
 
-        vector_store = PGVector(
-            collection_name=self.embeddings_config.collection_name,
-            connection_string=self.db_factory.get_connection_str(),
-            embedding_function=self.embeddings_config.embeddings,
-        )
-
-        ragas_scoring_callback_handler = RagasEvaluationAndDbLoggingCallbackHandler(
-            openai_config=self.openai_config,
-            embeddings_config=self.embeddings_config,
-            engine=self.engine,
-        )
-
-        rag_prompt = self.prompt
-        print("Rag--", rag_prompt)
-        # Local llm llama
         llm = Ollama(
             model="llama2",
             verbose=True,
-            temperature=0.9,
-            top_k=50,
-            top_p=0.6,
+            temperature=0.5,
+            top_k=30,
+            top_p=0.9,
             repeat_penalty=1.3,
             repeat_last_n=0,
             stop=["</s>"],
@@ -125,45 +143,30 @@ class BotRagPipeline:
             num_thread=None,
             tfs_z=None,
         )
-        # Explore k
-        retriever = vector_store.as_retriever(
-            search_type="mmr", search_kwargs={"k": 5, "fetch_k": 20}
-        )
 
-        qa_chain = RetrievalQA.from_chain_type(
-            llm,
-            retriever=retriever,
-            chain_type_kwargs={"prompt": rag_prompt},
-            verbose=True,
-            input_key="question",
-            return_source_documents=True,
-        )
+        return llm
 
-        result = qa_chain(
-            {"question": query}, callbacks=[ragas_scoring_callback_handler]
-        )
-        logger.info(result.keys())
-        logger.info(result["source_documents"])
-        return result
+    def _get_llm(self) -> Union[Ollama, Bedrock, SagemakerEndpoint]:
+        if self.inference_config.inference_engine.name.lower() == "local":
+            llm = self._get_local_llm()
+        elif self.inference_config.inference_engine.name.lower() == "sagemaker":
+            llm = self._get_sagemaker_llm()
+        elif self.inference_config.inference_engine.name.lower() == "bedrock":
+            llm = self._get_bedrock_llm()
+        else:
+            raise ValueError(
+                f"Invalid inference engine {self.inference_config.inference_engine.name}"
+            )
+        return llm
 
-    def _inference_with_sagemaker_endpoint(self, query):
+    def _get_sagemaker_llm(
+        self,
+    ) -> SagemakerEndpoint:
         """
         Perform inference using the Llama2 LLM through AWS via Sagemaker Endpoint and the vectordb
         """
         if not self.sagemaker_runtime_api:
             raise ValueError("Sagemaker Api must be present.")
-
-        ragas_scoring_callback_handler = RagasEvaluationAndDbLoggingCallbackHandler(
-            openai_config=self.openai_config,
-            embeddings_config=self.embeddings_config,
-            engine=self.engine,
-        )
-        vector_store = PGVector(
-            collection_name=self.embeddings_config.collection_name,
-            connection_string=self.db_factory.get_connection_str(),
-            embedding_function=self.embeddings_config.embeddings,
-        )
-        rag_prompt = self.prompt
 
         content_handler = ContentTransformationHandler()
 
@@ -184,22 +187,19 @@ class BotRagPipeline:
             client=self.sagemaker_runtime_api.client,
         )
 
-        retriever = vector_store.as_retriever(k=3)
-        # RetrievalQA
-        qa_chain = RetrievalQA.from_chain_type(
-            llm,
-            retriever=retriever,
-            chain_type_kwargs={"prompt": rag_prompt},
-            verbose=True,
-            return_source_documents=True,
-            input_key="question",
+        return llm
+
+    def _get_bedrock_llm(self) -> Bedrock:
+        """
+        Perform inference using the Llama2 LLM through AWS via Bedrock and use vectordb
+        """
+        llm = Bedrock(
+            client=self.inference_config.bedrock_client,
+            model_id=str(self.inference_config.bedrock_model_id),
+            model_kwargs={"temperature": 0.5, "top_p": 0.9, "max_gen_len": 512},
         )
-        result = qa_chain(
-            {"question": query},
-            callbacks=[ragas_scoring_callback_handler],
-        )
-        print("Results-----", result.keys())
-        return result
+
+        return llm
 
     def _prepare_source_documents_s3(
         self, source_docs: List[Document]

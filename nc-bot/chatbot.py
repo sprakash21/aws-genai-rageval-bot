@@ -1,4 +1,5 @@
 from typing import List
+from rag_application_framework.config.app_enums import InferenceEngine
 from rag_application_framework.aws.sagemaker_runtime_api import SagemakerRuntimeApi
 import os
 import sqlalchemy
@@ -16,6 +17,9 @@ from rag_application_framework.modules.chat.bot_rag_pipeline import (
     BotRagPipeline,
     SourceDocument,
 )
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app_config = AppConfigFactory.build_from_env()
 db_connection_factory = PsycopgConnectionFactory(
@@ -34,14 +38,16 @@ embeddings_db = EmbeddingsDatabase(
 
 boto3_session = None
 sagemaker_runtime_api = None
+bedrock_runtime_client = None
 s3_api = None
 
-if not app_config.inference_config.local:
+if app_config.inference_config.inference_engine.name.lower() == "sagemaker":
     boto3_session = AwsSessionFactory.create_session_from_config(app_config.aws_config)
     sagemaker_runtime_api = AwsClientFactory.build_from_boto_session(
         boto3_session,
         SagemakerRuntimeApi,
     )
+
 
 
 if app_config.file_store_config.is_s3:
