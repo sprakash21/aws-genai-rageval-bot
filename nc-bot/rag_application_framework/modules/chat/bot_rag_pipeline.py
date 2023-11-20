@@ -26,6 +26,8 @@ from langchain.schema import Document
 from rag_application_framework.aws.s3_api import S3Api
 from rag_application_framework.config.app_config import FileStoreConfig
 from dataclasses import dataclass
+from langchain.prompts.chat import ChatPromptTemplate
+
 
 logger = Logging.get_logger(__name__)
 
@@ -74,7 +76,15 @@ class BotRagPipeline:
         self.engine = engine
         self.inference_config = inference_config
         self.db_factory = db_factory
-        self.prompt = hub.pull("rlm/rag-prompt-llama")
+        # self.prompt = hub.pull("rlm/rag-prompt-llama")
+
+        template_string = """[INST]<<SYS>>You are an assistant for question-answering tasks. Your name is Nordcloud Bot. Use the following pieces of retrieved context to answer the question. If and only if the question is about yourself, like "who are you?" or "what is your name", then ignore the given context and answer exactly with "I am Nordcloud QA Bot.". If you dont know the answer, reply exactly with "I do not know the answer to that question.". Keep the answer concise.<</SYS>> 
+Question: {question} 
+Context: {context} 
+Answer: [/INST]
+"""
+
+        self.prompt = ChatPromptTemplate.from_template(template_string)
         self.sagemaker_runtime_api = sagemaker_runtime_api
         self.s3_api = s3_api
         self.file_store_config = file_store_config
