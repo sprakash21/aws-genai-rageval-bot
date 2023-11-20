@@ -49,7 +49,6 @@ if app_config.inference_config.inference_engine.name.lower() == "sagemaker":
     )
 
 
-
 if app_config.file_store_config.is_s3:
     boto3_session = AwsSessionFactory.create_session_from_config(app_config.aws_config)
     s3_api = AwsClientFactory.build_from_boto_session(
@@ -97,9 +96,14 @@ def prepare_source_docs(docs: List[SourceDocument]):
     mk_txt = "<details style='border:1px dotted'><summary><span style='color:DodgerBlue;'>I Referenced following documents for generation:</span>: </summary><br>"
     temp_list = list()
     for doc in docs:
-        if doc.url not in temp_list:
-            temp_list.append(doc.url)
-            mk_txt += f'<a href="{doc.url}">{doc.display_key}</a><br>'
+        if doc.file_store_url not in temp_list:
+            temp_list.append(doc.file_store_url)
+            mk_txt += f'<a href="{doc.file_store_url}">{doc.display_text}</a>'
+
+            if doc.confluence_source_info:
+                mk_txt += f' - <a href="{doc.confluence_source_info.page_url}"> Original Confluence Page </a> <br>'
+            else:
+                mk_txt += f"<br>"
     mk_txt += f"</details>"
     return mk_txt
 

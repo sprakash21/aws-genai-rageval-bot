@@ -1,7 +1,12 @@
 # import os
+from functools import partial
+from rag_application_framework.modules.data_pipelines.confluence_data_pipeline import (
+    ConfluenceFilePipeline,
+)
 from rag_application_framework.modules.file_uploader.file_system_file_uploader import (
     FileSystemFilesUploader,
 )
+from functools import partial
 import streamlit as st
 
 # from rag_application_framework.config.app_config import get_db_type
@@ -19,6 +24,10 @@ from rag_application_framework.config.app_config_factory import AppConfigFactory
 from rag_application_framework.db.embeddings_database import EmbeddingsDatabase
 from rag_application_framework.modules.file_uploader.s3_file_uploader import (
     S3FilesUploader,
+)
+from rag_application_framework.modules.file_uploader.file_uploader import (
+    FileUpload,
+    UploadedFile,
 )
 from rag_application_framework.aws.aws_session_factory import AwsSessionFactory
 
@@ -61,25 +70,41 @@ def clear_db_show_toast():
     )
 
 
+def load_confluence_data(confluence_pipeline: ConfluenceFilePipeline):
+    result = confluence_pipeline.load_from_confluence("ED")
+
+    st.toast(
+        f"{len(result)} documents loaded successfully from confluence.",
+    )
+
+
 st.sidebar.markdown("# Data Uploader")
 st.title("Data Uploader")
 st.caption("Extend the Vector Database by uploading Pdf data")
 btn = st.button("Refresh Database", on_click=clear_db_show_toast)
+
+if app_config.confluence_config:
+    confluence_pipeline = ConfluenceFilePipeline(
+        file_uploader=file_uploader, confluence_config=app_config.confluence_config
+    )
+    event_handler = partial(load_confluence_data, confluence_pipeline)
+    btn = st.button("Load Confluence Data", on_click=event_handler)
 
 
 uploaded_files = st.file_uploader(
     "Choose a PDF File", accept_multiple_files=True, type=["pdf", "txt", "docx"]
 )
 
-for uploaded_file in uploaded_files:
-    bytes_data = uploaded_file.read()
-    fname = uploaded_file.name.replace(" ", "-")
-    presigned_source_url = file_uploader.upload_and_get_url(
-        file_content=bytes_data,
-        file_name=f"{fname}",
-    )
-    st.write(f"{uploaded_file.name} is uploaded successfully to S3")
-    st.write(
-        f"You can access it from - <a href='{presigned_source_url}'>{fname}</a>",
-        unsafe_allow_html=True,
-    )
+if uploaded_files:
+    file_uploads = [
+        FileUpload(file.read(), file.name.replace(" ", "-")) for file in uploaded_files
+    ]
+
+    file_uploads_result = file_uploader.upload_and_get_url(file_uploads)
+
+    for file_upload_result in file_uploads_result:
+        st.write(f"{file_upload_result.file_name} is uploaded successfully to S3")
+        st.write(
+            f"You can access it from - <a href='{file_upload_result.url}'>{file_upload_result.file_name}</a>",
+            unsafe_allow_html=True,
+        )

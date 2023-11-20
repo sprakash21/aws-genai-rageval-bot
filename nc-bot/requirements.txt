@@ -22,3 +22,4 @@ pyOpenSSL
 SQLAlchemy
 mypy
 plotly
+atlassian-python-api

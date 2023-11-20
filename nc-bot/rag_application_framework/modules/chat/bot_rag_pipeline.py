@@ -31,9 +31,17 @@ logger = Logging.get_logger(__name__)
 
 
 @dataclass
+class ConfluenceSourceInfo:
+    page_id: str
+    page_title: str
+    page_url: str
+
+
+@dataclass
 class SourceDocument:
-    url: str
-    display_key: str
+    file_store_url: str
+    display_text: str
+    confluence_source_info: Optional[ConfluenceSourceInfo] = None
 
 
 class BotRagPipeline:
@@ -218,13 +226,17 @@ class BotRagPipeline:
                     bucket_name=bucket_name,
                     fname=full_file_key,
                 )
-
-                source_doc_uris.append(
-                    SourceDocument(
-                        url=url,
-                        display_key=source_uri,
-                    )
+                source_doc = SourceDocument(
+                    file_store_url=url,
+                    display_text=source_uri,
                 )
+                if doc.metadata.get("confluence_id"):
+                    source_doc.confluence_source_info = ConfluenceSourceInfo(
+                        page_id=doc.metadata["confluence_id"],
+                        page_title=doc.metadata["confluence_title"],
+                        page_url=doc.metadata["confluence_source"],
+                    )
+                source_doc_uris.append(source_doc)
         return source_doc_uris
 
     def _prepare_source_documents_local(
@@ -237,10 +249,17 @@ class BotRagPipeline:
                 absolute_path = source_uri
                 url = f"file://{absolute_path}"
                 display_key = source_uri
-                source_doc_uris.append(
-                    SourceDocument(
-                        url=url,
-                        display_key=display_key,
-                    )
+                source_doc = SourceDocument(
+                    file_store_url=url,
+                    display_text=display_key,
                 )
+
+                if doc.metadata.get("confluence_id"):
+                    source_doc.confluence_source_info = ConfluenceSourceInfo(
+                        page_id=doc.metadata["confluence_id"],
+                        page_title=doc.metadata["confluence_title"],
+                        page_url=doc.metadata["confluence_source"],
+                    )
+
+                source_doc_uris.append(source_doc)
         return source_doc_uris

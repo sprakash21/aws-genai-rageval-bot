@@ -11,6 +11,7 @@ from rag_application_framework.config.app_enums import InferenceEngine
 from rag_application_framework.config.app_config import (
     AppConfig,
     AwsConfig,
+    ConfluenceConfig,
     DbConfig,
     EmbeddingConfig,
     FileStoreConfig,
@@ -50,6 +51,8 @@ class AppConfigFactory:
 
         file_store_config = AppConfigFactory.get_file_store_config()
 
+        confluence_config = AppConfigFactory.get_confluence_config()
+
         return AppConfig(
             db_config=db_config,
             embedding_config=embedding_config,
@@ -57,6 +60,7 @@ class AppConfigFactory:
             aws_config=AppConfigFactory.aws_config,
             inference_config=inference_config,
             file_store_config=file_store_config,
+            confluence_config=confluence_config,
         )
 
     @staticmethod
@@ -232,8 +236,24 @@ class AppConfigFactory:
                 api_base=api_base,
                 deployment_name=deployment_name,
             )
-
             return openai_config
         except KeyError as e:
             logger.error("Missing required OpenAI config: %s", e)
+        return None
+
+    @staticmethod
+    def get_confluence_config() -> Union[ConfluenceConfig, None]:
+        try:
+            url = os.environ["CONFLUENCE_URL"]
+            api_key = os.environ["CONFLUENCE_API_KEY"]
+            username = os.environ["CONFLUENCE_USERNAME"]
+
+            confluence_config = ConfluenceConfig(
+                url=url,
+                api_key=api_key,
+                username=username,
+            )
+            return confluence_config
+        except KeyError as e:
+            logger.error("Missing required Confluence config: %s", e)
         return None

@@ -67,7 +67,10 @@
       "BEDROCK_EMBEDDINGS_REGION": "us-central-1",
       "INFERENCE_ENGINE": "bedrock",
       "BEDROCK_INFERENCE_REGION": "us-east-1",
-      "BEDROCK_INFERENCE_MODEL_ID": "meta.llama2-13b-chat-v1"
+      "BEDROCK_INFERENCE_MODEL_ID": "meta.llama2-13b-chat-v1",
+      "CONFLUENCE_URL": "https://nordcloud.atlassian.net/wiki",
+      "CONFLUENCE_API_KEY": "...",
+      "CONFLUENCE_USERNAME": "..."
     }
   }
 }

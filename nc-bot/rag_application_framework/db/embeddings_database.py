@@ -88,6 +88,23 @@ class EmbeddingsDatabase:
                 cursor.execute(query)
                 cursor.connection.commit()
 
+    def delete_documents_with_sources(self, sources: list[str], cursor=None):
+        if not cursor:
+            _cursor = self.cursor
+        else:
+            _cursor = cursor
+
+        if self.is_existing_table(cursor=_cursor):
+            query = f"""
+                DELETE FROM langchain_pg_embedding as embed 
+                    WHERE embed.cmetadata ->> 'source' in ({','.join([ f"'{source}'" for source in sources])});
+            """
+            _cursor.execute(query)
+            _cursor.connection.commit()
+
+        if not cursor:
+            _cursor.connection.close()
+
     def save_as_embedding(
         self,
         documents: list[Document],
@@ -105,22 +122,23 @@ class EmbeddingsDatabase:
 
         # Short vs Long chunk
 
-        if documents:
-            file_name = documents[0].metadata["source"]
+        document_unique_sources = list(
+            set([doc.metadata["source"] for doc in documents])
+        )
 
-            with self.cursor as cursor:
-                if self.is_existing_table(cursor):
-                    if not self.is_file_embedded(file_name=file_name, cursor=cursor):
-                        store = PGVector(
-                            collection_name=self.collection_name,
-                            connection_string=self.vector_db.get_connection_str(),
-                            embedding_function=self.embeddings,
-                        )
-                        store.add_documents(documents)
-                else:
-                    PGVector.from_documents(
-                        documents=documents,
-                        embedding=self.embeddings,
-                        collection_name=self.collection_name,
-                        connection_string=self.vector_db.get_connection_str(),
-                    )
+        with self.cursor as cursor:
+            if self.is_existing_table(cursor):
+                self.delete_documents_with_sources(sources=document_unique_sources)
+                store = PGVector(
+                    collection_name=self.collection_name,
+                    connection_string=self.vector_db.get_connection_str(),
+                    embedding_function=self.embeddings,
+                )
+                store.add_documents(documents)
+            else:
+                PGVector.from_documents(
+                    documents=documents,
+                    embedding=self.embeddings,
+                    collection_name=self.collection_name,
+                    connection_string=self.vector_db.get_connection_str(),
+                )

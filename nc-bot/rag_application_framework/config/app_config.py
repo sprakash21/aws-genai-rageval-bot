@@ -54,6 +54,13 @@ class FileStoreConfig:
 
 
 @dataclass
+class ConfluenceConfig:
+    url: str
+    api_key: str
+    username: str
+
+
+@dataclass
 class AppConfig:
     db_config: DbConfig
     embedding_config: EmbeddingConfig
@@ -61,3 +68,4 @@ class AppConfig:
     inference_config: InferenceConfig
     file_store_config: FileStoreConfig
     openai_config: Optional[OpenAIConfig] = None
+    confluence_config: Optional[ConfluenceConfig] = None

@@ -28,11 +28,11 @@ class S3FilesUploader(FilesUploaderBase):
         self.bucket_name = bucket_name
         self.boto3_session = boto3_session
 
-    def upload_and_get_loader(
+    def store_file_and_get_loader(
         self,
         file_content: bytes,
         file_name: str,
-    ) -> Union[S3FileLoader, UnstructuredFileLoader]:
+    ) -> S3FileLoader:
         s3_api = AwsClientFactory.build_from_boto_session(
             session=self.boto3_session, service_api_type=S3Api
         )
