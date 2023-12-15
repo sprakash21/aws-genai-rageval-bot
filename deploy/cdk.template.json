@@ -56,6 +56,8 @@
     "branch": null,
     "app_container_vcpus": 1024,
     "app_container_memory": 2048,
+    "domain_name": "OPTIONAL - domain name for SSM Certificate",
+    "hosted_zone_id": "OPTIONAL - Route53 Hosted Zone ID",
     "app_params": {
       "DB_LOCAL": "false",
       "EMBEDDING_COLLECTION_NAME": "llm_collection",
@@ -70,7 +72,8 @@
       "BEDROCK_INFERENCE_MODEL_ID": "meta.llama2-13b-chat-v1",
       "CONFLUENCE_URL": "https://nordcloud.atlassian.net/wiki",
       "CONFLUENCE_API_KEY": "...",
-      "CONFLUENCE_USERNAME": "..."
+      "CONFLUENCE_USERNAME": "...",
+      "LOGIN_CODE": "..."
     }
   }
 }

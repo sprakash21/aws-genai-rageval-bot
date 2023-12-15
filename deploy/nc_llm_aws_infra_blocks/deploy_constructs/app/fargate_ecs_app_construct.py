@@ -5,11 +5,14 @@ from aws_cdk import CfnParameter, SecretValue
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk import aws_ecs as ecs
 from aws_cdk import aws_elasticloadbalancingv2 as elbv2
+from aws_cdk import aws_certificatemanager as acm
 from aws_cdk import aws_iam
 from aws_cdk import aws_s3 as s3
-from aws_cdk import aws_secretsmanager, aws_ssm
+from aws_cdk import aws_secretsmanager
 from constructs import Construct
 from nc_llm_aws_infra_blocks.library.base.base_construct import BaseConstruct
+from aws_cdk import aws_route53 as route53
+from aws_cdk.aws_route53_targets import LoadBalancerTarget
 
 
 class EcsWithLoadBalancer(BaseConstruct):
@@ -28,6 +31,8 @@ class EcsWithLoadBalancer(BaseConstruct):
         app_params: dict[str, str],
         openai_api_key: str,
         db_secret: aws_secretsmanager.ISecret,
+        domain_name: Union[str, None] = None,
+        hosted_zone_id: Union[str, None] = None,
         **kwargs,
     ) -> None:
         super().__init__(scope, id, **kwargs)
@@ -161,7 +166,7 @@ class EcsWithLoadBalancer(BaseConstruct):
 
         # Here you might want to add a container to the task definition
         # Add listener to Load Balancer
-        listener = self.lb.add_listener("listener", port=80)
+
         # Create Fargate Service
         fargate_service = ecs.FargateService(
             self,
@@ -173,10 +178,50 @@ class EcsWithLoadBalancer(BaseConstruct):
             ),
         )
 
-        # Attach the service to the ALB
-        listener.add_targets(
-            "ecs-targets",
-            port=8501,
-            targets=[fargate_service],
-            protocol=elbv2.ApplicationProtocol.HTTP,
-        )
+        if domain_name:
+            certificate = acm.Certificate(
+                self,
+                "Certificate",
+                domain_name=f"*.{domain_name}",
+                validation=acm.CertificateValidation.from_dns(),
+            )
+            listener = self.lb.add_listener(
+                "HttpsListener", port=443, certificates=[certificate]
+            )
+
+            listener.add_targets(
+                "ecs-targets",
+                port=8501,
+                targets=[fargate_service],
+                protocol=elbv2.ApplicationProtocol.HTTP,  # Ensure this matches your service configuration
+            )
+
+            # Retrieve an existing hosted zone
+            hosted_zone = route53.HostedZone.from_hosted_zone_attributes(
+                self,
+                "HostedZone",
+                hosted_zone_id=hosted_zone_id,
+                zone_name=domain_name,
+            )
+
+            # Add a DNS A record to point to the ELB
+            route53.ARecord(
+                self,
+                "AliasRecord",
+                zone=hosted_zone,
+                target=route53.RecordTarget.from_alias(LoadBalancerTarget(self.lb)),
+                record_name="chat",
+            )
+
+        else:
+            listener = self.lb.add_listener(
+                "listener",
+                port=80,
+            )
+
+            listener.add_targets(
+                "ecs-targets",
+                port=8501,
+                targets=[fargate_service],
+                protocol=elbv2.ApplicationProtocol.HTTP,  # Ensure this matches your service configuration
+            )

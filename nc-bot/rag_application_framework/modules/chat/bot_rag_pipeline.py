@@ -78,7 +78,7 @@ class BotRagPipeline:
         self.db_factory = db_factory
         # self.prompt = hub.pull("rlm/rag-prompt-llama")
 
-        template_string = """[INST]<<SYS>>You are an assistant for question-answering tasks. Your name is Nordcloud Bot. Use the following pieces of retrieved context to answer the question. If and only if the question is about yourself, like "who are you?" or "what is your name", then ignore the given context and answer exactly with "I am Nordcloud QA Bot.". If you dont know the answer, reply exactly with "I do not know the answer to that question.". Keep the answer concise.<</SYS>> 
+        template_string = """[INST]<<SYS>> You are an assistant for question-answering tasks. Use the following pieces of retrieved context to answer the question. If you don't know the answer, just say that you don't know. Use three sentences maximum and keep the answer concise. If and only if the question is about yourself, like "who are you?" or "what is your name", then ignore the given context and answer exactly with "I am Nordcloud QA Bot".<</SYS>> 
 Question: {question} 
 Context: {context} 
 Answer: [/INST]

@@ -38,6 +38,10 @@ else:
     raise ValueError(f"Inference type {inference_type} is not known.")
 
 
+domain_name = app.node.try_get_context("domain_name")
+hosted_zone_id = app.node.try_get_context("hosted_zone_id")
+
+
 ecr_repo = app.node.try_get_context("ecr_repo")
 ecr_tag = app.node.try_get_context("ecr_image_tag")
 ecr_url = app.node.try_get_context("ecr_url")
@@ -81,6 +85,8 @@ app_deployment_builder = ApplicationDeploymentBuilder(
     app_container_vcpus=app_container_vcpus,
     openai_api_key=openai_api_key,
     inference_type=inference_type,
+    domain_name=domain_name,
+    hosted_zone_id=hosted_zone_id,
 )
 
 if not deploy_pipeline:

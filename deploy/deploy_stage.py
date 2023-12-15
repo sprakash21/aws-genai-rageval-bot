@@ -53,6 +53,8 @@ class ApplicationDeploymentBuilder:
         inference_type: InferenceType,
         app_container_vcpus: Union[int, float] = 1,
         app_container_memory: int = 2048,
+        domain_name: Union[str, None] = None,
+        hosted_zone_id: Union[str, None] = None,
         inference_engine_instance_type: Union[str, None] = None,
         inference_enginer_instance_count: Union[int, None] = None,
         inference_enginer_gpu_count: Union[int, None] = None,
@@ -85,6 +87,8 @@ class ApplicationDeploymentBuilder:
         self.app_container_memory = app_container_memory
         self.openai_api_key = openai_api_key
         self.inference_type = inference_type
+        self.domain_name = domain_name
+        self.hosted_zone_id = hosted_zone_id
 
     def build(self, scope):
         if self.inference_type == InferenceType.SAGEMAKER:
@@ -144,6 +148,8 @@ class ApplicationDeploymentBuilder:
             app_params=self.app_params,
             container_vcpus=self.app_container_vcpus,
             container_memory=self.app_container_memory,
+            domain_name=self.domain_name,
+            hosted_zone_id=self.hosted_zone_id,
         )
 
 

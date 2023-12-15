@@ -28,6 +28,8 @@ class SimpleRagAppStack(Stack):
         app_params: dict[str, str],
         container_vcpus: Union[int, float],
         container_memory: int,
+        domain_name: Union[str, None] = None,
+        hosted_zone_id: Union[str, None] = None,
         sagemaker_endpoint_name: Union[CfnParameter, None] = None,
         **kwargs
     ) -> None:
@@ -59,4 +61,6 @@ class SimpleRagAppStack(Stack):
             openai_api_key=openai_api_key,
             app_params=app_params,
             db_secret=context_db.db_secret,
+            domain_name=domain_name,
+            hosted_zone_id=hosted_zone_id,
         )
