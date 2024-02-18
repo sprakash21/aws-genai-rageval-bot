@@ -26,9 +26,6 @@ nc-bot
 
 The project is structure as shown above. The important modules are the rag_application_framework/handlers/ragas_evaluation_and_db_logging_callback_handler.py which includes the callback handling of the RAG pipeline to perform the evaluation and saving the scores in the RagScore Table. The helpers module contain all the necessary helpers for ingestion, inference, and evaluation.  
 
-## Chatbot Home Page
-<TODO: Add the home page>
-
 ## Setup the bot locally
 We can also setup the local via docker. For this one must do the following activities and we assume that docker is setup already in the machine.  
 

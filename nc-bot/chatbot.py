@@ -19,7 +19,8 @@ from rag_application_framework.modules.chat.bot_rag_pipeline import (
     SourceDocument,
 )
 
-
+from dotenv import load_dotenv
+load_dotenv()
 def page():
     app_config = AppConfigFactory.build_from_env()
     db_connection_factory = PsycopgConnectionFactory(

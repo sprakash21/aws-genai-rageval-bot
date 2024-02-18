@@ -47,7 +47,6 @@ class SourceDocument:
 
 
 class BotRagPipeline:
-    # Generate a docstring for the class
     """
     A class to perform inference using the Llama2 LLM.
     """

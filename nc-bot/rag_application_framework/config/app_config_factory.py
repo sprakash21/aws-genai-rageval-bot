@@ -50,8 +50,8 @@ class AppConfigFactory:
         inference_config = AppConfigFactory.get_inference_config()
 
         file_store_config = AppConfigFactory.get_file_store_config()
-
-        confluence_config = AppConfigFactory.get_confluence_config()
+        # No confluence configuration
+        #confluence_config = AppConfigFactory.get_confluence_config()
 
         return AppConfig(
             db_config=db_config,
@@ -60,7 +60,7 @@ class AppConfigFactory:
             aws_config=AppConfigFactory.aws_config,
             inference_config=inference_config,
             file_store_config=file_store_config,
-            confluence_config=confluence_config,
+            #confluence_config=confluence_config,
         )
 
     @staticmethod
