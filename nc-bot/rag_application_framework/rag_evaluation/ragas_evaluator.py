@@ -1,13 +1,11 @@
 import logging
 import os
 from datasets import Dataset
-from rag_application_framework.config.app_config import OpenAIConfig
+from rag_application_framework.config.app_config import OpenAIConfig, EvaluationConfig
 from rag_application_framework.logging.logging import Logging
-
+from langchain.chat_models import BedrockChat
+from langchain.llms.bedrock import Bedrock
 from langchain.schema.embeddings import Embeddings
-from langchain.chat_models.azure_openai import AzureChatOpenAI
-
-
 logger = Logging.get_logger(__name__)
 
 
@@ -21,20 +19,19 @@ class RagasEvaluator:
 
     def __init__(
         self,
-        openai_config: OpenAIConfig,
+        #openai_config: OpenAIConfig,
+        evaluation_config: EvaluationConfig,
         embeddings: Embeddings,
     ):
-        self.opeai_config = openai_config
+        #os.environ.setdefault("OPENAI_API_KEY", "")
+        #self.opeai_config = openai_config
+        self.evaluation_confg = evaluation_config
         self.embeddings = embeddings
-
-        os.environ.setdefault("OPENAI_API_KEY", self.opeai_config.api_key)
-
-        self.judge_model = AzureChatOpenAI(
-            deployment_name=self.opeai_config.deployment_name,
-            openai_api_base=self.opeai_config.api_base,
-            openai_api_type=self.opeai_config.api_type,
-            openai_api_version=self.opeai_config.api_version,
-            openai_api_key=self.opeai_config.api_key,
+        # Bedrock Judge
+        self.judge_model = BedrockChat(
+            client=self.evaluation_confg.bedrock_client,
+            model_id=str(self.evaluation_confg.bedrock_model_id),
+            model_kwargs={"temperature": 0.6, "top_p": 1, "max_tokens_to_sample": 4000, "top_k": 250},
         )
 
     def create_dataset(self, run_data):
@@ -55,8 +52,8 @@ class RagasEvaluator:
         return Dataset.from_dict(data_dict)
 
     def evaluate(self, run_data):
-        """Performs evaluation using chatgpt as judge for the answer generated from
-        LLM like llama2. Note: The judge can be any judge. We here use ChatGPT.
+        """Performs evaluation using Anthropic Claude-v2 as judge for the answer generated from
+        LLM like llama2. Note: The judge can be any judge. We here use Anthropic Claude-v2.
 
         Args:
             run_data (Dataset): The dataset to be evaluated
@@ -67,29 +64,22 @@ class RagasEvaluator:
         from ragas.metrics import (
             answer_relevancy,
             faithfulness,
-            context_precision,
+            context_utilization,
         )
-        from ragas.metrics.critique import harmfulness
+        from ragas.metrics.critique import correctness
         from ragas import evaluate
 
         data = self.create_dataset(run_data)
 
-        context_precision.llm = self.judge_model
-        faithfulness.llm = self.judge_model
-
-        answer_relevancy.embeddings = self.embeddings
-        harmfulness.embeddings = self.embeddings
-
-        answer_relevancy.llm = self.judge_model
-        harmfulness.llm = self.judge_model
-
         result = evaluate(
             dataset=data,
             metrics=[
-                context_precision,
+                context_utilization,
                 faithfulness,
                 answer_relevancy,
-                harmfulness,
+                correctness,
             ],
+            llm=self.judge_model,
+            embeddings=self.embeddings
         )
         return result

@@ -2,10 +2,10 @@ from collections import defaultdict
 from datetime import datetime
 from time import time
 from typing import Any, DefaultDict, Dict, List
-
+import numpy as np
 import sqlalchemy
 from langchain.callbacks.base import BaseCallbackHandler
-from rag_application_framework.config.app_config import EmbeddingConfig, OpenAIConfig
+from rag_application_framework.config.app_config import EmbeddingConfig, OpenAIConfig, EvaluationConfig
 from rag_application_framework.db.models.models import RagScore
 from rag_application_framework.logging.logging import Logging
 from rag_application_framework.rag_evaluation.ragas_evaluator import RagasEvaluator
@@ -20,15 +20,17 @@ class RagasEvaluationAndDbLoggingCallbackHandler(BaseCallbackHandler):
 
     def __init__(
         self,
-        openai_config: OpenAIConfig,
+        #openai_config: OpenAIConfig,
         embeddings_config: EmbeddingConfig,
+        evaluation_config: EvaluationConfig,
         engine: sqlalchemy.engine.Engine,
     ) -> None:
         self.run_data_llm: DefaultDict[str, Any] = defaultdict(dict)
         self.run_data_chain: DefaultDict[str, Any] = defaultdict(dict)
         super().__init__()
-        self.openai_config = openai_config
+        #self.openai_config = openai_config
         self.embeddings_config = embeddings_config
+        self.evaluation_config = evaluation_config
         self.engine = engine
 
     def process_llama2_prompt(self, prompt: str) -> Any:
@@ -38,7 +40,8 @@ class RagasEvaluationAndDbLoggingCallbackHandler(BaseCallbackHandler):
 
     def evaluate(self, response_data: dict) -> dict:
         evaluation_helper = RagasEvaluator(
-            openai_config=self.openai_config,
+            #openai_config=self.openai_config,″
+            evaluation_config=self.evaluation_config,
             embeddings=self.embeddings_config.embeddings,
         )
         logger.info("Evaluation Started.")
@@ -60,10 +63,10 @@ class RagasEvaluationAndDbLoggingCallbackHandler(BaseCallbackHandler):
                 model_type=response_data["model_type"],
                 qa_status=response_data["qa_status"],
                 total_duration=response_data["total_duration"],
-                faithfulness=result["faithfulness"],
-                context_precision=result["context_precision"],
-                answer_relevancy=result["answer_relevancy"],
-                harmfulness=result["harmfulness"],
+                faithfulness=result["faithfulness"] if not np.isnan(result["faithfulness"]) else 0,
+                context_precision=result["context_utilization"] if not np.isnan(result["context_utilization"]) else 0,
+                answer_relevancy=result["answer_relevancy"] if not np.isnan(result["answer_relevancy"]) else 0,
+                correctness=result["correctness"] if not np.isnan(result["correctness"]) else 0,
                 time_stamp=datetime.utcnow(),
             )
             session.add(rag_score)

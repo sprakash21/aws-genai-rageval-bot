@@ -55,8 +55,8 @@ def page():
         st.plotly_chart(fig, theme="streamlit", use_container_width=True)
 
     with cl2:
-        st.subheader("Harmfulness")
-        fig = px.line(filtered_data, x="time_stamp", y="harmfulness", markers=True)
+        st.subheader("Correctness")
+        fig = px.line(filtered_data, x="time_stamp", y="correctness", markers=True)
         st.plotly_chart(fig, theme="streamlit", use_container_width=True)
 
     cl11, cl22 = st.columns(2)
@@ -68,11 +68,11 @@ def page():
         )
         st.plotly_chart(fig, theme="streamlit", use_container_width=True)
 
-    with cl22:
-        st.subheader("Score Correlation")
-        corr_df = filtered_data[["context_precision", "answer_relevancy"]]
-        fig = px.imshow(corr_df.corr())
-        st.plotly_chart(fig, theme="streamlit", use_container_width=True)
+#    with cl22:
+#        st.subheader("Score Correlation")
+#        corr_df = filtered_data[["context_precision", "answer_relevancy"]]
+#        fig = px.imshow(corr_df.corr())
+#        st.plotly_chart(fig, theme="streamlit", use_container_width=True)
 
 
 empty = st.empty()

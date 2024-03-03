@@ -16,6 +16,7 @@ from rag_application_framework.config.app_config import (
     EmbeddingConfig,
     FileStoreConfig,
     InferenceConfig,
+    EvaluationConfig,
     OpenAIConfig,
 )
 from rag_application_framework.ml.embeddings.langchain_embeddings_factory import (
@@ -42,6 +43,7 @@ class AppConfigFactory:
     @staticmethod
     def build_from_env():
         openai_config = AppConfigFactory.get_open_ai_config()
+        evaluation_config = AppConfigFactory.get_evaluation_config()
 
         db_config = AppConfigFactory.get_db_config()
 
@@ -59,6 +61,7 @@ class AppConfigFactory:
             openai_config=openai_config,
             aws_config=AppConfigFactory.aws_config,
             inference_config=inference_config,
+            evaluation_config=evaluation_config,
             file_store_config=file_store_config,
             #confluence_config=confluence_config,
         )
@@ -133,6 +136,39 @@ class AppConfigFactory:
             raise ValueError(f"Invalid inference engine: {inference_engine} specified")
 
         return inference_config
+    
+    @staticmethod
+    def get_evaluation_config() -> EvaluationConfig:
+        evaluation_engine = os.environ.get("INFERENCE_ENGINE", "bedrock")
+        if evaluation_engine.lower() == "bedrock":
+            aws_config = AppConfigFactory.aws_config
+            bedrock_inference_region = os.environ.get(
+                "BEDROCK_INFERENCE_REGION", aws_config.region_name
+            )
+            bedrock_inference_profile = os.environ.get(
+                "BEDROCK_INFERENCE_PROFILE", aws_config.profile_name
+            )
+            bedrock_model_id = os.environ["BEDROCK_EVALUATION_MODEL_ID"]
+            aws_session = AwsSessionFactory.create_session_from_config(
+                config=AwsConfig(
+                    region_name=bedrock_inference_region,
+                    profile_name=bedrock_inference_profile,
+                )
+            )
+            bedrock_api = AwsClientFactory.build_from_boto_session(
+                aws_session,
+                BedrockRuntimeApi,
+                client_config=Config(region_name=bedrock_inference_region),
+            )
+            evaluation_confg = EvaluationConfig(
+                evaluation_engine=evaluation_engine,
+                bedrock_client=bedrock_api.client,
+                bedrock_model_id=bedrock_model_id,
+            )
+        else:
+            raise ValueError(f"Invalid inference engine: {evaluation_engine} specified")
+
+        return evaluation_confg
 
     @staticmethod
     def get_embedding_config() -> EmbeddingConfig:

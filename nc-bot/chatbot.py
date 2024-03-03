@@ -67,7 +67,8 @@ def page():
     inititalize(engine)
 
     bot_rag_pipeline = BotRagPipeline(
-        openai_config=app_config.openai_config,
+        #openai_config=app_config.openai_config,
+        evaluation_config = app_config.evaluation_config,
         embeddings_config=app_config.embedding_config,
         engine=engine,
         file_store_config=app_config.file_store_config,
