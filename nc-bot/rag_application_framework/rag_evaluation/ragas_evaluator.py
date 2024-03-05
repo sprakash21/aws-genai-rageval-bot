@@ -3,7 +3,7 @@ import os
 from datasets import Dataset
 from rag_application_framework.config.app_config import OpenAIConfig, EvaluationConfig
 from rag_application_framework.logging.logging import Logging
-from langchain.chat_models import BedrockChat
+from langchain.chat_models.bedrock import BedrockChat
 from langchain.llms.bedrock import Bedrock
 from langchain.schema.embeddings import Embeddings
 logger = Logging.get_logger(__name__)

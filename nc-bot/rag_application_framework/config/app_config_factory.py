@@ -42,7 +42,7 @@ class AppConfigFactory:
 
     @staticmethod
     def build_from_env():
-        openai_config = AppConfigFactory.get_open_ai_config()
+        #openai_config = AppConfigFactory.get_open_ai_config()
         evaluation_config = AppConfigFactory.get_evaluation_config()
 
         db_config = AppConfigFactory.get_db_config()
@@ -58,7 +58,7 @@ class AppConfigFactory:
         return AppConfig(
             db_config=db_config,
             embedding_config=embedding_config,
-            openai_config=openai_config,
+            #openai_config=openai_config,
             aws_config=AppConfigFactory.aws_config,
             inference_config=inference_config,
             evaluation_config=evaluation_config,

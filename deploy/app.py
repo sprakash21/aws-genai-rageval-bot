@@ -9,7 +9,7 @@ from nc_llm_aws_infra_blocks.pre_built_stacks.inference.sagemaker_hugging_face.h
     HuggingFaceTaskType,
 )
 
-from deploy_stage import ApplicationDeploymentBuilder, InferenceType
+from deploy_stage import ApplicationDeploymentBuilder, InferenceType, EvaluationType
 
 # Environment information
 
@@ -26,9 +26,9 @@ deploy_stage = app.node.get_context("deploy_stage")
 deploy_region = app.node.get_context("deploy_region")
 app_container_vcpus = app.node.get_context("app_container_vcpus")
 app_container_memory = app.node.get_context("app_container_memory")
-openai_api_key = app.node.get_context("openai_api_key")
 app_params: dict[str, str] = app.node.get_context("app_params")
 inference_type = app_params["INFERENCE_ENGINE"]
+evaluation_type = app_params["BEDROCK_EVALUATION_ENGINE"]
 
 if inference_type == InferenceType.BEDROCK.name.lower():
     inference_type = InferenceType.BEDROCK
@@ -36,6 +36,13 @@ elif inference_type == InferenceType.SAGEMAKER.name.lower():
     inference_type = InferenceType.SAGEMAKER
 else:
     raise ValueError(f"Inference type {inference_type} is not known.")
+
+if evaluation_type == EvaluationType.BEDROCK.name.lower():
+    evaluation_type = EvaluationType.BEDROCK
+elif evaluation_type == EvaluationType.SAGEMAKER.name.lower():
+    evaluation_type = EvaluationType.SAGEMAKER
+else:
+    raise ValueError(f"EvaluationType type {evaluation_type} is not known.")
 
 
 domain_name = app.node.try_get_context("domain_name")
@@ -83,8 +90,8 @@ app_deployment_builder = ApplicationDeploymentBuilder(
     app_params=app_params,
     app_container_memory=app_container_memory,
     app_container_vcpus=app_container_vcpus,
-    openai_api_key=openai_api_key,
     inference_type=inference_type,
+    evaluation_type=evaluation_type,
     domain_name=domain_name,
     hosted_zone_id=hosted_zone_id,
 )

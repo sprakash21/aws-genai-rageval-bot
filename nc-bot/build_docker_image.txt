@@ -1,0 +1,1 @@
+./build_and_push_docker.sh ../../nc-bot/Dockerfile bot-repo qa-app-1.0.0 eu-central-1 602844611342

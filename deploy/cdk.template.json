@@ -33,7 +33,6 @@
       "aws",
       "aws-cn"
     ],
-    "openai_api_key": "...",
     "ecr_repo": "...",
     "ecr_image_tag": "...",
     "ecr_url": "...",
@@ -61,19 +60,20 @@
     "app_params": {
       "DB_LOCAL": "false",
       "EMBEDDING_COLLECTION_NAME": "llm_collection",
-      "OPENAI_API_TYPE": "azure",
-      "OPENAI_API_VERSION": "2023-07-01-preview",
-      "OPENAI_API_BASE": "https://oai-int-azg-we-001.openai.azure.com/",
-      "OPENAI_DEPLOYMENT_NAME": "dep-gpt-35-turbo",
       "USE_BEDROCK_EMBEDDINGS": "true",
-      "BEDROCK_EMBEDDINGS_REGION": "us-central-1",
+      "BEDROCK_EMBEDDINGS_REGION": "eu-central-1",
       "INFERENCE_ENGINE": "bedrock",
       "BEDROCK_INFERENCE_REGION": "us-east-1",
-      "BEDROCK_INFERENCE_MODEL_ID": "meta.llama2-13b-chat-v1",
-      "CONFLUENCE_URL": "https://nordcloud.atlassian.net/wiki",
-      "CONFLUENCE_API_KEY": "...",
-      "CONFLUENCE_USERNAME": "...",
-      "LOGIN_CODE": "..."
+      "BEDROCK_INFERENCE_MODEL_ID": "meta.llama2-70b-chat-v1",
+      "BEDROCK_EVALUATION_ENGINE":"bedrock",
+      "BEDROCK_EVALUATION_REGION":"eu-central-1",
+      "BEDROCK_EVALUATION_MODEL_ID":"anthropic.claude-v2",
+      "LOGIN_CODE": "...",
+      "PGVECTOR_USER":"OPTIONAL: Applies When DB_LOCAL Is True",
+      "PGVECTOR_PASSWORD":"OPTIONAL: Applies When DB_LOCAL Is True",
+      "PGVECTOR_PORT":"5432",
+      "PGVECTOR_HOST":"OPTIONAL: Applies When DB_LOCAL Is True",
+      "PGVECTOR_DATABASE":"OPTIONAL: Applies When DB_LOCAL Is True"
     }
   }
 }
