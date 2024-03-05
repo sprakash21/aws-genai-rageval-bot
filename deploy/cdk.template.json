@@ -47,7 +47,7 @@
       "gpu_count": 1
     },
     "sagemaker_session_profile_name": "default",
-    "project_prefix": "nordcloud",
+    "project_prefix": "your_prefix",
     "deploy_stage": "dev",
     "deploy_region": "eu-west-1",
     "deploy_pipeline": false,

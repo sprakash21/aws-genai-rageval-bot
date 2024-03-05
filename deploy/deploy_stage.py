@@ -135,9 +135,9 @@ class ApplicationDeploymentBuilder:
             env=self.env,
         )
 
-        nordcloud_bot_app_stack = SimpleRagAppStack(
+        qa_bot_app_stack = SimpleRagAppStack(
             scope,
-            f"{self.project_prefix}-{self.deploy_stage}-nordcloud-bot-app",
+            f"{self.project_prefix}-{self.deploy_stage}-bot-app",
             env=self.env,
             vpc=network_stack.vpc,
             deploy_stage=self.deploy_stage,
