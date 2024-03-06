@@ -1,10 +1,9 @@
 from typing import List, Optional, Union
-from langchain import hub
 from langchain.chains import RetrievalQA
 from langchain.llms.ollama import Ollama
 from langchain.llms.sagemaker_endpoint import SagemakerEndpoint
 from langchain.vectorstores.pgvector import PGVector
-from rag_application_framework.langchain.bedrock import Bedrock
+from langchain_community.llms.bedrock import Bedrock
 from rag_application_framework.aws.sagemaker_runtime_api import SagemakerRuntimeApi
 from rag_application_framework.config.app_config import (
     EmbeddingConfig,
