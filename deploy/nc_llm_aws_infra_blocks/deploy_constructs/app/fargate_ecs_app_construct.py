@@ -29,7 +29,6 @@ class EcsWithLoadBalancer(BaseConstruct):
         ecr_url: str,
         sagemaker_endpoint_name: Union[CfnParameter, None],
         app_params: dict[str, str],
-        openai_api_key: str,
         db_secret: aws_secretsmanager.ISecret,
         domain_name: Union[str, None] = None,
         hosted_zone_id: Union[str, None] = None,
@@ -47,15 +46,19 @@ class EcsWithLoadBalancer(BaseConstruct):
 
         # Create an S3 Bucket using cdk
         bucket_name = f"{self.resource_prefix}-{self.deploy_region}-bucket"
-
-        bucket = s3.Bucket(
-            self,
-            bucket_name,
-            bucket_name=bucket_name,
-            block_public_access=s3.BlockPublicAccess.BLOCK_ALL,
-            removal_policy=aws_cdk.RemovalPolicy.RETAIN,
-            auto_delete_objects=False,
-        )
+        bucket = s3.Bucket.from_bucket_name(self, "ExstingBucket", bucket_name=bucket_name)
+        if (not bucket.bucket_name):
+            bucket = s3.Bucket(
+                self,
+                bucket_name,
+                bucket_name=bucket_name,
+                block_public_access=s3.BlockPublicAccess.BLOCK_ALL,
+                removal_policy=aws_cdk.RemovalPolicy.RETAIN,
+                auto_delete_objects=False,
+            )
+        else:
+            print(f"The Bucket with name - {bucket_name} exists already")
+            print(f"Bucket ARN - {bucket.bucket_arn}")
 
         # Create a Fargate task definition
         task_def = ecs.FargateTaskDefinition(
@@ -65,21 +68,10 @@ class EcsWithLoadBalancer(BaseConstruct):
             memory_limit_mib=container_memory,
         )
 
-        secret_name = f"{self.project_stage_prefix}-open-ai-key"
-        secret = aws_secretsmanager.Secret(
-            self,
-            id="open-ai-key",
-            secret_name=secret_name,
-            secret_string_value=SecretValue.unsafe_plain_text(openai_api_key),
-        )
-
-        secret.grant_read(task_def.task_role)
-
         db_secret.grant_read(task_def.task_role)
 
         app_env = {
             "RDS_SECRET_NAME": db_secret.secret_name,
-            "OPENAI_API_KEY_SECRET_NAME": secret_name,
             "BUCKET_NAME": bucket_name,
             **app_params,
         }

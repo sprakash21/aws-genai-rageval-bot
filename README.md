@@ -1,10 +1,11 @@
+# Monitoring and evaluating RAG Pipeline Performance on AWS using Ragas
+This is the reference code repository for the blog post titled "<TOBEUPDATED>".  
 
-# Generative AI with AWS
-## TODO: Update Full updated README
-# Part-1: Investigating the service offerings.  
-# Part-2: Setting up Sagemaker infrastructure for Foundational model usage.  
-# Part-2a: Consuming the foundational model.  
-# Part-3: Setting up AWS Bedrock infrastructure for the Foundational model usage and consuming.  
-# Part-4: Develop a use case for the FM.  
-# Part-5: Use streamlit to build a chat interface.  
-# Part-6: Outlook and conclusion.  
+## Features of the Repository:  
+1. Provision to deploy both open source, bedrock and aws foundational models.  
+2. Ability to deploy and extend vector databases.  
+3. A demonstration of the RAG evaluation pipeline through introduction of a new callback handler within a QA Bot and continuous monitoring of the results through an app.  
+
+## Details
+For Application Details Refer: [app_documentation](nc-bot/README.md)  
+For Stack Deployment Details Refer: [deployment_documentation](deploy/README.md)  

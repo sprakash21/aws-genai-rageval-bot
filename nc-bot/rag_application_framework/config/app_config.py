@@ -45,6 +45,12 @@ class InferenceConfig:
     bedrock_client: Optional[BaseClient] = None
     bedrock_model_id: Optional[str] = None
 
+@dataclass
+class EvaluationConfig:
+    evaluation_engine: str = "bedrock"
+    bedrock_client: Optional[BaseClient] = None
+    bedrock_model_id: Optional[str] = None
+
 
 @dataclass
 class FileStoreConfig:
@@ -68,4 +74,5 @@ class AppConfig:
     inference_config: InferenceConfig
     file_store_config: FileStoreConfig
     openai_config: Optional[OpenAIConfig] = None
+    evaluation_config: Optional[EvaluationConfig] = None
     confluence_config: Optional[ConfluenceConfig] = None

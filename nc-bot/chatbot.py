@@ -19,7 +19,8 @@ from rag_application_framework.modules.chat.bot_rag_pipeline import (
     SourceDocument,
 )
 
-
+from dotenv import load_dotenv
+load_dotenv()
 def page():
     app_config = AppConfigFactory.build_from_env()
     db_connection_factory = PsycopgConnectionFactory(
@@ -66,7 +67,8 @@ def page():
     inititalize(engine)
 
     bot_rag_pipeline = BotRagPipeline(
-        openai_config=app_config.openai_config,
+        #openai_config=app_config.openai_config,
+        evaluation_config = app_config.evaluation_config,
         embeddings_config=app_config.embedding_config,
         engine=engine,
         file_store_config=app_config.file_store_config,

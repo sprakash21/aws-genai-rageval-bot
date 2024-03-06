@@ -10,6 +10,7 @@ from rag_application_framework.config.app_config import (
     EmbeddingConfig,
     InferenceConfig,
     OpenAIConfig,
+    EvaluationConfig
 )
 from rag_application_framework.db.psycopg_connection_factory import (
     PsycopgConnectionFactory,
@@ -47,7 +48,6 @@ class SourceDocument:
 
 
 class BotRagPipeline:
-    # Generate a docstring for the class
     """
     A class to perform inference using the Llama2 LLM.
     """
@@ -59,7 +59,8 @@ class BotRagPipeline:
         inference_config: InferenceConfig,
         file_store_config: FileStoreConfig,
         db_factory: PsycopgConnectionFactory,
-        openai_config: Union[OpenAIConfig, None],
+        #openai_config: Union[OpenAIConfig, None],
+        evaluation_config: Union[EvaluationConfig, None],
         sagemaker_runtime_api: Optional[SagemakerRuntimeApi] = None,
         s3_api: Optional[S3Api] = None,
     ) -> None:
@@ -71,19 +72,18 @@ class BotRagPipeline:
                 "SagemakerRuntimeApi must be provided when running in local mode"
             )
 
-        self.openai_config = openai_config
+        #self.openai_config = openai_config
+        self.evaluation_config = evaluation_config
         self.embeddings_config = embeddings_config
         self.engine = engine
         self.inference_config = inference_config
         self.db_factory = db_factory
-        # self.prompt = hub.pull("rlm/rag-prompt-llama")
 
-        template_string = """[INST]<<SYS>> You are an assistant for question-answering tasks. Use the following pieces of retrieved context to answer the question. If you don't know the answer, just say that you don't know. Use three sentences maximum and keep the answer concise. If and only if the question is about yourself, like "who are you?" or "what is your name", then ignore the given context and answer exactly with "I am Nordcloud QA Bot".<</SYS>> 
-Question: {question} 
-Context: {context} 
-Answer: [/INST]
-"""
-
+        template_string = """[INST]<<SYS>> You are an assistant for question-answering tasks and you will only answer as much as possible by strictly looking into the context. If you don't know the answer, just say that you don't know and do not make up answers by looking into context. Use three sentences maximum and keep the answer concise. If and only if the question is about yourself, like "who are you?" or "what is your name", then ignore the given context and answer exactly with "I am QA Bot".<</SYS>> 
+        Question: {question}
+        Context: {context} 
+        Answer: [/INST]
+        """
         self.prompt = ChatPromptTemplate.from_template(template_string)
         self.sagemaker_runtime_api = sagemaker_runtime_api
         self.s3_api = s3_api
@@ -101,17 +101,18 @@ Answer: [/INST]
 
         callback_handlers = []
 
-        if self.openai_config:
+        if self.evaluation_config:
             callback_handlers.append(
                 RagasEvaluationAndDbLoggingCallbackHandler(
-                    openai_config=self.openai_config,
+                    #openai_config=self.openai_config,
+                    evaluation_config=self.evaluation_config,
                     embeddings_config=self.embeddings_config,
                     engine=self.engine,
                 )
             )
 
         retriever = vector_store.as_retriever(
-            search_type="mmr", search_kwargs={"k": 5, "fetch_k": 20}
+            search_type="mmr", search_kwargs={"k": 5, "fetch_k": 30}
         )
 
         llm = self._get_llm()
@@ -214,7 +215,7 @@ Answer: [/INST]
         llm = Bedrock(
             client=self.inference_config.bedrock_client,
             model_id=str(self.inference_config.bedrock_model_id),
-            model_kwargs={"temperature": 0.5, "top_p": 0.9, "max_gen_len": 512},
+            model_kwargs={"temperature": 0.7, "top_p": 0.9, "max_gen_len": 512},
         )
 
         return llm
