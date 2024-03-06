@@ -33,7 +33,10 @@
       "aws",
       "aws-cn"
     ],
-    "huggingface.token_id":"",
+    "ecr_repo": "...",
+    "ecr_image_tag": "...",
+    "ecr_url": "...",
+    "huggingface.token_id":"...",
     "huggingface.llama2.13b": {
       "model_id":"meta-llama/Llama-2-7b-chat-hf",
       "task": "text-generation"
@@ -43,29 +46,34 @@
       "instance_count": 1,
       "gpu_count": 1
     },
-    "openai_api_key": "",
     "sagemaker_session_profile_name": "default",
-    "project_prefix": "swara",
+    "project_prefix": "your_prefix",
     "deploy_stage": "dev",
     "deploy_region": "eu-west-1",
-    "ecr_repo": "swara-bot",
-    "ecr_image_tag": "app-0.0.1",
-    "ecr_url": "214181320558.dkr.ecr.eu-west-1.amazonaws.com",
     "deploy_pipeline": false,
     "codecommit_repo_name": null,
     "branch": null,
     "app_container_vcpus": 1024,
     "app_container_memory": 2048,
+    "domain_name": "OPTIONAL - domain name for SSM Certificate",
+    "hosted_zone_id": "OPTIONAL - Route53 Hosted Zone ID",
     "app_params": {
-      "INFER_LOCAL": "false",
       "DB_LOCAL": "false",
       "EMBEDDING_COLLECTION_NAME": "llm_collection",
-      "OPENAI_API_TYPE": "azure",
-      "OPENAI_API_VERSION": "2023-07-01-preview",
-      "OPENAI_API_BASE": "https://oai-int-azg-we-001.openai.azure.com/",
-      "OPENAI_DEPLOYMENT_NAME": "dep-gpt-35-turbo",
-      "USE_BEDROCK": "true",
-      "BEDROCK_REGION": "eu-central-1"
+      "USE_BEDROCK_EMBEDDINGS": "true",
+      "BEDROCK_EMBEDDINGS_REGION": "eu-central-1",
+      "INFERENCE_ENGINE": "bedrock",
+      "BEDROCK_INFERENCE_REGION": "us-east-1",
+      "BEDROCK_INFERENCE_MODEL_ID": "meta.llama2-70b-chat-v1",
+      "BEDROCK_EVALUATION_ENGINE":"bedrock",
+      "BEDROCK_EVALUATION_REGION":"eu-central-1",
+      "BEDROCK_EVALUATION_MODEL_ID":"anthropic.claude-v2",
+      "LOGIN_CODE": "...",
+      "PGVECTOR_USER":"OPTIONAL: Applies When DB_LOCAL Is True",
+      "PGVECTOR_PASSWORD":"OPTIONAL: Applies When DB_LOCAL Is True",
+      "PGVECTOR_PORT":"5432",
+      "PGVECTOR_HOST":"OPTIONAL: Applies When DB_LOCAL Is True",
+      "PGVECTOR_DATABASE":"OPTIONAL: Applies When DB_LOCAL Is True"
     }
   }
 }

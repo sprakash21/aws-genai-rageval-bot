@@ -1,3 +1,3 @@
-CREATE DATABASE vectordblab;
-\c vectordblab;
+CREATE DATABASE test;
+\c test;
 CREATE EXTENSION IF NOT EXISTS vector;

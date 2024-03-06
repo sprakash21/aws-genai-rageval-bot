@@ -1,10 +1,7 @@
 from typing import Union
 
-from altair import param
-
-from aws_cdk import Stack
+from aws_cdk import CfnParameter, Stack
 from aws_cdk import aws_ec2 as ec2
-from aws_cdk import aws_ssm as ssm
 from constructs import Construct
 from nc_llm_aws_infra_blocks.deploy_constructs.app.aurora_postgres_sl_context_db_construct import (
     AuroraPostgresSlContextDb,
@@ -27,11 +24,12 @@ class SimpleRagAppStack(Stack):
         ecr_repository_name: str,
         ecr_image_tag: str,
         ecr_url: str,
-        sagemaker_endpoint_name: ssm.CfnParameter,
-        openai_api_key: str,
         app_params: dict[str, str],
         container_vcpus: Union[int, float],
         container_memory: int,
+        domain_name: Union[str, None] = None,
+        hosted_zone_id: Union[str, None] = None,
+        sagemaker_endpoint_name: Union[CfnParameter, None] = None,
         **kwargs
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)
@@ -59,7 +57,8 @@ class SimpleRagAppStack(Stack):
             deploy_stage=deploy_stage,
             deploy_region=deploy_region,
             sagemaker_endpoint_name=sagemaker_endpoint_name,
-            openai_api_key=openai_api_key,
             app_params=app_params,
             db_secret=context_db.db_secret,
+            domain_name=domain_name,
+            hosted_zone_id=hosted_zone_id,
         )
