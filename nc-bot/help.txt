@@ -1,1 +1,0 @@
-./build_and_push_docker.sh ../../nc-bot/Dockerfile nc-bot-repo chatbot-app eu-west-1 214181320558

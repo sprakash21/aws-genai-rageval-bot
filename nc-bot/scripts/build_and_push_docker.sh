@@ -37,7 +37,7 @@ then
 
     color_blue "Building Docker image: $REPO_NAME from Dockerfile: $DOCKERFILE_PATH"
     # Build the Docker image
-    docker build --platform linux/amd64 -t $REPO_NAME -f $DOCKERFILE_PATH ../
+    docker buildx build --platform linux/amd64 -t $REPO_NAME -f $DOCKERFILE_PATH ../
     color_blue "Tagging Docker image as: $REPO_NAME:$IMAGE_TAG"
     # Tag the image for ECR
     docker tag $REPO_NAME:latest $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$REPO_NAME:$IMAGE_TAG

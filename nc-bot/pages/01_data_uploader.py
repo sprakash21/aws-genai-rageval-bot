@@ -1,11 +1,8 @@
 # import os
 from functools import partial
 import os
-from rag_application_framework.modules.data_pipelines.confluence_data_pipeline import (
-    ConfluenceFilePipeline,
-)
 from rag_application_framework.modules.file_uploader.file_system_file_uploader import (
-    FileSystemFilesUploader,
+    FileSystemFilesUploader
 )
 from functools import partial
 import streamlit as st
@@ -64,38 +61,10 @@ def page():
             "Database is cleared successfully.",
         )
 
-    def load_confluence_data_eh(confluence_pipeline: ConfluenceFilePipeline):
-        result = confluence_pipeline.load_from_confluence_loader("ED")
-
-        no_of_files = len(result)
-
-        st.toast(
-            f"{no_of_files} documents loaded successfully from confluence.",
-        )
-
-    def load_confluence_data_git(confluence_pipeline: ConfluenceFilePipeline):
-        result = confluence_pipeline.load_from_confluence_loader("GIT")
-
-        no_of_files = len(result)
-
-        st.toast(
-            f"{no_of_files} documents loaded successfully from confluence.",
-        )
-
     st.sidebar.markdown("# Data Uploader")
     st.title("Data Uploader")
     st.caption("Extend the Vector Database by uploading Pdf data")
     btn = st.button("Clear Database", on_click=clear_db_show_toast)
-
-    if app_config.confluence_config:
-        confluence_pipeline = ConfluenceFilePipeline(
-            file_uploader=file_uploader, confluence_config=app_config.confluence_config
-        )
-        event_handler_eh = partial(load_confluence_data_eh, confluence_pipeline)
-        event_handler_git = partial(load_confluence_data_git, confluence_pipeline)
-
-        st.button("Load Employee Handbook", on_click=event_handler_eh)
-        st.button("Load Group IT Handbook", on_click=event_handler_git)
 
     uploaded_files = st.file_uploader(
         "Choose a PDF File", accept_multiple_files=True, type=["pdf", "txt", "docx"]
@@ -115,7 +84,6 @@ def page():
                 f"You can access it from - <a href='{file_upload_result.url}'>{file_upload_result.file_name}</a>",
                 unsafe_allow_html=True,
             )
-
 
 empty = st.empty()
 if "login" not in st.session_state:
