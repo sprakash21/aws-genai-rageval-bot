@@ -1,3 +1,4 @@
+from math import inf
 from typing import Union
 from aws_cdk import Environment, Stage
 from constructs import Construct
@@ -28,9 +29,16 @@ from nc_llm_aws_infra_blocks.pre_built_stacks.app.application_stack import (
     SimpleRagAppStack,
 )
 
-from nc_llm_aws_infra_blocks.library.helpers.model_info import (
-    get_sagemaker_model_info,
-)
+from enum import Enum
+
+
+class InferenceType(Enum):
+    SAGEMAKER = "sagemaker"
+    BEDROCK = "bedrock"
+
+class EvaluationType(Enum):
+    SAGEMAKER = "sagemaker"
+    BEDROCK = "bedrock"
 
 
 class ApplicationDeploymentBuilder:
@@ -39,24 +47,27 @@ class ApplicationDeploymentBuilder:
         project_prefix: str,
         deploy_stage: str,
         deploy_region: str,
-        hugging_face_token: str,
-        huggingface_model_id: str,
-        huggingface_task: HuggingFaceTaskType,
         env: Environment,
-        instance_type: str,
-        instance_count: int,
-        gpu_count: int,
         ecr_repository_name: str,
         ecr_image_tag: str,
         ecr_url: str,
         application_name: str,
-        openai_api_key: str,
         app_params: dict[str, str],
+        inference_type: InferenceType,
+        evaluation_type: EvaluationType,
+        app_container_vcpus: Union[int, float] = 1,
+        app_container_memory: int = 2048,
+        domain_name: Union[str, None] = None,
+        hosted_zone_id: Union[str, None] = None,
+        inference_engine_instance_type: Union[str, None] = None,
+        inference_enginer_instance_count: Union[int, None] = None,
+        inference_enginer_gpu_count: Union[int, None] = None,
+        hugging_face_token: Union[str, None] = None,
+        huggingface_model_id: Union[str, None] = None,
+        huggingface_task: Union[HuggingFaceTaskType, None] = None,
         pytorch_version: Union[str, None] = None,
         repository_override: Union[str, None] = None,
         image_tag_override: Union[str, None] = None,
-        app_container_vcpus: Union[int, float] = 1,
-        app_container_memory: int = 2048,
     ):
         self.project_prefix = project_prefix
         self.deploy_stage = deploy_stage
@@ -65,9 +76,9 @@ class ApplicationDeploymentBuilder:
         self.huggingface_model_id = huggingface_model_id
         self.huggingface_task = huggingface_task
         self.env = env
-        self.instance_type = instance_type
-        self.instance_count = instance_count
-        self.gpu_count = gpu_count
+        self.instance_type = inference_engine_instance_type
+        self.instance_count = inference_enginer_instance_count
+        self.gpu_count = inference_enginer_gpu_count
         self.pytorch_version = pytorch_version
         self.repository_override = repository_override
         self.image_tag_override = image_tag_override
@@ -78,33 +89,43 @@ class ApplicationDeploymentBuilder:
         self.app_params = app_params
         self.app_container_vcpus = app_container_vcpus
         self.app_container_memory = app_container_memory
-        self.openai_api_key = openai_api_key
+        self.inference_type = inference_type
+        self.evaluation_type = evaluation_type
+        self.domain_name = domain_name
+        self.hosted_zone_id = hosted_zone_id
 
     def build(self, scope):
-        llm_hf_execution_role_stack = HuggingFaceSageMakerRoleStack(
-            scope,
-            f"{self.project_prefix}-{self.deploy_stage}-hf-execution-role",
-            env=self.env,
-        )
+        if self.inference_type == InferenceType.SAGEMAKER:
+            llm_hf_execution_role_stack = HuggingFaceSageMakerRoleStack(
+                scope,
+                f"{self.project_prefix}-{self.deploy_stage}-hf-execution-role",
+                env=self.env,
+            )
 
-        llama2_inference_stack = HuggingFaceSageMakerEndpointStack(
-            scope,
-            f"{self.project_prefix}-{self.deploy_stage}-hf-sagemaker-llama2-endpoint",
-            project_prefix=self.project_prefix,
-            deploy_stage=self.deploy_stage,
-            deploy_region=self.deploy_region,
-            huggingface_model_id=self.huggingface_model_id,
-            huggingface_task=self.huggingface_task,
-            huggingface_token_id=self.hugging_face_token,
-            instance_type=self.instance_type,
-            instance_count=self.instance_count,
-            gpu_count=self.gpu_count,
-            execution_role_arn=llm_hf_execution_role_stack.execution_role_arn,
-            env=self.env,
-            pytorch_version=self.pytorch_version,
-            repository_override=self.repository_override,
-            image_tag_override=self.image_tag_override,
-        )
+            llama2_inference_stack = HuggingFaceSageMakerEndpointStack(
+                scope,
+                f"{self.project_prefix}-{self.deploy_stage}-hf-sagemaker-llama2-endpoint",
+                project_prefix=self.project_prefix,
+                deploy_stage=self.deploy_stage,
+                deploy_region=self.deploy_region,
+                huggingface_model_id=self.huggingface_model_id,
+                huggingface_task=self.huggingface_task,
+                huggingface_token_id=self.hugging_face_token,
+                instance_type=self.instance_type,
+                instance_count=self.instance_count,
+                gpu_count=self.gpu_count,
+                execution_role_arn=llm_hf_execution_role_stack.execution_role_arn,
+                env=self.env,
+                pytorch_version=self.pytorch_version,
+                repository_override=self.repository_override,
+                image_tag_override=self.image_tag_override,
+            )
+
+            sagemaker_endpoint_name = (
+                llama2_inference_stack.hf_endpoint.ssm_parameter_endpoint_name
+            )
+        else:
+            sagemaker_endpoint_name = None
 
         network_stack = VPCNetworkStack(
             scope,
@@ -114,9 +135,9 @@ class ApplicationDeploymentBuilder:
             env=self.env,
         )
 
-        swara_bot_app_stack = SimpleRagAppStack(
+        qa_bot_app_stack = SimpleRagAppStack(
             scope,
-            f"{self.project_prefix}-{self.deploy_stage}-swara-bot-app",
+            f"{self.project_prefix}-{self.deploy_stage}-bot-app",
             env=self.env,
             vpc=network_stack.vpc,
             deploy_stage=self.deploy_stage,
@@ -126,11 +147,12 @@ class ApplicationDeploymentBuilder:
             ecr_repository_name=self.ecr_repository_name,
             ecr_image_tag=self.ecr_image_tag,
             ecr_url=self.ecr_url,
-            sagemaker_endpoint_name=llama2_inference_stack.hf_endpoint.ssm_parameter_endpoint_name,
-            openai_api_key=self.openai_api_key,
+            sagemaker_endpoint_name=sagemaker_endpoint_name,
             app_params=self.app_params,
             container_vcpus=self.app_container_vcpus,
             container_memory=self.app_container_memory,
+            domain_name=self.domain_name,
+            hosted_zone_id=self.hosted_zone_id,
         )
 
 

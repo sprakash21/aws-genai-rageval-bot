@@ -1,7 +1,7 @@
 # RAGTrack: AWS-Powered Context-Aware QA Bot with Quality Monitoring capabilities
 
 ## Introduction
-RAGTrack is a context aware QA bot built upon Llama2 with Quality Monitoring capabilties. The framework includes the component to ingest pdf data into vectordb, Inference with the QA bot through in-context learning, Quality monitoring of the RAG (Retreival Augmented Generation) pipeline.
+RAGTrack is a context aware QA bot built upon Llama2 with Quality Monitoring capabilties. The framework includes the component to ingest pdf data into vectordb, Inference with the QA bot through in-context learning, Quality monitoring of the RAG (Retreival Augmented Generation) pipeline against a Judge Model Claude v2.
 
 ## Project Structure
 ```
@@ -26,9 +26,6 @@ nc-bot
 
 The project is structure as shown above. The important modules are the rag_application_framework/handlers/ragas_evaluation_and_db_logging_callback_handler.py which includes the callback handling of the RAG pipeline to perform the evaluation and saving the scores in the RagScore Table. The helpers module contain all the necessary helpers for ingestion, inference, and evaluation.  
 
-## Chatbot Home Page
-<TODO: Add the home page>
-
 ## Setup the bot locally
 We can also setup the local via docker. For this one must do the following activities and we assume that docker is setup already in the machine.  
 
@@ -49,8 +46,8 @@ First setup the .env required for the application. In order to do so, perform th
 | RDS_POSTRGRES_CREDENTIALS_SECRET_NAME     | SecretName  | Optional: RDS Secret name for created from CDK if using RDS and IS_LOCAL_DB is false          |
 | OPENAI_API_KEY_SECRET_NAME | token       | Required to use evaluation of the RAG pipeline using ragas                                    |
 | BUCKET_NAME         | bucket_name | S3 bucket name to be created to store the pdf data and reference                              |
-| USE_BEDROCK         | true,false  | Either to use aws titan embeddings or not                                                     |
-| BEDROCK_REGION      | region      | Region of the aws bedrock model                                                               |
+| USE_BEDROCK_EMBEDDINGS         | true,false  | Either to use aws titan embeddings or not                                                     |
+| BEDROCK_EMBEDDINGS_REGION      | region      | Region of the aws bedrock model                                                               |
 
 2. Create the virtual environment with `python3 -m venv .venv` and install the pip requirements with `pip install -r requirements.txt`  
 
@@ -70,6 +67,7 @@ ollama pull llama2:7b|13b
 ollama run llama2:7b|13b
 /bye
 ```
+When instead if using Amazon Bedrock Service then it can directly be configured in the environment variables.  
 5. Run the app locally within your laptop:  
 ```
 # Change the function at chatbot.py from inference(prompt) to inference_local(prompt) to run locally using ollama
@@ -80,3 +78,6 @@ $streamlit run chatbot.py
 
 7. After some queries, you can see that the quality monitoring has started to kick in to monitoring the RAG pipeline.  
 ![Monitor](assets/quality_monitor.png "Monitoring")
+
+## Setup for AWS deployment  
+We have CDK stack to deploy the components into the AWS infrastructure including the foundational models that could be from Sagemaker or Huggingface. The docker image for the application itself needs to be built and uploaded into ecr for the account. This will then be referenced within the cdk.json. For the creation itself, reference build_docker_image.txt and the script at scripts/build_and_push_docker.sh.  

@@ -27,7 +27,7 @@ class FileSystemFilesUploader(FilesUploaderBase):
         if not os.path.exists(self.folder_path):
             os.makedirs(self.folder_path)
 
-    def upload_and_get_loader(
+    def store_file_and_get_loader(
         self,
         file_content: bytes,
         file_name: str,

@@ -11,12 +11,15 @@ RUN apt-get update && apt-get install -y \
     git \
     && rm -rf /var/lib/apt/lists/*
 
+RUN apt-get update && apt-get install -y tesseract-ocr
+RUN apt-get update && apt-get install -y libpoppler-dev
 
+COPY requirements_aws.txt /app/requirements_aws.txt
 
-COPY requirements.txt /app/requirements.txt
-
-RUN pip3 install --no-cache-dir -r requirements.txt
+RUN pip3 install --no-cache-dir -r requirements_aws.txt
 RUN apt-get update && apt-get install -y libgl1-mesa-glx
+
+
 
 # All folders copy
 COPY ./rag_application_framework /app/rag_application_framework

@@ -25,7 +25,7 @@ class RagMonitorQuery:
                 RagScore.faithfulness,
                 RagScore.model_type,
                 RagScore.qa_status,
-                RagScore.harmfulness,
+                RagScore.correctness,
                 RagScore.time_stamp,
             )
             .filter(RagScore.time_stamp >= since)
@@ -49,7 +49,7 @@ class RagMonitorQuery:
                 RagScore.faithfulness,
                 RagScore.model_type,
                 RagScore.qa_status,
-                RagScore.harmfulness,
+                RagScore.correctness,
                 RagScore.time_stamp,
             )
             .filter(RagScore.time_stamp >= since)
@@ -72,7 +72,7 @@ class RagMonitorQuery:
                 RagScore.faithfulness,
                 RagScore.model_type,
                 RagScore.qa_status,
-                RagScore.harmfulness,
+                RagScore.correctness,
                 RagScore.time_stamp,
             )
             .filter(RagScore.time_stamp >= since)
@@ -95,7 +95,7 @@ class RagMonitorQuery:
                 RagScore.faithfulness,
                 RagScore.model_type,
                 RagScore.qa_status,
-                RagScore.harmfulness,
+                RagScore.correctness,
                 RagScore.time_stamp,
             )
             .filter(RagScore.time_stamp >= since)

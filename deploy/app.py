@@ -1,38 +1,15 @@
 #!/usr/bin/env python3
 
-from os import name
-from platform import node, python_revision
+
 import aws_cdk as cdk
-from aws_cdk import aws_ec2 as ec2
+
 from build_and_deploy_pipeline import PipelineStack
 
-from nc_llm_aws_infra_blocks.pre_built_stacks.app.application_stack import (
-    SimpleRagAppStack,
-)
 from nc_llm_aws_infra_blocks.pre_built_stacks.inference.sagemaker_hugging_face.hf_sagemaker_role_stack import (
     HuggingFaceTaskType,
 )
 
-from nc_llm_aws_infra_blocks.pre_built_stacks.inference.sagemaker_aws.aws_sagemaker_endpoint_stack import (
-    AwsSagemakerEndpointStack,
-)
-from nc_llm_aws_infra_blocks.pre_built_stacks.inference.sagemaker_hugging_face import (
-    HuggingFaceSageMakerRoleStack,
-    HuggingFaceSageMakerEndpointStack,
-)
-from nc_llm_aws_infra_blocks.pre_built_stacks.supplements.network_stack import (
-    VPCNetworkStack,
-)
-
-from nc_llm_aws_infra_blocks.pre_built_stacks.app.application_stack import (
-    SimpleRagAppStack,
-)
-
-from nc_llm_aws_infra_blocks.library.helpers.model_info import (
-    get_sagemaker_model_info,
-)
-
-from deploy_stage import ApplicationDeploymentBuilder
+from deploy_stage import ApplicationDeploymentBuilder, InferenceType, EvaluationType
 
 # Environment information
 
@@ -49,8 +26,27 @@ deploy_stage = app.node.get_context("deploy_stage")
 deploy_region = app.node.get_context("deploy_region")
 app_container_vcpus = app.node.get_context("app_container_vcpus")
 app_container_memory = app.node.get_context("app_container_memory")
-openai_api_key = app.node.get_context("openai_api_key")
 app_params: dict[str, str] = app.node.get_context("app_params")
+inference_type = app_params["INFERENCE_ENGINE"]
+evaluation_type = app_params["BEDROCK_EVALUATION_ENGINE"]
+
+if inference_type == InferenceType.BEDROCK.name.lower():
+    inference_type = InferenceType.BEDROCK
+elif inference_type == InferenceType.SAGEMAKER.name.lower():
+    inference_type = InferenceType.SAGEMAKER
+else:
+    raise ValueError(f"Inference type {inference_type} is not known.")
+
+if evaluation_type == EvaluationType.BEDROCK.name.lower():
+    evaluation_type = EvaluationType.BEDROCK
+elif evaluation_type == EvaluationType.SAGEMAKER.name.lower():
+    evaluation_type = EvaluationType.SAGEMAKER
+else:
+    raise ValueError(f"EvaluationType type {evaluation_type} is not known.")
+
+
+domain_name = app.node.try_get_context("domain_name")
+hosted_zone_id = app.node.try_get_context("hosted_zone_id")
 
 
 ecr_repo = app.node.try_get_context("ecr_repo")
@@ -81,9 +77,9 @@ app_deployment_builder = ApplicationDeploymentBuilder(
     huggingface_model_id=huggingface_model_id,
     huggingface_task=HuggingFaceTaskType.from_string(huggingface_task),
     env=aws_environment,
-    instance_type=instance_type,
-    instance_count=instance_count,
-    gpu_count=gpu_count,
+    inference_engine_instance_type=instance_type,
+    inference_enginer_instance_count=instance_count,
+    inference_enginer_gpu_count=gpu_count,
     image_tag_override=image_tag_override,
     pytorch_version=pytorch_version,
     repository_override=repository_override,
@@ -94,7 +90,10 @@ app_deployment_builder = ApplicationDeploymentBuilder(
     app_params=app_params,
     app_container_memory=app_container_memory,
     app_container_vcpus=app_container_vcpus,
-    openai_api_key=openai_api_key,
+    inference_type=inference_type,
+    evaluation_type=evaluation_type,
+    domain_name=domain_name,
+    hosted_zone_id=hosted_zone_id,
 )
 
 if not deploy_pipeline:

@@ -1,3 +1,0 @@
-export AWS_PROFILE=<profile_name>
-export AWS_REGION=<your_region>
-./build_and_push_docker.sh ../../nc-bot/Dockerfile swara-bot app-0.0.1 eu-west-1 214181320558

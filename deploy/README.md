@@ -1,20 +1,18 @@
-# RAGTrack Deployment on AWS
+# GenAI CDK Setup and Foundation
 
-## Introduction
-
-RAGTrack deployment solution is designed for flexible RAG app deployment on native AWS Services.
+## Features
+This CDK packages acts as a foundation to deploy gen-ai application stack which encompasses:   
+1. Deployment of Foundation models from AWS, open source LLM model from HuggingFace into Sagemaker through Deep Learning Containers.  
+2. Deployment of the Vector Database required for the underneath application. We currently have used Aurora Postgres with Pgvector only. This could be extended to support for other databases.  
+3. Deployment of a QABot application with the quality monitoring capabilities alongside integrated with Amazon Bedrock is also deployed.  
 
 ## Deployment Overview
 
-The deployment of RAGTrack is executed through the AWS Cloud Development Kit (CDK), utilizing Python as the programming language. This setup ensures a streamlined deployment process.
-
-### Key Components
-
-The deployment uses `nc_llm_aws_infra_blocks`, a package that provides CDK constructs and stacks for a quick setup of a Retrieval Augmented Generation (RAG) application. The main stacks include Inference on SageMaker AWS Models, Inference on SageMaker Hugging Face models, the Application stack, and a VPC stack.
+The deployment of QABot is executed through the AWS Cloud Development Kit (CDK), utilizing Python as the programming language. This setup ensures a streamlined deployment process.
 
 ### Configuration Parameters
 
-The `cdk.template.json` configuration file outlines the parameters for deployment. You can use the `cdk.template.json` as it is by adding the 2 missing values for `openai_api_key` and `huggingface.token_id`. 
+The `cdk.template.json` configuration file outlines the parameters for deployment. You can use the `cdk.template.json` as it is by adding the values for `huggingface.token_id` for open source LLM deployments. 
 
 Below is a detailed description of each parameter:
 
@@ -29,7 +27,6 @@ Below is a detailed description of each parameter:
     * `instance_count`: The number of instances to deploy for the inference endpoint. A higher count can offer improved performance and handle higher request volumes.
     * `gpu_count`: The number of GPUs assigned to each instance. This is particularly important for computation-intensive models and can significantly affect inference performance.
 
-* `openai_api_key`: The API key for OpenAI, utilized for quality evaluation.
 * `sagemaker_session_profile_name`: (Optional) A configured AWS profile name for setting up SageMaker sessions with boto3. Defaults to the default AWS profile on the machine if not specified.
 * `project_prefix`: A unique prefix for each deployment within an AWS account, aiding in resource identification.
 * `deploy_stage`: The stage of deployment, such as development, staging, or production.
@@ -43,35 +40,26 @@ Below is a detailed description of each parameter:
 * `app_container_vcpus`: The number of virtual CPUs allocated for the ECS task running the application.
 * `app_container_memory`: The memory allocation (in MB) for the ECS task running the application.
 * `app_params`: Application-specific parameters.
-    * `INFER_LOCAL`: Should be "false" for non-local development.
-    * `DB_LOCAL`: Should be "false" for non-local development.
-    * `EMBEDDING_COLLECTION_NAME`: The collection name for embeddings; can be any   static string.
-    * `OPENAI_API_TYPE`: The type of OpenAI API key being used.
-    * `OPENAI_API_VERSION`: The version of the OpenAI API.
-    * `OPENAI_API_BASE`: The base URL for the OpenAI API.
-    * `OPENAI_DEPLOYMENT_NAME`: The specific deployment name for the OpenAI API key.
-    * `USE_BEDROCK`: Boolean to indicate if Bedrock is used for embeddings.
-    * `BEDROCK_REGION`: Specifies the AWS region for Bedrock if it's used.
+    * `DB_LOCAL`: Whether database is locally setup or not (Boolean true or false).
+    * `EMBEDDING_COLLECTION_NAME`: your_collection_name.
+    * `USE_BEDROCK_EMBEDDINGS`: true/false.
+    * `BEDROCK_EMBEDDINGS_REGION`: region.
+    * `INFERENCE_ENGINE`: bedrock/sagemaker.
+    * `BEDROCK_INFERENCE_REGION`: region, if inference is from bedrock.
+    * `BEDROCK_INFERENCE_MODEL_ID`: "meta.llama2-70b-chat-v1".
+    * `BEDROCK_EVALUATION_ENGINE`: bedrock.
+    * `BEDROCK_EVALUATION_REGION`: region.
+    * `BEDROCK_EVALUATION_MODEL_ID`:"anthropic.claude-v2".
+    * `LOGIN_CODE`: initial code for app to get access to.
+    * `PGVECTOR_USER`:OPTIONAL: Applies When DB_LOCAL Is True.
+    * `PGVECTOR_PASSWORD`:OPTIONAL: Applies When DB_LOCAL Is True.
+    * `PGVECTOR_PORT`:5432.
+    * `PGVECTOR_HOST`: OPTIONAL: Applies When DB_LOCAL Is True.
+    * `PGVECTOR_DATABASE`: OPTIONAL: Applies When DB_LOCAL Is True.
 
-
-## Deployment Steps in Sandbox AWS Environment
-
-1. **Fetch the Repository**: 
-
-
-2. **Docker Setup**: 
-
-
-3. **Set up an aws profile**
-    
-    `aws configure`
-
-4. **Configuration**: Create a `cdk.json` from the `cdk.template.json`, ensuring to fill in the `openai_api_key` and `huggingface.token_id`.
-
-
-
-5. **Deploy** 
-
-    `cdk deploy --all`
-
-By following these steps and understanding each configuration parameter, you can deploy RAGTrack in a sandbox AWS environment efficiently. For any queries or assistance, please reach out to
+## Steps for deployment
+1. Copy the `cdk.template.json` to `cdk.json` and work with the adapting the values in accordance to your needs. For instance, it could model deployments, or adaptation to extend to deploy a new application.  
+2. `python3 -m .venv venv` to create the virtual environment and source `.venv/bin/activate` to activate it.  
+3. `pip install -r requirements.txt` to install the required cdk related packages. You may require to install cdk from npm as well.  
+4. To syntheses the stack run `cdk synth --all` or a stack.  
+5. To deploy the stack run `cdk deploy --all` or a stack.  
