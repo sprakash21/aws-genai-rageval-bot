@@ -2,7 +2,7 @@
 requests==2.31.0
 boto3>=1.28.62
 botocore>=1.31.57
-cryptography==38.0.4
+cryptography==42.0.0
 streamlit==1.27.0
 python-dotenv==1.0.0
 pypdf
@@ -22,7 +22,6 @@ langchainhub
 # Base
 #ragas==0.0.17
 ragas==0.1.1
-
 llama_index
 pyOpenSSL
 SQLAlchemy
