@@ -1,6 +1,7 @@
 from typing import Union
 
-from langchain.embeddings import BedrockEmbeddings, HuggingFaceEmbeddings
+from langchain_community.embeddings.bedrock import BedrockEmbeddings
+from langchain_community.embeddings.huggingface import HuggingFaceEmbeddings
 from langchain.schema import Document
 from langchain.vectorstores.pgvector import PGVector
 from psycopg2.extensions import cursor as Cursor

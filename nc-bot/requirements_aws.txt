@@ -7,10 +7,9 @@ antlr4-python3-runtime==4.9.3
 anyio==3.7.1
 appdirs==1.4.4
 async-timeout==4.0.3
-atlassian-python-api==3.41.10
 attrs==23.1.0
 backoff==2.2.1
-beautifulsoup4==4.12.2
+beautifulsoup4==4.12.3
 blinker==1.6.3
 boto3==1.28.62
 botocore==1.31.62
@@ -44,7 +43,7 @@ greenlet==3.0.1
 h11==0.14.0
 httpcore==1.0.3
 httpx==0.26.0
-huggingface-hub==0.17.3
+huggingface-hub==0.19.3
 humanfriendly==10.0
 idna==3.4
 importlib-metadata==6.8.0
@@ -58,14 +57,7 @@ jsonpointer==2.4
 jsonschema==4.19.1
 jsonschema-specifications==2023.7.1
 kiwisolver==1.4.5
-langchain==0.1.7
-langchain-community==0.0.20
-langchain-core==0.1.30
-langchain-openai==0.0.6
-langchainhub==0.1.13
-langdetect==1.0.9
-langsmith==0.0.87
-layoutparser==0.3.4
+langchain==0.1.13
 llama-index==0.10.22
 lxml==4.9.3
 markdown-it-py==3.0.0
@@ -106,9 +98,9 @@ pydantic==1.10.13
 pydantic_core==2.10.1
 pydeck==0.8.1b0
 Pygments==2.16.1
-pyOpenSSL==23.2.0
+pyOpenSSL==24.0.0
 pyparsing==3.1.1
-pypdf==3.16.4
+pypdf==4.0.1
 pypdfium2==4.21.0
 pysbd==0.3.4
 pytesseract==0.3.10
@@ -146,7 +138,7 @@ tenacity==8.2.3
 threadpoolctl==3.2.0
 tiktoken==0.6.0
 timm==0.9.7
-tokenizers==0.14.1
+tokenizers==0.15.2
 toml==0.10.2
 tomli==2.0.1
 toolz==0.12.0
