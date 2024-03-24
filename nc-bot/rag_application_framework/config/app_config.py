@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 from typing import Optional, Union, Literal
 from rag_application_framework.config.app_enums import InferenceEngine
-from langchain.embeddings import BedrockEmbeddings, HuggingFaceEmbeddings
+from langchain_community.embeddings.bedrock import BedrockEmbeddings
+from langchain_community.embeddings.huggingface import HuggingFaceEmbeddings
 from botocore.client import BaseClient
 
 

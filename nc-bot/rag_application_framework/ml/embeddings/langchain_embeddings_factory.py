@@ -2,7 +2,8 @@ import re
 import boto3
 from typing import Union
 from botocore.client import BaseClient
-from langchain.embeddings import HuggingFaceEmbeddings, BedrockEmbeddings
+from langchain_community.embeddings.bedrock import BedrockEmbeddings
+from langchain_community.embeddings.huggingface import HuggingFaceEmbeddings
 from rag_application_framework.aws.bedrock_api import BedrockApi
 
 
