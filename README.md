@@ -1,5 +1,5 @@
 # Monitoring and evaluating RAG Pipeline Performance on AWS using Ragas
-This is the reference code repository for the blog post titled "<TOBEUPDATED>".  
+This is the reference code repository for the blog post titled "Monitoring and evaluating RAG Pipeline Performance on AWS using Ragas".  
 
 ## Features of the Repository:  
 1. Provision to deploy both open source, bedrock and aws foundational models.  
@@ -9,3 +9,7 @@ This is the reference code repository for the blog post titled "<TOBEUPDATED>".
 ## Details
 For Application Details Refer: [app_documentation](nc-bot/README.md)  
 For Stack Deployment Details Refer: [deployment_documentation](deploy/README.md)  
+
+## Executed On
+Python: 3.9.12  
+Requirements Strict: [requirements](nc-bot/requirements_aws.txt)

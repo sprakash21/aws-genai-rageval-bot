@@ -1,7 +1,8 @@
 from abc import abstractmethod
 from typing import Optional, Union
 from attr import dataclass
-from langchain.embeddings import BedrockEmbeddings, HuggingFaceEmbeddings
+from langchain_community.embeddings.bedrock import BedrockEmbeddings
+from langchain_community.embeddings.huggingface import HuggingFaceEmbeddings
 from langchain.document_loaders.s3_file import S3FileLoader
 from langchain.document_loaders.unstructured import UnstructuredFileLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter

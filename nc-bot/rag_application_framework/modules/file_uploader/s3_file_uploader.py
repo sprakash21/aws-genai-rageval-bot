@@ -1,7 +1,8 @@
 from boto3.session import Session
 from langchain.document_loaders.s3_file import S3FileLoader
 from langchain.document_loaders.unstructured import UnstructuredFileLoader
-from langchain.embeddings import BedrockEmbeddings, HuggingFaceEmbeddings
+from langchain_community.embeddings.bedrock import BedrockEmbeddings
+from langchain_community.embeddings.huggingface import HuggingFaceEmbeddings
 from rag_application_framework.aws.aws_client_factory import AwsClientFactory
 from rag_application_framework.aws.s3_api import S3Api
 from rag_application_framework.db.embeddings_database import EmbeddingsDatabase

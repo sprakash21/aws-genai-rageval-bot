@@ -3,8 +3,7 @@ import os
 from datasets import Dataset
 from rag_application_framework.config.app_config import OpenAIConfig, EvaluationConfig
 from rag_application_framework.logging.logging import Logging
-from langchain.chat_models.bedrock import BedrockChat
-from langchain.llms.bedrock import Bedrock
+from langchain_community.chat_models.bedrock import BedrockChat
 from langchain.schema.embeddings import Embeddings
 logger = Logging.get_logger(__name__)
 
@@ -31,7 +30,7 @@ class RagasEvaluator:
         self.judge_model = BedrockChat(
             client=self.evaluation_confg.bedrock_client,
             model_id=str(self.evaluation_confg.bedrock_model_id),
-            model_kwargs={"temperature": 0.6, "top_p": 1, "max_tokens_to_sample": 4000, "top_k": 250},
+            model_kwargs={"temperature": 0.2, "top_p": 1, "max_tokens": 4000, "top_k": 250},
         )
 
     def create_dataset(self, run_data):
