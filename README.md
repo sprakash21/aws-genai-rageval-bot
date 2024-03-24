@@ -11,5 +11,5 @@ For Application Details Refer: [app_documentation](nc-bot/README.md)
 For Stack Deployment Details Refer: [deployment_documentation](deploy/README.md)  
 
 ## Executed On
-Python: 3.9.12
-Requirements: requirement_aws.txt
+Python: 3.9.12  
+Requirements Strict: [requirements](nc-bot/requirements_aws.txt)
