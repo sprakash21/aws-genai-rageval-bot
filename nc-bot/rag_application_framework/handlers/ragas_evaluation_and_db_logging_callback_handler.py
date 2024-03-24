@@ -83,6 +83,7 @@ class RagasEvaluationAndDbLoggingCallbackHandler(BaseCallbackHandler):
         self.run_data_llm[run_id] = {}
         self.run_data_llm[run_id]["prompts"] = prompts
         self.run_data_llm[run_id]["start_time"] = time()
+        self.run_data_llm[run_id]["name"] = serialized["name"]
         logger.info("on_llm_start Prompt -- %s", str(prompts))
         logger.info("on_llm_start Seralized -- %s", str(serialized))
 
@@ -108,7 +109,7 @@ class RagasEvaluationAndDbLoggingCallbackHandler(BaseCallbackHandler):
                     run_data_llm["model_type"] = generation.generation_info["model"]
                     run_data_llm["qa_status"] = generation.generation_info["done"]
                 else:
-                    run_data_llm["model_type"] = "sagemaker_endpoint"
+                    run_data_llm["model_type"] = run_data_llm["name"]
                     run_data_llm["qa_status"] = (
                         True
                         if (hasattr(generation, "text")) and (len(generation.text) > 0)
