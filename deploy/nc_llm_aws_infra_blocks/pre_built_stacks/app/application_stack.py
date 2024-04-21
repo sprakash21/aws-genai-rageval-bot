@@ -1,5 +1,4 @@
 from typing import Union
-
 from aws_cdk import CfnParameter, Stack
 from aws_cdk import aws_ec2 as ec2
 from constructs import Construct
@@ -42,7 +41,6 @@ class SimpleRagAppStack(Stack):
             project_prefix=project_prefix,
             deploy_stage=deploy_stage,
         )
-
         app_ecr_stack = EcsWithLoadBalancer(
             self,
             "ecs-app",
