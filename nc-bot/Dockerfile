@@ -1,5 +1,6 @@
 # nc-bot/Dockerfile
 FROM python:3.9-slim
+RUN adduser --system --group --no-create-home appuser
 WORKDIR /app
 RUN apt-get update && apt-get --no-install-recommends install -y \
     build-essential \
@@ -17,5 +18,6 @@ COPY ./pages /app/pages
 # COPY .env /app/.env
 COPY chatbot.py /app/chatbot.py
 EXPOSE 8501
+USER appuser
 HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/health
 ENTRYPOINT ["streamlit", "run", "chatbot.py", "--server.port=8501", "--server.address=0.0.0.0"]

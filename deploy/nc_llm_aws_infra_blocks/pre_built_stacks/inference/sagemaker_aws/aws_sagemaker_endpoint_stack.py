@@ -62,11 +62,7 @@ class AwsSagemakerEndpointStack(Stack):
             "sm-ecr-policy",
             statements=[
                 iam.PolicyStatement(
-                    effect=iam.Effect.ALLOW,
-                    actions=[
-                        "ecr:*",
-                    ],
-                    resources=["*"],
+                    effect=iam.Effect.ALLOW, actions=["ecr:*",], resources=["*"],
                 )
             ],
         )

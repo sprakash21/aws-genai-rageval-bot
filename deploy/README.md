@@ -62,4 +62,5 @@ Below is a detailed description of each parameter:
 2. `python3 -m .venv venv` to create the virtual environment and source `.venv/bin/activate` to activate it.  
 3. `pip install -r requirements.txt` to install the required cdk related packages. You may require to install cdk from npm as well.  
 4. To syntheses the stack run `cdk synth --all` or a stack.  
-5. To deploy the stack run `cdk deploy --all` or a stack.  
+5. The deployment stack is also setup with cdk-nag to apply and verify the best practises for the deployment of the AWS stack. Note: Some of the not required Error are added into supressions.  
+6. To deploy the stack run `cdk deploy --all` or a stack.  
