@@ -1,5 +1,6 @@
 from math import inf
 from typing import Union
+import cdk_nag
 from aws_cdk import Environment, Stage
 from constructs import Construct
 from os import name
@@ -35,6 +36,7 @@ from enum import Enum
 class InferenceType(Enum):
     SAGEMAKER = "sagemaker"
     BEDROCK = "bedrock"
+
 
 class EvaluationType(Enum):
     SAGEMAKER = "sagemaker"
@@ -153,6 +155,33 @@ class ApplicationDeploymentBuilder:
             container_memory=self.app_container_memory,
             domain_name=self.domain_name,
             hosted_zone_id=self.hosted_zone_id,
+        )
+        # Supressions for cdk_nag at stack level
+        cdk_nag.NagSuppressions.add_stack_suppressions(
+            qa_bot_app_stack,
+            [
+                cdk_nag.NagPackSuppression(
+                    id="AwsSolutions-SMG4", reason="Not required"
+                ),
+                cdk_nag.NagPackSuppression(
+                    id="AwsSolutions-RDS6", reason="No IAM Auth needed"
+                ),
+                cdk_nag.NagPackSuppression(
+                    id="AwsSolutions-ECS2",
+                    reason="The environment variables are configurations used",
+                ),
+                cdk_nag.NagPackSuppression(
+                    id="AwsSolutions-IAM5", reason="Resource supression is added"
+                ),
+                cdk_nag.NagPackSuppression(
+                    id="AwsSolutions-EC23",
+                    reason="Supressing the rule as it uses the default SG for the demo purposes",
+                ),
+                cdk_nag.NagPackSuppression(
+                    id="AwsSolutions-ELB2",
+                    reason="Supressing the rule as it is not required for the demo purposes",
+                )
+            ],
         )
 
 

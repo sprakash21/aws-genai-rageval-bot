@@ -1,7 +1,7 @@
 from typing import Union
-
+import cdk_nag
 import aws_cdk
-from aws_cdk import CfnParameter, SecretValue
+from aws_cdk import CfnParameter, SecretValue, Aspects
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk import aws_ecs as ecs
 from aws_cdk import aws_elasticloadbalancingv2 as elbv2
@@ -37,17 +37,21 @@ class EcsWithLoadBalancer(BaseConstruct):
         super().__init__(scope, id, **kwargs)
 
         # Create ECS Fargate Cluster
-        self.cluster = ecs.Cluster(self, "ecs-fargate-cluster", vpc=vpc)
+        self.cluster = ecs.Cluster(
+            self, "ecs-fargate-cluster", vpc=vpc, container_insights=True
+        )
 
         # Create Internet Facing Load Balancer
         self.lb = elbv2.ApplicationLoadBalancer(
-            self, "internet-facing-lb", vpc=vpc, internet_facing=True
+            self, "internet-facing-lb", vpc=vpc, internet_facing=True,
         )
 
         # Create an S3 Bucket using cdk
         bucket_name = f"{self.resource_prefix}-{self.deploy_region}-bucket"
-        bucket = s3.Bucket.from_bucket_name(self, "ExstingBucket", bucket_name=bucket_name)
-        if (not bucket.bucket_name):
+        bucket = s3.Bucket.from_bucket_name(
+            self, "ExstingBucket", bucket_name=bucket_name
+        )
+        if not bucket.bucket_name:
             bucket = s3.Bucket(
                 self,
                 bucket_name,
@@ -126,27 +130,21 @@ class EcsWithLoadBalancer(BaseConstruct):
                 ),
                 aws_iam.PolicyStatement(
                     actions=[
-                        "bedrock:*",
+                        "bedrock:InvokeModel",
+                        "bedrock:InvokeModelWithResponseStreams",
                     ],
-                    resources=[f"*"],
+                    resources=["*"],
                 ),
             ],
         )
 
         if sagemaker_endpoint_name:
             policy_task.add_statements(
-                aws_iam.PolicyStatement(
-                    actions=[
-                        "sagemaker:*",
-                    ],
-                    resources=[f"*"],
-                ),
+                aws_iam.PolicyStatement(actions=["sagemaker:*",], resources=["*"],),
             )
             policy_task.add_statements(
                 aws_iam.PolicyStatement(
-                    actions=[
-                        "ssm:GetParameter",
-                    ],
+                    actions=["ssm:GetParameter",],
                     resources=[
                         f"arn:aws:ssm:{self.deploy_region}:*:parameter{sagemaker_endpoint_name.name}"
                     ],
@@ -206,10 +204,7 @@ class EcsWithLoadBalancer(BaseConstruct):
             )
 
         else:
-            listener = self.lb.add_listener(
-                "listener",
-                port=80,
-            )
+            listener = self.lb.add_listener("listener", port=80,)
 
             listener.add_targets(
                 "ecs-targets",
@@ -217,3 +212,4 @@ class EcsWithLoadBalancer(BaseConstruct):
                 targets=[fargate_service],
                 protocol=elbv2.ApplicationProtocol.HTTP,  # Ensure this matches your service configuration
             )
+        Aspects.of(self).add(cdk_nag.AwsSolutionsChecks(verbose=True))

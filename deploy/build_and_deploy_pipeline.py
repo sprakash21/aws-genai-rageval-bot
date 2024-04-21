@@ -79,8 +79,7 @@ class PipelineStack(Stack):
                 "echo Done!",
             ],
             build_environment=codebuild.BuildEnvironment(
-                privileged=True,
-                build_image=codebuild.LinuxBuildImage.STANDARD_4_0,
+                privileged=True, build_image=codebuild.LinuxBuildImage.STANDARD_4_0,
             ),
         )
 
