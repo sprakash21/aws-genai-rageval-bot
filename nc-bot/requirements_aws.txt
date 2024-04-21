@@ -21,7 +21,7 @@ charset-normalizer==3.3.0
 click==8.1.7
 coloredlogs==15.0.1
 contourpy==1.1.1
-cryptography==42.0.0
+cryptography==42.0.4
 cycler==0.12.1
 dataclasses-json==0.5.14
 datasets==2.14.6
@@ -38,7 +38,7 @@ fonttools==4.43.1
 frozenlist==1.4.0
 fsspec==2023.9.2
 gitdb==4.0.10
-GitPython==3.1.37
+GitPython==3.1.41
 greenlet==3.0.1
 h11==0.14.0
 httpcore==1.0.3
@@ -109,7 +109,7 @@ python-docx==1.1.0
 python-dotenv==1.0.0
 python-iso639==2023.6.15
 python-magic==0.4.27
-python-multipart==0.0.6
+python-multipart==0.0.7
 pytz==2023.3.post1
 PyYAML==6.0.1
 ragas==0.1.1
