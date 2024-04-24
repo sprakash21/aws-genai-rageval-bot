@@ -1,4 +1,4 @@
-# RAGTrack: AWS-Powered Context-Aware QA Bot with Quality Monitoring capabilities
+# RAGTrack: Amazon-Powered Context-Aware QA Bot with Quality Monitoring capabilities
 
 ## Introduction
 RAGTrack is a context aware QA bot built upon Llama2 with Quality Monitoring capabilties. The framework includes the component to ingest pdf data into vectordb, Inference with the QA bot through in-context learning, Quality monitoring of the RAG (Retreival Augmented Generation) pipeline against a Judge Model Claude v2. All of the foundational models are configured to use Amazon Bedrock. Additionally, we offer the capability to also infer from local models or using Amazon Sagemaker endpoint.  
@@ -37,24 +37,28 @@ First setup the .env required for the application. In order to do so, perform th
 | AWS_PROFILE         | AWS_PROFILE | AWS profile                                                                                   |
 | AWS_REGION          | AWS_REGION  | AWS region                                                                                    |
 | DB_LOCAL         | true,false  | Use Local database or from AWS                                                                |
-| PGVECTOR_DATABASE   | dbname      | db name to use vectordblab                                                                    |
+| PGVECTOR_DATABASE   | dbname      | db name to use test                                                                    |
 | PGVECTOR_USER       | postgres    | postgres                                                                                      |
 | PGVECTOR_PASSWORD   | pwd         | set a password                                                                                |
 | PGVECTOR_PORT       | 5432        | 5432                                                                                          |
 | PGVECTOR_HOST       | postgres    | localhost/service_name                                                                                    |
-| SAGEMAKER_ENDPOINT_SSM_PARAM_NAME    | ssm_param   | Optional: SSM parameter store name for Sagemaker endpoint created from CDK if using Sagemaker |
-| RDS_POSTRGRES_CREDENTIALS_SECRET_NAME     | SecretName  | Optional: RDS Secret name for created from CDK if using RDS and IS_LOCAL_DB is false          |
-| OPENAI_API_KEY_SECRET_NAME | token       | Required to use evaluation of the RAG pipeline using ragas                                    |
 | BUCKET_NAME         | bucket_name | S3 bucket name to be created to store the pdf data and reference                              |
-| USE_BEDROCK_EMBEDDINGS         | true,false  | Either to use aws titan embeddings or not                                                     |
-| BEDROCK_EMBEDDINGS_REGION      | region      | Region of the aws bedrock model                                                               |
+| USE_BEDROCK_EMBEDDINGS         | true,false  | Either to use Amazon titan embeddings or not                                                     |
+| BEDROCK_EMBEDDINGS_REGION      | region      | Region of the Amazon bedrock model                                                               |
+| EMBEDDING_COLLECTION_NAME      | name of the collection      | name of the collection                                                               |
+| INFERENCE_ENGINE      | region      | Region of the Amazon bedrock model                                                               |
+| BEDROCK_INFERENCE_REGION      | region      | Region of the Amazon bedrock model for inference                                                               |
+| BEDROCK_INFERENCE_MODEL_ID      | model.id  |Model-id of the foundational model on Amazon                                                               |
+| BEDROCK_EVALUATION_ENGINE      | bedrock      | Default evaluation supported is bedrock ragas                                                               |
+| BEDROCK_EVALUATION_MODEL_ID      | model.id      | Model-id for evaluation using Amazon Bedrock                                               |
+| LOGIN_CODE      | region      | Region of the Amazon bedrock model                                                               |
 
 2. Create the virtual environment with `python3 -m venv .venv` and install the pip requirements with `pip install -r requirements.txt`  
 
 3. Build and start the postgres local image containing the pgvector extension with the following steps:  
 ```
 # Build the docker image
-cd genai-aws/nc-bot
+cd genai-Amazon/nc-bot
 docker build -t pgvector_local -f pg_vector/Dockerfile .
 
 Run:
@@ -88,8 +92,7 @@ When instead if using Amazon Bedrock Service then it can directly be configured 
 5. Run the app locally within your laptop:  
 ```
 # Run the application locally
-```
-cd genai-aws/nc-bot
+cd genai-Amazon/nc-bot
 $streamlit run chatbot.py
 ```
 6. Open `http://localhost:8501`. It should launch our home page.  
@@ -98,5 +101,10 @@ $streamlit run chatbot.py
 7. After some queries, you can see that the quality monitoring has started to kick in to monitoring the RAG pipeline.  
 ![Monitor](assets/quality_monitor.png "Monitoring")
 
-## Setup for AWS deployment  
-We have CDK stack to deploy the components into the AWS infrastructure including the foundational models that could be from Sagemaker or Huggingface. The docker image for the application itself needs to be built and uploaded into ecr for the account. This will then be referenced within the cdk.json. For the creation of the docker image, reference `nc-bot/build_docker_image.txt` and the script at `nc-bot/scripts/build_and_push_docker.sh` for more details.  
+## Setup for Amazon deployment
+We have CDK stack to deploy the components into the Amazon infrastructure including the foundational models that could be from Sagemaker or Huggingface. The docker image for the application itself needs to be built and uploaded into ecr for the account. This will then be referenced within the cdk.json. For the creation of the docker image, reference `nc-bot/build_docker_image.txt` and the script at `nc-bot/scripts/build_and_push_docker.sh` for more details.  
+
+
+## Learnings and Future Work
+1. Using claude-v2 as a judge model provides good results, but sometime it cannot get some results for metrics.  
+2. The evaluation framework was also configured to use the latest models from anthropic. However, the obtained results were not satisfactory using ragas. This will be addressed to either check for proper support with the usage of anthropic model or changes required to the ragas package.  
