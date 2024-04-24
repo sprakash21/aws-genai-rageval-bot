@@ -5,6 +5,15 @@ cd genai-aws/nc-bot
 docker build -t pgvector_local -f pg_vector/Dockerfile .
 
 Run:
+# If the app is deployed through docker-compose then run:
+docker run \
+    --network backend-network --network-alias postgres \
+    --name postgresql-container \
+    -p 5432:5432 \
+    -e POSTGRES_PASSWORD=test \
+    -d pgvector_local
+
+# If using the database independently then run:
 docker run \
     --name postgresql-container \
     -p 5432:5432 \

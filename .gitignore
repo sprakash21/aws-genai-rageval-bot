@@ -175,5 +175,5 @@ test.txt
 
 nc-bot/context_data/**
 deploy/cdk.json
-
+rogue_files/*.txt
 #.vscode folder except .vscode/settings.json

@@ -1,1 +1,5 @@
-./build_and_push_docker.sh ../../nc-bot/Dockerfile bot-repo qa-app-1.0.0 eu-central-1 602844611342
+Steps to build the docker image for application:
+1. export AWS_PROFILE=<your_profile>
+2. cd nc-bot/scripts
+Run: ./build_and_push_docker.sh ../../nc-bot/Dockerfile bot-repo qa-app-1.0.0 <region> <account_id>
+Note: The repo and tag of the image will have to be provided to the cdk.json as it refers that for the deployment of the application.
