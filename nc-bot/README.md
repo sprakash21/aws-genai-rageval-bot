@@ -51,7 +51,7 @@ First setup the .env required for the application. In order to do so, perform th
 | BEDROCK_INFERENCE_MODEL_ID      | model.id  |Model-id of the foundational model on Amazon                                                               |
 | BEDROCK_EVALUATION_ENGINE      | bedrock      | Default evaluation supported is bedrock ragas                                                               |
 | BEDROCK_EVALUATION_MODEL_ID      | model.id      | Model-id for evaluation using Amazon Bedrock                                               |
-| LOGIN_CODE      | region      | Region of the Amazon bedrock model                                                               |
+| LOGIN_CODE      | test      |  Acts as a login token to the app                                                               |
 
 2. Create the virtual environment with `python3 -m venv .venv` and install the pip requirements with `pip install -r requirements.txt`  
 
