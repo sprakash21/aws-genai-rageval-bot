@@ -64,3 +64,4 @@ Below is a detailed description of each parameter:
 4. To syntheses the stack run `cdk synth --all` or a stack.  
 5. The deployment stack is also setup with cdk-nag to apply and verify the best practises for the deployment of the AWS stack. Note: Some of the not required Error are added into supressions.  
 6. To deploy the stack run `cdk deploy --all` or a stack.  
+7. If you get "Unable to resolve AWS account to use. It must be either configured when you define your CDK Stack, or through the environment" then export the AWS_PROFILE as export `AWS_PROFILE=<your_profile>`  
