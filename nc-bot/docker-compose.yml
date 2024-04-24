@@ -12,7 +12,7 @@ services:
     ports:
       - "8501:8501"
     volumes:
-      - ~/.aws:/root/.aws:ro
+      - ~/.aws:/home/app/.aws:ro
     networks:
       - backend-network
     deploy:
@@ -27,16 +27,13 @@ services:
   postgres:
     container_name: pgvector_container
     environment:
-      POSTGRES_USER: test
+      POSTGRES_DB: test
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: test
-      PGDATA: /var/lib/postgresql/data
     build:
       context: .
       dockerfile: pg_vector/Dockerfile
-    volumes:
-       - db:/var/lib/postgresql/data
-       - ./pg_vector/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
-    ports:
+      ports:
       - "5432:5432"
     networks:
       - backend-network
