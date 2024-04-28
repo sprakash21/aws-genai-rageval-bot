@@ -1,6 +1,7 @@
 from typing import Union
 import cdk_nag
 import aws_cdk
+from aws_cdk import Stack
 from aws_cdk import CfnParameter, SecretValue, Aspects
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk import aws_ecs as ecs
@@ -64,6 +65,18 @@ class EcsWithLoadBalancer(BaseConstruct):
             print(f"The Bucket with name - {bucket_name} exists already")
             print(f"Bucket ARN - {bucket.bucket_arn}")
 
+        # Enable access logs
+        # As per: https://docs.aws.amazon.com/elasticloadbalancing/latest/application/enable-access-logging.html#attach-bucket-policy
+        resource_policy = aws_iam.PolicyStatement(
+                    actions=["s3:PutObject"],
+                    resources=[
+                        f"arn:aws:s3:::{bucket_name}/logs/AWSLogs/{Stack.account}/*"
+                    ],
+                    principals=[aws_iam.ArnPrincipal("arn:aws:iam:054676820928:root")]
+                )
+        # Add the resource policy for elb
+        bucket.add_to_resource_policy(permission=resource_policy)
+        self.lb.log_access_logs(bucket=bucket, prefix="logs")
         # Create a Fargate task definition
         task_def = ecs.FargateTaskDefinition(
             self,
@@ -110,7 +123,9 @@ class EcsWithLoadBalancer(BaseConstruct):
                         "ecr:BatchCheckLayerAvailability",
                         "ecr:GetAuthorizationToken",
                     ],
-                    resources=["*"],
+                    resources=[
+                        f"arn:aws:ecr:{self.deploy_region}:{Stack.account}:repository/{ecr_repository_name}"
+                    ],
                 ),
             ],
         )
@@ -126,18 +141,19 @@ class EcsWithLoadBalancer(BaseConstruct):
                         "s3:PutObject",
                         "s3:DeleteObject",
                     ],
-                    resources=[bucket.bucket_arn, f"{bucket.bucket_arn}/*"],
+                    # May sometimes require the bucket_arn with wildcard f"{bucket.bucket_arn}/*"
+                    resources=[bucket.bucket_arn],
                 ),
                 aws_iam.PolicyStatement(
                     actions=[
                         "bedrock:InvokeModel",
                         "bedrock:InvokeModelWithResponseStreams",
                     ],
-                    resources=["*"],
+                    resources=[f"arn:aws:bedrock:{app_params['BEDROCK_INFERENCE_REGION']}::foundation-model/{app_params['BEDROCK_INFERENCE_MODEL_ID']}",
+                    f"arn:aws:bedrock:{app_params['BEDROCK_EVALUATION_REGION']}::foundation-model/{app_params['BEDROCK_EVALUATION_MODEL_ID']}"],
                 ),
             ],
         )
-
         if sagemaker_endpoint_name:
             policy_task.add_statements(
                 aws_iam.PolicyStatement(actions=["sagemaker:*",], resources=["*"],),
