@@ -1,6 +1,7 @@
 from aws_cdk import Duration, Aspects
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk import aws_rds as rds
+from aws_cdk import aws_secretsmanager as sm
 from aws_cdk.aws_rds import (
     AuroraPostgresEngineVersion,
     DatabaseClusterEngine,
@@ -54,6 +55,15 @@ class AuroraPostgresSlContextDb(BaseConstruct):
             storage_encrypted=True,
             # Disable this to allow deletion of DB
             deletion_protection=True,
+        )
+        #
+        self.cluster.secret.add_rotation_schedule(
+            "RotationSchedule",
+            hosted_rotation=sm.HostedRotation.postgre_sql_single_user(
+                exclude_characters="`\"$%'!&*^#@()}{[]\\>=+<?%/"
+            ),
+            rotate_immediately_on_update=False,
+            automatically_after=Duration.days(30),
         )
         Aspects.of(self).add(cdk_nag.AwsSolutionsChecks(verbose=True))
 

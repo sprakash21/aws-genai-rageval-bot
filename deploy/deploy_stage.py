@@ -160,27 +160,32 @@ class ApplicationDeploymentBuilder:
         cdk_nag.NagSuppressions.add_stack_suppressions(
             qa_bot_app_stack,
             [
+                # Fixed
+                # cdk_nag.NagPackSuppression(
+                #    id="AwsSolutions-SMG4", reason="Not required"
+                # ),
                 cdk_nag.NagPackSuppression(
-                    id="AwsSolutions-SMG4", reason="Not required"
-                ),
-                cdk_nag.NagPackSuppression(
-                    id="AwsSolutions-RDS6", reason="No IAM Auth needed"
+                    id="AwsSolutions-RDS6", reason="No need for IAM Auth"
                 ),
                 cdk_nag.NagPackSuppression(
                     id="AwsSolutions-ECS2",
                     reason="The environment variables are configurations used",
                 ),
-                cdk_nag.NagPackSuppression(
-                    id="AwsSolutions-IAM5", reason="Resource supression is added"
-                ),
+                # Fixed wildcards with resources
+                #cdk_nag.NagPackSuppression(
+                #    id="AwsSolutions-IAM5",
+                #    reason="Resource supression is added to supress on granular * resources",
+                #),
                 cdk_nag.NagPackSuppression(
                     id="AwsSolutions-EC23",
-                    reason="Supressing the rule as it uses the default SG for the demo purposes",
+                    reason="""This is a false alarm raised from the cdk-nag for load_balancer. Load_balancer is designed in a way that all traffic is coming into it on the designated port\n
+                           Check the recommended rules: https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-update-security-groups.html#security-group-recommended-rules""",
                 ),
-                cdk_nag.NagPackSuppression(
-                    id="AwsSolutions-ELB2",
-                    reason="Supressing the rule as it is not required for the demo purposes",
-                )
+                #Fixed by adding access_logs support
+                #cdk_nag.NagPackSuppression(
+                #    id="AwsSolutions-ELB2",
+                #    reason="Supressing the rule as it is not required for the demo purposes",
+                #),
             ],
         )
 
