@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 
-
+import os
 import aws_cdk as cdk
-
 from build_and_deploy_pipeline import PipelineStack
 
 from nc_llm_aws_infra_blocks.pre_built_stacks.inference.sagemaker_hugging_face.hf_sagemaker_role_stack import (
@@ -24,6 +23,7 @@ sagemaker_session_profile_name = app.node.get_context("sagemaker_session_profile
 project_prefix = app.node.get_context("project_prefix")
 deploy_stage = app.node.get_context("deploy_stage")
 deploy_region = app.node.get_context("deploy_region")
+deploy_account = app.node.get_context("deploy_account")
 app_container_vcpus = app.node.get_context("app_container_vcpus")
 app_container_memory = app.node.get_context("app_container_memory")
 app_params: dict[str, str] = app.node.get_context("app_params")
@@ -66,12 +66,11 @@ instance_type = inference_endpoint["instance_type"]
 instance_count = inference_endpoint["instance_count"]
 gpu_count = inference_endpoint["gpu_count"]
 
-
-aws_environment = cdk.Environment(region=deploy_region)
-
+aws_environment = cdk.Environment(account=deploy_account,region=deploy_region)
 app_deployment_builder = ApplicationDeploymentBuilder(
     project_prefix=project_prefix,
     deploy_stage=deploy_stage,
+    deploy_account=deploy_account,
     deploy_region=deploy_region,
     hugging_face_token=hugging_face_token,
     huggingface_model_id=huggingface_model_id,

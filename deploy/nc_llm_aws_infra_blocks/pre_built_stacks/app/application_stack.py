@@ -1,7 +1,10 @@
 from typing import Union
+import aws_cdk as cdk
+from aws_cdk import Environment
 from aws_cdk import CfnParameter, Stack
 from aws_cdk import aws_ec2 as ec2
 from constructs import Construct
+
 from nc_llm_aws_infra_blocks.deploy_constructs.app.aurora_postgres_sl_context_db_construct import (
     AuroraPostgresSlContextDb,
 )
@@ -16,6 +19,7 @@ class SimpleRagAppStack(Stack):
         scope: Construct,
         construct_id: str,
         vpc: ec2.IVpc,
+        account:str,
         project_prefix: str,
         deploy_stage: str,
         deploy_region: str,
@@ -32,7 +36,6 @@ class SimpleRagAppStack(Stack):
         **kwargs
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)
-
         context_db = AuroraPostgresSlContextDb(
             self,
             "eh-context",
@@ -58,5 +61,5 @@ class SimpleRagAppStack(Stack):
             app_params=app_params,
             db_secret=context_db.db_secret,
             domain_name=domain_name,
-            hosted_zone_id=hosted_zone_id,
+            hosted_zone_id=hosted_zone_id
         )
