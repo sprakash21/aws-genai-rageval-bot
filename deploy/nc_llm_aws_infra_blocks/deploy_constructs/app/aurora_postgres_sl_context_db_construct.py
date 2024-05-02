@@ -56,15 +56,7 @@ class AuroraPostgresSlContextDb(BaseConstruct):
             # Disable this to allow deletion of DB
             deletion_protection=True,
         )
-        #
-        self.cluster.secret.add_rotation_schedule(
-            "RotationSchedule",
-            hosted_rotation=sm.HostedRotation.postgre_sql_single_user(
-                exclude_characters="`\"$%'!&*^#@()}{[]\\>=+<?%/"
-            ),
-            rotate_immediately_on_update=False,
-            automatically_after=Duration.days(30),
-        )
+        self.cluster.add_rotation_single_user()
         Aspects.of(self).add(cdk_nag.AwsSolutionsChecks(verbose=True))
 
     @property

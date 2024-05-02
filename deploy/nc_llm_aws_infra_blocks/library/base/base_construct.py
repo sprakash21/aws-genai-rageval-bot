@@ -24,3 +24,7 @@ class BaseConstruct(Construct):
     @property
     def resource_prefix(self) -> str:
         return f"{self.project_stage_prefix}-{self.construct_id}"
+    
+    @property
+    def region(self) -> str:
+        return self.deploy_region
