@@ -142,23 +142,23 @@ class AppConfigFactory:
         evaluation_engine = os.environ.get("INFERENCE_ENGINE", "bedrock")
         if evaluation_engine.lower() == "bedrock":
             aws_config = AppConfigFactory.aws_config
-            bedrock_inference_region = os.environ.get(
-                "BEDROCK_INFERENCE_REGION", aws_config.region_name
+            bedrock_eval_region = os.environ.get(
+                "BEDROCK_EVALUATION_REGION", aws_config.region_name
             )
-            bedrock_inference_profile = os.environ.get(
+            bedrock_eval_profile = os.environ.get(
                 "BEDROCK_INFERENCE_PROFILE", aws_config.profile_name
             )
             bedrock_model_id = os.environ["BEDROCK_EVALUATION_MODEL_ID"]
             aws_session = AwsSessionFactory.create_session_from_config(
                 config=AwsConfig(
-                    region_name=bedrock_inference_region,
-                    profile_name=bedrock_inference_profile,
+                    region_name=bedrock_eval_region,
+                    profile_name=bedrock_eval_profile,
                 )
             )
             bedrock_api = AwsClientFactory.build_from_boto_session(
                 aws_session,
                 BedrockRuntimeApi,
-                client_config=Config(region_name=bedrock_inference_region),
+                client_config=Config(region_name=bedrock_eval_region),
             )
             evaluation_confg = EvaluationConfig(
                 evaluation_engine=evaluation_engine,
@@ -166,7 +166,7 @@ class AppConfigFactory:
                 bedrock_model_id=bedrock_model_id,
             )
         else:
-            raise ValueError(f"Invalid inference engine: {evaluation_engine} specified")
+            raise ValueError(f"Invalid inference engine for evaluation: {evaluation_engine} specified")
 
         return evaluation_confg
 
