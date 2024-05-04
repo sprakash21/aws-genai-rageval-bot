@@ -1,6 +1,7 @@
 from aws_cdk import Duration, Aspects
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk import aws_rds as rds
+from aws_cdk import aws_secretsmanager as sm
 from aws_cdk.aws_rds import (
     AuroraPostgresEngineVersion,
     DatabaseClusterEngine,
@@ -55,6 +56,7 @@ class AuroraPostgresSlContextDb(BaseConstruct):
             # Disable this to allow deletion of DB
             deletion_protection=True,
         )
+        self.cluster.add_rotation_single_user()
         Aspects.of(self).add(cdk_nag.AwsSolutionsChecks(verbose=True))
 
     @property

@@ -50,6 +50,7 @@
     "project_prefix": "your_prefix",
     "deploy_stage": "dev",
     "deploy_region": "eu-west-1",
+    "deploy_account": "XXXXXXX132"
     "deploy_pipeline": false,
     "codecommit_repo_name": null,
     "branch": null,

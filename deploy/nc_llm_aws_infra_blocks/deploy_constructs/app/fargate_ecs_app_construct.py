@@ -1,6 +1,7 @@
 from typing import Union
 import cdk_nag
 import aws_cdk
+from aws_cdk import Aws
 from aws_cdk import CfnParameter, SecretValue, Aspects
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk import aws_ecs as ecs
@@ -35,35 +36,62 @@ class EcsWithLoadBalancer(BaseConstruct):
         **kwargs,
     ) -> None:
         super().__init__(scope, id, **kwargs)
-
         # Create ECS Fargate Cluster
+        #print(self.deploy_account)
         self.cluster = ecs.Cluster(
             self, "ecs-fargate-cluster", vpc=vpc, container_insights=True
         )
-
         # Create Internet Facing Load Balancer
         self.lb = elbv2.ApplicationLoadBalancer(
             self, "internet-facing-lb", vpc=vpc, internet_facing=True,
         )
-
         # Create an S3 Bucket using cdk
         bucket_name = f"{self.resource_prefix}-{self.deploy_region}-bucket"
-        bucket = s3.Bucket.from_bucket_name(
-            self, "ExstingBucket", bucket_name=bucket_name
+        #self.bucket = s3.Bucket.from_bucket_name(
+        #    self, "ExstingBucket", bucket_name=bucket_name
+        #)
+        #if not self.bucket.bucket_name:
+        self.bucket = s3.Bucket(
+            self,
+            bucket_name,
+            bucket_name=bucket_name,
+            block_public_access=s3.BlockPublicAccess.BLOCK_ALL,
+            removal_policy=aws_cdk.RemovalPolicy.DESTROY,
+            encryption=s3.BucketEncryption.S3_MANAGED,
+            auto_delete_objects=True,
+            #server_access_logs_bucket=True,
+            enforce_ssl=True
         )
-        if not bucket.bucket_name:
-            bucket = s3.Bucket(
-                self,
-                bucket_name,
-                bucket_name=bucket_name,
-                block_public_access=s3.BlockPublicAccess.BLOCK_ALL,
-                removal_policy=aws_cdk.RemovalPolicy.RETAIN,
-                auto_delete_objects=False,
-            )
-        else:
-            print(f"The Bucket with name - {bucket_name} exists already")
-            print(f"Bucket ARN - {bucket.bucket_arn}")
+        #else:
+            #print(f"The Bucket with name - {bucket_name} exists already")
+            #print(f"Bucket ARN - {self.bucket.bucket_arn}")
 
+        # Enable access logs
+        # As per: https://docs.aws.amazon.com/elasticloadbalancing/latest/application/enable-access-logging.html#attach-bucket-policy
+        # There seems to be an issue with the cdk not detecting the region from the stack
+        #resource_policy = aws_iam.PolicyStatement(
+        #            actions=["s3:PutObject"],
+        #            resources=[
+        #                f"arn:aws:s3:::{bucket_name}/logs/AWSLogs/*"
+        #            ],
+         #           principals=[aws_iam.ArnPrincipal("arn:aws:iam:054676820928:root")]
+         #       )
+        # Define the bucket policy
+        self.bucket.add_to_resource_policy(
+            permission=aws_iam.PolicyStatement(
+                actions=["s3:PutObject"],
+                effect=aws_iam.Effect.ALLOW,
+                resources=[self.bucket.arn_for_objects("*")],
+                conditions={
+                    "StringEquals": {
+                        "s3:x-amz-acl": "bucket-owner-full-control"
+                    }
+                },
+                principals=[aws_iam.ServicePrincipal("delivery.logs.amazonaws.com")]
+            )
+        )
+        # Add the resource policy for elb
+        #bucket.add_to_resource_policy(permission=resource_policy)
         # Create a Fargate task definition
         task_def = ecs.FargateTaskDefinition(
             self,
@@ -71,8 +99,12 @@ class EcsWithLoadBalancer(BaseConstruct):
             cpu=vcpus,
             memory_limit_mib=container_memory,
         )
-
         db_secret.grant_read(task_def.task_role)
+        # Bucket work
+        #self.bucket.grant_read_write(task_def.task_role)
+        #self.bucket.grant_put(task_def.task_role)
+        #self.bucket.grant_put_acl(task_def.task_role)
+        self.lb.log_access_logs(bucket=self.bucket)
 
         app_env = {
             "RDS_SECRET_NAME": db_secret.secret_name,
@@ -98,19 +130,25 @@ class EcsWithLoadBalancer(BaseConstruct):
             port_mappings=[ecs.PortMapping(container_port=8501)],
             environment=app_env,
         )
-
         policy_execution = aws_iam.Policy(
             self,
             "fargate-execution-policy",
             statements=[
                 aws_iam.PolicyStatement(
                     actions=[
-                        "ecr:GetDownloadUrlForLayer",
-                        "ecr:BatchGetImage",
-                        "ecr:BatchCheckLayerAvailability",
-                        "ecr:GetAuthorizationToken",
+                        "ecr:GetAuthorizationToken"
                     ],
                     resources=["*"],
+                ),
+                aws_iam.PolicyStatement(
+                    actions=[
+                        "ecr:GetDownloadUrlForLayer",
+                        "ecr:BatchGetImage",
+                        "ecr:BatchCheckLayerAvailability"
+                    ],
+                    resources=[
+                        f"arn:aws:ecr:{self.deploy_region}:{scope.account}:repository/{ecr_repository_name}"
+                    ],
                 ),
             ],
         )
@@ -126,18 +164,21 @@ class EcsWithLoadBalancer(BaseConstruct):
                         "s3:PutObject",
                         "s3:DeleteObject",
                     ],
-                    resources=[bucket.bucket_arn, f"{bucket.bucket_arn}/*"],
+                    # Requires the bucket_arn with wildcard f"{bucket.bucket_arn}/*"
+                    resources=[self.bucket.bucket_arn,f"{self.bucket.bucket_arn}/*"],
                 ),
                 aws_iam.PolicyStatement(
                     actions=[
+                        "bedrock:GetFoundationModel",
                         "bedrock:InvokeModel",
-                        "bedrock:InvokeModelWithResponseStreams",
+                        "bedrock:InvokeModelWithResponseStream",
                     ],
-                    resources=["*"],
+                    resources=[f"arn:aws:bedrock:{app_params['BEDROCK_INFERENCE_REGION']}::foundation-model/{app_params['BEDROCK_INFERENCE_MODEL_ID']}",
+                    f"arn:aws:bedrock:{app_params['BEDROCK_EVALUATION_REGION']}::foundation-model/{app_params['BEDROCK_EVALUATION_MODEL_ID']}",
+                    "arn:aws:bedrock:eu-central-1::foundation-model/amazon.titan-embed-text-v1"],
                 ),
             ],
         )
-
         if sagemaker_endpoint_name:
             policy_task.add_statements(
                 aws_iam.PolicyStatement(actions=["sagemaker:*",], resources=["*"],),
@@ -153,9 +194,6 @@ class EcsWithLoadBalancer(BaseConstruct):
 
         task_def.task_role.attach_inline_policy(policy_task)
         task_def.obtain_execution_role().attach_inline_policy(policy_execution)
-
-        # Here you might want to add a container to the task definition
-        # Add listener to Load Balancer
 
         # Create Fargate Service
         fargate_service = ecs.FargateService(
@@ -213,3 +251,7 @@ class EcsWithLoadBalancer(BaseConstruct):
                 protocol=elbv2.ApplicationProtocol.HTTP,  # Ensure this matches your service configuration
             )
         Aspects.of(self).add(cdk_nag.AwsSolutionsChecks(verbose=True))
+    
+    @property
+    def bucket_arn(self):
+        return self.bucket.bucket_arn

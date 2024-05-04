@@ -68,12 +68,6 @@ def page():
         )
         st.plotly_chart(fig, theme="streamlit", use_container_width=True)
 
-#    with cl22:
-#        st.subheader("Score Correlation")
-#        corr_df = filtered_data[["context_precision", "answer_relevancy"]]
-#        fig = px.imshow(corr_df.corr())
-#        st.plotly_chart(fig, theme="streamlit", use_container_width=True)
-
 
 empty = st.empty()
 if "login" not in st.session_state:

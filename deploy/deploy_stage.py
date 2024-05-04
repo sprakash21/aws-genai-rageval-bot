@@ -48,6 +48,7 @@ class ApplicationDeploymentBuilder:
         self,
         project_prefix: str,
         deploy_stage: str,
+        deploy_account:str,
         deploy_region: str,
         env: Environment,
         ecr_repository_name: str,
@@ -73,6 +74,7 @@ class ApplicationDeploymentBuilder:
     ):
         self.project_prefix = project_prefix
         self.deploy_stage = deploy_stage
+        self.deploy_account = deploy_account
         self.deploy_region = deploy_region
         self.hugging_face_token = hugging_face_token
         self.huggingface_model_id = huggingface_model_id
@@ -140,9 +142,10 @@ class ApplicationDeploymentBuilder:
         qa_bot_app_stack = SimpleRagAppStack(
             scope,
             f"{self.project_prefix}-{self.deploy_stage}-bot-app",
-            env=self.env,
             vpc=network_stack.vpc,
             deploy_stage=self.deploy_stage,
+            env=self.env,
+            account=self.deploy_account,
             deploy_region=self.deploy_region,
             project_prefix=self.project_prefix,
             application_name=self.application_name,
@@ -160,27 +163,58 @@ class ApplicationDeploymentBuilder:
         cdk_nag.NagSuppressions.add_stack_suppressions(
             qa_bot_app_stack,
             [
+                # Fixed
+                # cdk_nag.NagPackSuppression(
+                #    id="AwsSolutions-SMG4", reason="Not required"
+                # ),
                 cdk_nag.NagPackSuppression(
-                    id="AwsSolutions-SMG4", reason="Not required"
-                ),
-                cdk_nag.NagPackSuppression(
-                    id="AwsSolutions-RDS6", reason="No IAM Auth needed"
+                    id="AwsSolutions-RDS6", reason="No need for IAM Auth"
                 ),
                 cdk_nag.NagPackSuppression(
                     id="AwsSolutions-ECS2",
                     reason="The environment variables are configurations used",
                 ),
+                # ECR AuthorizationToken needs to be on all resources with *
+                # Reference: https://docs.aws.amazon.com/AmazonECR/latest/userguide/security_iam_id-based-policy-examples.html
                 cdk_nag.NagPackSuppression(
-                    id="AwsSolutions-IAM5", reason="Resource supression is added"
+                    id="AwsSolutions-IAM5",
+                    applies_to=["Resource::*",{"regex":"/^Resource::.*/g"}],
+                    reason="ECR AuthorizationToken needs to be on all resources with * and S3 bucket needs wildcard also on resource",
                 ),
+                # The main stack has no direct relation with the wildcards on granular resources.
+                # This is internally required for the elbv2 setup for creation the access logs and hence supressed.
+                #cdk_nag.NagPackSuppression(
+                #    id="AwsSolutions-IAM5",
+                #    reason="Resource supression is added to supress on granular * resources",
+                #),
+                #cdk_nag.NagPackSuppression(
+                #    id="AwsSolutions-IAM5",
+                #    reason="""
+                #    The main stack has no direct relation with the wildcards on granular resources.
+                #    This is internally required for the elbv2 setup for creation the access logs and hence supressed.
+                #    """,
+                #    applies_to=["Action::s3:Abort*",
+                #    "Action::s3:DeleteObject*",
+                #    "Action::s3:GetBucket*",
+                #    "Action::s3:GetObject*",
+                #    "Action::s3:List*",
+                #    "Resource::*"]
+                #),
                 cdk_nag.NagPackSuppression(
                     id="AwsSolutions-EC23",
-                    reason="Supressing the rule as it uses the default SG for the demo purposes",
+                    reason="""This is a false alarm raised from the cdk-nag for load_balancer. Load_balancer is designed in a way that all traffic is coming into it on the designated port\n
+                           Check the recommended rules: https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-update-security-groups.html#security-group-recommended-rules""",
                 ),
                 cdk_nag.NagPackSuppression(
-                    id="AwsSolutions-ELB2",
-                    reason="Supressing the rule as it is not required for the demo purposes",
-                )
+                    id="AwsSolutions-S1",
+                    reason="""We are only using S3 bucket to upload and use the pdf-file from the UI
+                           for the demo application and there is no need for server access logs to be enabled""",
+                ),
+                #Fixed by adding access_logs support
+                #cdk_nag.NagPackSuppression(
+                #    id="AwsSolutions-ELB2",
+                #    reason="Supressing the rule as it is not required for the demo purposes",
+                #),
             ],
         )
 
