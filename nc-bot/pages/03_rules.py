@@ -4,6 +4,8 @@ import os
 
 def page():
     st.markdown("# Rules for the Chatbot 💬")
+    st.markdown("* If there are any specific rules to set. It can provided here...")
+
 
 
 empty = st.empty()
