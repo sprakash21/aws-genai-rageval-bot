@@ -31,6 +31,7 @@ Below is a detailed description of each parameter:
 * `project_prefix`: A unique prefix for each deployment within an AWS account, aiding in resource identification.
 * `deploy_stage`: The stage of deployment, such as development, staging, or production.
 * `deploy_region`: The AWS region where the deployment will occur.
+* `deploy_account`: The AWS account where the deployment will occur.  
 * `ecr_repo`: The name of the ECR repository where the Docker image is pushed.
 * `ecr_image_tag`: The tag of the Docker image in ECR.
 * `ecr_url`: The URL of the ECR repository.
@@ -65,3 +66,9 @@ Below is a detailed description of each parameter:
 5. The deployment stack is also setup with cdk-nag to apply and verify the best practises for the deployment of the AWS stack. Note: Some of the not required Error are added into supressions.  
 6. To deploy the stack run `cdk deploy --all` or a stack.  
 7. If you get "Unable to resolve AWS account to use. It must be either configured when you define your CDK Stack, or through the environment" then export the AWS_PROFILE as export `AWS_PROFILE=<your_profile>`  
+
+# Notes
+The Database is enabled with delete protection. This is done as per the best practises in the code. In order to destroy the stack, you will have to perform the following steps from the AWS console:  
+1. Go to RDS, Clusters  
+2. Select the cluster deployed from the stack and click Modify  
+3. At the bottom you should see delete protection, uncheck enable delete protection to destroy the stack with RDS deletion.  

@@ -175,7 +175,7 @@ class ApplicationDeploymentBuilder:
                     reason="The environment variables are configurations used",
                 ),
                 # ECR AuthorizationToken needs to be on all resources with *
-                # Reference: 
+                # Reference: https://docs.aws.amazon.com/AmazonECR/latest/userguide/security_iam_id-based-policy-examples.html
                 cdk_nag.NagPackSuppression(
                     id="AwsSolutions-IAM5",
                     applies_to=["Resource::*",{"regex":"/^Resource::.*/g"}],
