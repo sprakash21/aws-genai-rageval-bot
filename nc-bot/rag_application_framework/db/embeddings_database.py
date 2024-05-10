@@ -96,11 +96,13 @@ class EmbeddingsDatabase:
             _cursor = cursor
 
         if self.is_existing_table(cursor=_cursor):
+            id_placeholders = ','.join(['%s'] * len(sources))
+            print(sources)
             query = f"""
-                DELETE FROM langchain_pg_embedding as embed 
-                    WHERE embed.cmetadata ->> 'source' in ({','.join([ f"'{source}'" for source in sources])});
+            DELETE FROM langchain_pg_embedding as embed 
+            WHERE embed.cmetadata ->> 'source' IN ({id_placeholders})
             """
-            _cursor.execute(query)
+            _cursor.execute(query, sources)
             _cursor.connection.commit()
 
         if not cursor:

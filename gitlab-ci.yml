@@ -1,0 +1,47 @@
+stages:
+  - init
+  - test
+synth infra:
+  image: python:3.9
+  stage: init
+  variables:
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  cache:
+    key: $CI_COMMIT_REF_SLUG
+    paths:
+      - node_modules/
+      - .cache/pip
+  before_script:
+    - apt-get -qq update && apt-get -y install nodejs npm
+    - node -v
+    - npm i -g aws-cdk
+    - cdk --version
+    - cd deploy
+    - python -V
+    - pip3 install virtualenv
+    - virtualenv venv
+    - source venv/bin/activate
+    - pip3 install -r requirements.txt
+  script:
+    - cp cdk.template.json cdk.json
+    - cdk synth -o out --all
+  artifacts:
+    paths:
+      - deploy/out/*.template.json
+
+run probe:
+  image:
+    name: registry.gitlab.aws.dev/tsd/probe/standalone-scanner:latest
+    entrypoint: [""]
+  stage: test
+  dependencies:
+    - "synth infra"
+  script:
+    # https://gitlab.com/gitlab-org/gitlab-runner/-/merge_requests/3538 - mark directory as safe
+    - git config --global --add safe.directory $CI_PROJECT_DIR
+    - /usr/bin/python3 -u /exec/app.py
+  artifacts:
+    paths:
+      - ${CI_PROJECT_DIR}/probe-out/*
+    reports:
+      junit: ${CI_PROJECT_DIR}/probe-out/probe_report.xml
