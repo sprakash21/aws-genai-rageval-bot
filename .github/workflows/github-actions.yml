@@ -37,29 +37,16 @@ jobs:
       - name: Check CDK version
         run: cdk --version
 
-      - name: Navigate to deploy directory
-        run: cd deploy
-
-      - name: Check Python version
-        run: python -V
-
-      - name: Install virtualenv
-        run: pip3 install virtualenv
-
-      - name: Create virtual environment
-        run: virtualenv venv
-
-      - name: Activate virtual environment
-        run: source venv/bin/activate
-
-      - name: Install Python dependencies
-        run: pip3 install -r requirements.txt
-
-      - name: Copy CDK template
-        run: cp cdk.template.json cdk.json
-
-      - name: Synthesize CDK
-        run: cdk synth -o out --all
+      - name: Install the required dependencies
+        run: |
+          cd deploy
+          python -V
+          pip3 install virtualenv
+          virtualenv venv
+          source venv/bin/activate
+          pip3 install -r requirements.txt
+          cp cdk.template.json cdk.json
+          cdk synth -o out --all
 
       - name: Upload CDK artifacts
         uses: actions/upload-artifact@v2
