@@ -1,0 +1,93 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  synth_infra:
+    name: Synthesize Infrastructure
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.9]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Node.js and npm
+        run: |
+          sudo apt-get -qq update
+          sudo apt-get -y install nodejs npm
+
+      - name: Check Node.js version
+        run: node -v
+
+      - name: Install AWS CDK
+        run: npm i -g aws-cdk
+
+      - name: Check CDK version
+        run: cdk --version
+
+      - name: Navigate to deploy directory
+        run: cd deploy
+
+      - name: Check Python version
+        run: python -V
+
+      - name: Install virtualenv
+        run: pip3 install virtualenv
+
+      - name: Create virtual environment
+        run: virtualenv venv
+
+      - name: Activate virtual environment
+        run: source venv/bin/activate
+
+      - name: Install Python dependencies
+        run: pip3 install -r requirements.txt
+
+      - name: Copy CDK template
+        run: cp cdk.template.json cdk.json
+
+      - name: Synthesize CDK
+        run: cdk synth -o out --all
+
+      - name: Upload CDK artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: cdk-artifacts
+          path: deploy/out/*.template.json
+
+  run_probe:
+    name: Run Probe
+    runs-on: ubuntu-latest
+    needs: synth_infra
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run Probe Scanner
+        run: |
+          git config --global --add safe.directory ${{ github.workspace }}
+          /usr/bin/python3 -u /exec/app.py
+
+      - name: Upload Probe artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: probe-artifacts
+          path: ${{ github.workspace }}/probe-out/*
+      
+      - name: Upload JUnit report
+        uses: actions/upload-artifact@v2
+        with:
+          name: junit-report
+          path: ${{ github.workspace }}/probe-out/probe_report.xml
