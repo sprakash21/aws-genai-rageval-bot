@@ -47,10 +47,10 @@
       "gpu_count": 1
     },
     "sagemaker_session_profile_name": "default",
-    "project_prefix": "your_prefix",
+    "project_prefix": "your-prefix",
     "deploy_stage": "dev",
-    "deploy_region": "eu-west-1",
-    "deploy_account": "XXXXXXX132",
+    "deploy_region": "eu-central-1",
+    "deploy_account": "123844711321",
     "deploy_pipeline": false,
     "codecommit_repo_name": null,
     "branch": null,

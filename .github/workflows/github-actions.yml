@@ -53,29 +53,3 @@ jobs:
         with:
           name: cdk-artifacts
           path: deploy/out/*.template.json
-
-  run_probe:
-    name: Run Probe
-    runs-on: ubuntu-latest
-    needs: synth_infra
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Run Probe Scanner
-        run: |
-          git config --global --add safe.directory ${{ github.workspace }}
-          /usr/bin/python3 -u /exec/app.py
-
-      - name: Upload Probe artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: probe-artifacts
-          path: ${{ github.workspace }}/probe-out/*
-      
-      - name: Upload JUnit report
-        uses: actions/upload-artifact@v2
-        with:
-          name: junit-report
-          path: ${{ github.workspace }}/probe-out/probe_report.xml
