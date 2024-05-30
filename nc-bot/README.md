@@ -30,7 +30,7 @@ The project is structure as shown above. The important modules are the rag_appli
 We can also setup the local via docker. For this one must do the following activities and we assume that docker is setup already in the machine.  
 
 First setup the .env required for the application. In order to do so, perform the necessary steps:  
-1. Copy the .env.template as .env and fill in the following values in accordance as shown in the table:  
+1. Copy the nc-bot/environment_templates/.env.local.template as .env and fill in the following values in accordance as shown in the table:  
 
 | KEY                 | VALUE       | Description                                                                                   |
 |---------------------|-------------|-----------------------------------------------------------------------------------------------|
@@ -41,7 +41,7 @@ First setup the .env required for the application. In order to do so, perform th
 | PGVECTOR_USER       | postgres    | postgres                                                                                      |
 | PGVECTOR_PASSWORD   | pwd         | set a password                                                                                |
 | PGVECTOR_PORT       | 5432        | 5432                                                                                          |
-| PGVECTOR_HOST       | postgres    | localhost/service_name                                                                                    |
+| PGVECTOR_HOST       | postgres    | localhost/service_name (if on docker)                                                                                    |
 | BUCKET_NAME         | bucket_name | S3 bucket name to be created to store the pdf data and reference                              |
 | USE_BEDROCK_EMBEDDINGS         | true,false  | Either to use Amazon titan embeddings or not                                                     |
 | BEDROCK_EMBEDDINGS_REGION      | region      | Region of the Amazon bedrock model                                                               |
@@ -53,12 +53,17 @@ First setup the .env required for the application. In order to do so, perform th
 | BEDROCK_EVALUATION_MODEL_ID      | model.id      | Model-id for evaluation using Amazon Bedrock                                               |
 | LOGIN_CODE      | test      |  Acts as a login token to the app                                                               |
 
-2. Create the virtual environment with `python3 -m venv .venv` and install the pip requirements with `pip install -r requirements.txt`  
-
-3. Build and start the postgres local image containing the pgvector extension with the following steps:  
+2. Create the S3 bucket required to store the pdf documents. The bucket_name used will be going into the environment variable BUCKET_NAME.  
 ```
-# Build the docker image
-cd genai-Amazon/nc-bot
+aws s3api create-bucket --bucket <my-bucket> --profile <my-profile>
+```  
+
+3. Create the virtual environment with `python3 -m venv .venv` and install the pip requirements with `pip install -r requirements_aws.txt`  
+
+4. Build and start the postgres local image containing the pgvector extension with the following steps:  
+```
+# Build the docker image for pg_vector
+cd aws-genai-rageval-bot/nc-bot
 docker build -t pgvector_local -f pg_vector/Dockerfile .
 
 Run:
@@ -80,25 +85,18 @@ docker run \
 ```
 This should start a local postgres container with pgvector extension installed. Note: One can change the underlying vectordb to another. To verify if everything is alright just login to pgadmin docker container at `http://localhost:5555` and access the database by setting up new connection with the details with username as postgres, password as one you define during the run command as shown above. Note: The host will be service name while using application also deployed through docker otherwise localhost should be fine.    
 
-4. Next, since the database is setup update the .env with the values for the database and setting `DB_LOCAL` to true.  Note: While using chatbot locally on your laptop set the `PGVECTOR_HOST`` as localhost.  
-
-5. Download and install ollama (https://ollama.ai/)[Ollama] and pull llama2 for 7b or 13b. Note: You can also play around with some other model. You will need a laptop that is atleast quite high in configurations with multicore and about 16 to 32 GB of RAM.  
-```
-ollama pull llama2:7b|13b
-ollama run llama2:7b|13b
-/bye
-```
-When instead if using Amazon Bedrock Service then it can directly be configured in the environment variables.  
-5. Run the app locally within your laptop:  
+5. Next, since the database is setup update the .env with the values for the database and setting `DB_LOCAL` to true.  Note: While using chatbot locally on your laptop set the `PGVECTOR_HOST`` as localhost.  
+ 
+6. Run the app locally within your laptop:  
 ```
 # Run the application locally
-cd genai-Amazon/nc-bot
+cd aws-genai-rageval-bot/nc-bot
 $streamlit run chatbot.py
 ```
-6. Open `http://localhost:8501`. It should launch our home page.  
+7. Open `http://localhost:8501`. It should launch our home page.  
 ![RAGTrack](assets/chatbot.png "RAGTrack")
 
-7. After some queries, you can see that the quality monitoring has started to kick in to monitoring the RAG pipeline.  
+8. After some queries, you can see that the quality monitoring has started to kick in to monitoring the RAG pipeline.  
 ![Monitor](assets/quality_monitor.png "Monitoring")
 
 ## Setup for Amazon deployment
