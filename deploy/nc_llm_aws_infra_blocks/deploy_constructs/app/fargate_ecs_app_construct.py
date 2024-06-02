@@ -2,7 +2,7 @@ from typing import Union
 import cdk_nag
 import aws_cdk
 from aws_cdk import Aws
-from aws_cdk import CfnParameter, SecretValue, Aspects
+from aws_cdk import CfnOutput, CfnParameter, SecretValue, Aspects
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk import aws_ecs as ecs
 from aws_cdk import aws_elasticloadbalancingv2 as elbv2
@@ -250,6 +250,17 @@ class EcsWithLoadBalancer(BaseConstruct):
                 targets=[fargate_service],
                 protocol=elbv2.ApplicationProtocol.HTTP,  # Ensure this matches your service configuration
             )
+        # Output
+        CfnOutput(
+            scope=self,
+            id=f"{bucket_name}-OutputARN",
+            value=str(self.bucket.bucket_arn),
+        )
+        CfnOutput(
+            scope=self,
+            id=f"internet-facing-lb-DNSOutput",
+            value=str(self.lb.load_balancer_dns_name),
+        )
         Aspects.of(self).add(cdk_nag.AwsSolutionsChecks(verbose=True))
     
     @property

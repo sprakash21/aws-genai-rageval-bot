@@ -169,7 +169,8 @@ terraform.tfstate.backup
 !.vscode/launch.template.json
 
 test.txt
-*.pdf
+# Ignore pdf since we want to have pdf tutorials
+#*.pdf
 
 **/cdk.out/**
 

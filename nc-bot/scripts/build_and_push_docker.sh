@@ -5,7 +5,7 @@ DOCKERFILE_PATH=$1
 REPO_NAME=$2
 IMAGE_TAG=$3
 REGION=$4
-ACCOUNT_ID=$5
+ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 
 # Functions for text coloring
 color_red() {
