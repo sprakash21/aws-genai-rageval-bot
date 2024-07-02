@@ -59,28 +59,6 @@ class EmbeddingsDatabase:
         else:
             raise ValueError(f"Invalid result returned from database: {result}")
 
-    def is_file_embedded(
-        self,
-        file_name: str,
-        cursor: Union[Cursor, None] = None,
-    ) -> bool:
-        query = f"""
-        select count(*) as counts
-        from langchain_pg_embedding as embed
-        where embed.cmetadata ->> 'source'='{file_name}'
-        """
-
-        result = self.execute_query_fetch_one(query, cursor)
-
-        if result:
-            counts = result[0]
-            if counts > 0:
-                return True
-            else:
-                return False
-
-        raise ValueError(f"Invalid result returned from database: {result}")
-
     def clear_table(self):
         with self.cursor as cursor:
             if self.is_existing_table(cursor=cursor):

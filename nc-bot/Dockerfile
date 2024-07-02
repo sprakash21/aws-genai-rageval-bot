@@ -6,7 +6,7 @@ RUN apt-get update && apt-get --no-install-recommends install -y \
     software-properties-common \
     git \
     tesseract-ocr libpoppler-dev libgl1-mesa-glx \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* && apt-get clean
 RUN useradd -ms /bin/bash app
 WORKDIR /home/app
 COPY requirements_aws.txt /home/app/requirements_aws.txt
