@@ -46,6 +46,7 @@ class InferenceConfig:
     bedrock_client: Optional[BaseClient] = None
     bedrock_model_id: Optional[str] = None
 
+
 @dataclass
 class EvaluationConfig:
     evaluation_engine: str = "bedrock"
