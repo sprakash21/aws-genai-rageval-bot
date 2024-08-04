@@ -47,10 +47,10 @@ Below is a detailed description of each parameter:
     * `BEDROCK_EMBEDDINGS_REGION`: region.
     * `INFERENCE_ENGINE`: bedrock/sagemaker.
     * `BEDROCK_INFERENCE_REGION`: region, if inference is from bedrock.
-    * `BEDROCK_INFERENCE_MODEL_ID`: "meta.llama2-70b-chat-v1".
+    * `BEDROCK_INFERENCE_MODEL_ID`: "meta.llama3-70b-instruct-v1:0".
     * `BEDROCK_EVALUATION_ENGINE`: bedrock.
     * `BEDROCK_EVALUATION_REGION`: region.
-    * `BEDROCK_EVALUATION_MODEL_ID`:"anthropic.claude-v2".
+    * `BEDROCK_EVALUATION_MODEL_ID`:"anthropic.claude-3-sonnet-20240229-v1:0".
     * `LOGIN_CODE`: initial code for app to get access to.
     * `PGVECTOR_USER`:OPTIONAL: Applies When DB_LOCAL Is True.
     * `PGVECTOR_PASSWORD`:OPTIONAL: Applies When DB_LOCAL Is True.

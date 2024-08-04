@@ -4,8 +4,8 @@ from abc import ABC
 from typing import Any, Dict, Iterator, List, Mapping, Optional
 
 from langchain.callbacks.manager import CallbackManagerForLLMRun
-from langchain.llms.base import LLM
-from langchain.llms.utils import enforce_stop_tokens
+from langchain_community.llms import BaseLLM
+from langchain_community.llms.utils import enforce_stop_tokens
 from langchain.pydantic_v1 import BaseModel, Extra, root_validator
 from langchain.schema.output import GenerationChunk
 from langchain.utilities.anthropic import (
@@ -312,7 +312,7 @@ class BedrockBase(BaseModel, ABC):
                 run_manager.on_llm_new_token(chunk.text, chunk=chunk)
 
 
-class Bedrock(LLM, BedrockBase):
+class Bedrock(BaseLLM, BedrockBase):
     """Bedrock models.
 
     To authenticate, the AWS client uses the following methods to

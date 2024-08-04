@@ -1,5 +1,5 @@
 # nc-bot/Dockerfile
-FROM python:3.9-slim
+FROM python:3.11-slim
 RUN apt-get update && apt-get --no-install-recommends install -y \
     build-essential \
     curl \

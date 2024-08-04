@@ -1,5 +1,5 @@
 import psycopg2
-from langchain.vectorstores.pgvector import PGVector
+from langchain_community.vectorstores.pgvector import PGVector
 from psycopg2.extensions import connection
 
 

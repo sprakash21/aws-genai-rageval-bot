@@ -21,6 +21,8 @@ from rag_application_framework.modules.chat.bot_rag_pipeline import (
 
 from dotenv import load_dotenv
 load_dotenv()
+
+
 def page():
     app_config = AppConfigFactory.build_from_env()
     db_connection_factory = PsycopgConnectionFactory(
@@ -95,7 +97,8 @@ def page():
             st.write(prompt, unsafe_allow_html=True)
 
     def prepare_source_docs(docs: List[SourceDocument]):
-        mk_txt = "<details style='border:1px dotted'><summary><span style='color:DodgerBlue;'>I Referenced following documents for generation:</span>: </summary><br>"
+        mk_txt = "<details style='border:1px dotted'><summary><span style='color:DodgerBlue;'>I have been referencing\
+        following documents for generation:</span>: </summary><br>"
         temp_list = list()
         for doc in docs:
             if doc.file_store_url not in temp_list:
@@ -115,6 +118,7 @@ def page():
             with st.spinner("Thinking..."):
                 # A collection name is fixed for the application and can be extended
                 response = bot_rag_pipeline.infer(prompt)
+
                 st.write(response["result"], unsafe_allow_html=True)
                 source_docs = prepare_source_docs(response["source_documents"])
                 st.write(source_docs, unsafe_allow_html=True)

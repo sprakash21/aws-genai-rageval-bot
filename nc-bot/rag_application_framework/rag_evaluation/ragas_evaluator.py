@@ -33,8 +33,8 @@ class RagasEvaluator:
             model_kwargs={"temperature": 0.2, "top_p": 1, "max_tokens": 4000, "top_k": 250},
         )
 
-    def create_dataset(self, run_data):
-        """_summary_
+    def create_dataset(self, run_data: dict):
+        """
 
         Args:
             run_data (dict): Dictionary information of the run data consisting of question, contexts and answer
@@ -50,12 +50,12 @@ class RagasEvaluator:
         }
         return Dataset.from_dict(data_dict)
 
-    def evaluate(self, run_data):
-        """Performs evaluation using Anthropic Claude-v2 as judge for the answer generated from
-        LLM like llama2. Note: The judge can be any judge. We here use Anthropic Claude-v2.
+    def evaluate(self, run_data: dict):
+        """Performs evaluation using Anthropic Claude-v3-Sonnet as judge for the answer generated from
+        LLM family like llama2, llama3. Note: The judge can be any judge. We here use Anthropic Claude Sonnet.
 
         Args:
-            run_data (Dataset): The dataset to be evaluated
+            run_data (dict): The dataset to be evaluated
 
         Returns:
             dict: Scores

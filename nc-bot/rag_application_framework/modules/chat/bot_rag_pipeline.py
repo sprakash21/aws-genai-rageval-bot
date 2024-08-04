@@ -1,9 +1,9 @@
 from typing import List, Optional, Union
 from langchain.chains.retrieval_qa.base import RetrievalQA
-from langchain.llms.ollama import Ollama
-from langchain.llms.sagemaker_endpoint import SagemakerEndpoint
-from langchain.vectorstores.pgvector import PGVector
-from langchain.llms.bedrock import Bedrock
+from langchain_community.llms.ollama import Ollama
+from langchain_community.llms.sagemaker_endpoint import SagemakerEndpoint
+from langchain_community.vectorstores.pgvector import PGVector
+from langchain_community.llms.bedrock import Bedrock
 from rag_application_framework.aws.sagemaker_runtime_api import SagemakerRuntimeApi
 from rag_application_framework.config.app_config import (
     EmbeddingConfig,
@@ -47,7 +47,7 @@ class SourceDocument:
 
 class BotRagPipeline:
     """
-    A class to perform inference using the Llama2 LLM.
+    A class to perform inference using the Bedrock Model LLM.
     """
 
     def __init__(
@@ -77,11 +77,17 @@ class BotRagPipeline:
         self.inference_config = inference_config
         self.db_factory = db_factory
 
-        template_string = """[INST]<<SYS>> You are an assistant for question-answering tasks and you will only answer as much as possible by strictly looking into the context. If you don't know the answer, just say that you don't know and do not make up answers by looking into context. Use three sentences maximum and keep the answer concise. If and only if the question is about yourself, like "who are you?" or "what is your name", then ignore the given context and answer exactly with "I am QA Bot".<</SYS>> 
-        Question: {question}
-        Context: {context} 
-        Answer: [/INST]
-        """
+        template_string = (
+            "[INST]<<SYS>> You are an assistant for question-answering tasks and you will only answer as much as "
+            "possible by strictly looking into the context. If you don't know the answer, just say that "
+            "you are trained on the uploaded document information and do not make up answers by looking into context. "
+            "Use three sentences maximum and keep the answer concise. If and only if the question is about yourself, "
+            "like \"who are you?\" or \"what is your name\", then ignore the given context and answer exactly "
+            "with \"I am QA Bot\".<</SYS>> \n"
+            "        Question: {question}\n"
+            "        Context: {context} \n"
+            "        Answer: \n[/INST]"
+            "        ")
         self.prompt = ChatPromptTemplate.from_template(template_string)
         self.sagemaker_runtime_api = sagemaker_runtime_api
         self.s3_api = s3_api
@@ -89,7 +95,7 @@ class BotRagPipeline:
 
     def infer(self, query):
         """
-        Perform inference using the Llama2 LLM locally using the query and the vectordb
+        Perform inference using the LLM using the query and the vectordb
         """
         vector_store = PGVector(
             collection_name=self.embeddings_config.collection_name,
@@ -140,7 +146,7 @@ class BotRagPipeline:
 
     def _get_local_llm(self) -> Ollama:
         """
-        Perform inference using the Llama2 LLM locally using the query and the vectordb
+        Perform inference using the LLM locally using the query and the vectordb
         """
 
         llm = Ollama(
@@ -180,7 +186,7 @@ class BotRagPipeline:
         self,
     ) -> SagemakerEndpoint:
         """
-        Perform inference using the Llama2 LLM through AWS via Sagemaker Endpoint and the vectordb
+        Perform inference using the LLM through AWS via Sagemaker Endpoint and the vectordb
         """
         if not self.sagemaker_runtime_api:
             raise ValueError("Sagemaker Api must be present.")
@@ -208,7 +214,7 @@ class BotRagPipeline:
 
     def _get_bedrock_llm(self) -> Bedrock:
         """
-        Perform inference using the Llama2 LLM through AWS via Bedrock and use vectordb
+        Perform inference using the LLM through AWS via Bedrock and use vectordb
         """
         llm = Bedrock(
             client=self.inference_config.bedrock_client,

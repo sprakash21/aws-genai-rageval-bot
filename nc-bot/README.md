@@ -1,7 +1,7 @@
 # RAGTrack: Amazon-Powered Context-Aware QA Bot with Quality Monitoring capabilities
 
 ## Introduction
-RAGTrack is a context aware QA bot built upon Llama2 with Quality Monitoring capabilties. The framework includes the component to ingest pdf data into vectordb, Inference with the QA bot through in-context learning, Quality monitoring of the RAG (Retreival Augmented Generation) pipeline against a Judge Model Claude v2. All of the foundational models are configured to use Amazon Bedrock. Additionally, we offer the capability to also infer from local models or using Amazon Sagemaker endpoint.  
+RAGTrack is a context aware QA bot built upon Large Language Model with Quality Monitoring capabilities. The framework includes the component to ingest pdf data into vectordb, Inference with the QA bot through in-context learning, Quality monitoring of the RAG (Retreival Augmented Generation) pipeline against a Judge Model. All of the foundational models are configured to use Amazon Bedrock. Additionally, we offer the capability to also infer from local models or using Amazon Sagemaker endpoint.  
 
 ## Project Structure
 ```
@@ -104,5 +104,6 @@ We have CDK stack to deploy the components into the Amazon infrastructure includ
 
 
 ## Learnings and Future Work
-1. Using claude-v2 as a judge model provides good results, but sometime it cannot get some results for metrics.  
-2. The evaluation framework was also configured to use the latest models from anthropic. However, the obtained results were not satisfactory using ragas. This will be addressed to either check for proper support with the usage of anthropic model or changes required to the ragas package.  
+1. Improving Judge model answering capabilities.  
+2. Extending the framework to use multiple judges and take voting on the best scores to choose.   
+3. Advancing the methodologies of RAG techniques and testing with other model use cases.  
