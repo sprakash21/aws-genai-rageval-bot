@@ -104,5 +104,6 @@ We have CDK stack to deploy the components into the Amazon infrastructure includ
 
 
 ## Learnings and Future Work
-1. Extending the framework to use multiple judges and take voting on the best scores to choose.   
-2. Advancing the methodologies of RAG techniques and testing with other model use cases.  
+1. Improving Judge model answering capabilities.  
+2. Extending the framework to use multiple judges and take voting on the best scores to choose.   
+3. Advancing the methodologies of RAG techniques and testing with other model use cases.  
