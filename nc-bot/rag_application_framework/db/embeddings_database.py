@@ -3,7 +3,7 @@ from typing import Union
 from langchain_community.embeddings.bedrock import BedrockEmbeddings
 from langchain_community.embeddings.huggingface import HuggingFaceEmbeddings
 from langchain.schema import Document
-from langchain.vectorstores.pgvector import PGVector
+from langchain_community.vectorstores.pgvector import PGVector
 from psycopg2.extensions import cursor as Cursor
 from rag_application_framework.db.psycopg_connection_factory import (
     PsycopgConnectionFactory,

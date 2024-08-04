@@ -33,11 +33,6 @@ class RagasEvaluationAndDbLoggingCallbackHandler(BaseCallbackHandler):
         self.evaluation_config = evaluation_config
         self.engine = engine
 
-    def process_llama2_prompt(self, prompt: str) -> Any:
-        question_raw = prompt.split("Context:")[0].split("Question:")[1].strip()
-        context_raw = prompt.split("Context:")[1].replace("Answer: [/INST]", "").strip()
-        return question_raw, context_raw
-
     def evaluate(self, response_data: dict) -> dict:
         evaluation_helper = RagasEvaluator(
             #openai_config=self.openai_config,″

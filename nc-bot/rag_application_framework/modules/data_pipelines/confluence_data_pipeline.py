@@ -5,7 +5,7 @@ from rag_application_framework.modules.file_uploader.file_uploader import (
     FileUpload,
     UploadedFile,
 )
-from langchain.document_loaders import ConfluenceLoader
+from langchain_community.document_loaders import ConfluenceLoader
 from dataclasses import dataclass
 from rag_application_framework.logging.logging import Logging
 from concurrent.futures import ThreadPoolExecutor
