@@ -17,7 +17,7 @@ COPY ./rag_application_framework /home/app/rag_application_framework
 COPY ./pages /home/app/pages
 # Remove this when on AWS. Should come from Secrets Manager,config and be read from it.
 #COPY .env /home/app/.env
-COPY chatbot.py /home/app/chatbot.py
+COPY app.py /home/app/chatbot.py
 EXPOSE 8501
 HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/health
 ENTRYPOINT ["streamlit", "run", "chatbot.py", "--server.port=8501", "--server.address=0.0.0.0"]
