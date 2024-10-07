@@ -70,10 +70,10 @@ class ConfluenceConfig:
 
 @dataclass
 class CognitoConfig:
-    username: str
-    password: str
     client_id: str
     client_secret: str
+    username: str = None
+    password: str = None
 
 
 @dataclass

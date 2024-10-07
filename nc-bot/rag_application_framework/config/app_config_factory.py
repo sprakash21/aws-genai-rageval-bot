@@ -50,9 +50,7 @@ class AuthConfig(AppFactorySession):
         if auth_local:
             auth_config = CognitoConfig(
                 client_secret=os.environ.get("APP_SECRET"),
-                client_id=os.environ.get("CLIENT_ID"),
-                username=os.environ.get("USERNAME"),
-                password=os.environ.get("PASSWORD")
+                client_id=os.environ.get("CLIENT_ID")
             )
         else:
             secretsmanager_client = AwsClientFactory.build_from_boto_session(
@@ -70,8 +68,8 @@ class AuthConfig(AppFactorySession):
             auth_config = CognitoConfig(
                 client_secret=cognito_secret["COGNITO_CLIENT_SECRET"],
                 client_id=cognito_secret["COGNITO_CLIENT_ID"],
-                username=cognito_secret["COGNITO_USERNAME"],
-                password=cognito_secret["COGNITO_PASSWORD"]
+                #username=cognito_secret["COGNITO_USERNAME"],
+                #password=cognito_secret["COGNITO_PASSWORD"]
             )
 
         return auth_config

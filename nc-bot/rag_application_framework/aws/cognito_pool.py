@@ -43,3 +43,11 @@ class CognitoIdpApi(BaseAwsClient, metaclass=MetaClass):
             logger.error(f"Error initiating authentication for the user {username}")
             logger.error(f"Error stack is {e}")
             raise
+
+    def global_logout(self, access_token: str):
+        try:
+            response = self._client.global_sign_out(AccessToken=access_token)
+        except Exception as e:
+            logger.error(f"There has been an error during sign out for the user")
+            raise
+

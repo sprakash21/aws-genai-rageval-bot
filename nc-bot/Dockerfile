@@ -14,7 +14,7 @@ RUN pip3 install --no-cache-dir -r requirements_aws.txt
 # All folders copy
 USER app
 COPY ./rag_application_framework /home/app/rag_application_framework
-COPY ./pages /home/app/pages
+COPY requests /home/app/pages
 # Remove this when on AWS. Should come from Secrets Manager,config and be read from it.
 #COPY .env /home/app/.env
 COPY app.py /home/app/chatbot.py
