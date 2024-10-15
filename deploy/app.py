@@ -109,5 +109,4 @@ else:
         env=aws_environment,
     )
 
-
 app.synth()
