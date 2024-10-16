@@ -49,7 +49,7 @@ jobs:
           cdk synth -o out --all
 
       - name: Upload CDK artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: cdk-artifacts
           path: deploy/out/*.template.json
