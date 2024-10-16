@@ -32,26 +32,29 @@ We can also setup the local via docker. For this one must do the following activ
 First setup the .env required for the application. In order to do so, perform the necessary steps:  
 1. Copy the nc-bot/environment_templates/.env.local.template as .env and fill in the following values in accordance as shown in the table:  
 
-| KEY                 | VALUE       | Description                                                                                   |
-|---------------------|-------------|-----------------------------------------------------------------------------------------------|
-| AWS_PROFILE         | AWS_PROFILE | AWS profile                                                                                   |
-| AWS_REGION          | AWS_REGION  | AWS region                                                                                    |
-| DB_LOCAL         | true,false  | Use Local database or from AWS                                                                |
-| PGVECTOR_DATABASE   | dbname      | db name to use test                                                                    |
-| PGVECTOR_USER       | postgres    | postgres                                                                                      |
-| PGVECTOR_PASSWORD   | pwd         | set a password                                                                                |
-| PGVECTOR_PORT       | 5432        | 5432                                                                                          |
-| PGVECTOR_HOST       | postgres    | localhost/service_name (if on docker)                                                                                    |
-| BUCKET_NAME         | bucket_name | S3 bucket name to be created to store the pdf data and reference                              |
-| USE_BEDROCK_EMBEDDINGS         | true,false  | Either to use Amazon titan embeddings or not                                                     |
-| BEDROCK_EMBEDDINGS_REGION      | region      | Region of the Amazon bedrock model                                                               |
-| EMBEDDING_COLLECTION_NAME      | name of the collection      | name of the collection                                                               |
-| INFERENCE_ENGINE      | region      | Region of the Amazon bedrock model                                                               |
-| BEDROCK_INFERENCE_REGION      | region      | Region of the Amazon bedrock model for inference                                                               |
-| BEDROCK_INFERENCE_MODEL_ID      | model.id  |Model-id of the foundational model on Amazon                                                               |
-| BEDROCK_EVALUATION_ENGINE      | bedrock      | Default evaluation supported is bedrock ragas                                                               |
-| BEDROCK_EVALUATION_MODEL_ID      | model.id      | Model-id for evaluation using Amazon Bedrock                                               |
-| LOGIN_CODE      | test      |  Acts as a login token to the app                                                               |
+| KEY                 | VALUE                          | Description                                                                    |
+|---------------------|--------------------------------|--------------------------------------------------------------------------------|
+| AWS_PROFILE         | AWS_PROFILE                    | AWS profile                                                                    |
+| AWS_REGION          | AWS_REGION                     | AWS region                                                                     |
+| DB_LOCAL         | true,false                     | Use Local database or from AWS                                                 |
+| AUTH_LOCAL| false                          | Use Secret or environment variables for cognito details                        |
+| PGVECTOR_DATABASE   | dbname                         | db name to use test                                                            |
+| PGVECTOR_USER       | postgres                       | postgres                                                                       |
+| PGVECTOR_PASSWORD   | pwd                            | set a password                                                                 |
+| PGVECTOR_PORT       | 5432                           | 5432                                                                           |
+| PGVECTOR_HOST       | postgres                       | localhost/service_name (if on docker)                                          |
+| BUCKET_NAME         | bucket_name                    | S3 bucket name to be created to store the pdf data and reference               |
+| USE_BEDROCK_EMBEDDINGS         | true,false                     | Either to use Amazon titan embeddings or not                                   |
+| BEDROCK_EMBEDDINGS_REGION      | region                         | Region of the Amazon bedrock model                                             |
+| EMBEDDING_COLLECTION_NAME      | name of the collection         | name of the collection                                                         |
+| INFERENCE_ENGINE      | region                         | Region of the Amazon bedrock model                                             |
+| BEDROCK_INFERENCE_REGION      | region                         | Region of the Amazon bedrock model for inference                               |
+| BEDROCK_INFERENCE_MODEL_ID      | model.id                       | Model-id of the foundational model on Amazon                                   |
+| BEDROCK_EVALUATION_ENGINE      | bedrock                        | Default evaluation supported is bedrock ragas                                  |
+| BEDROCK_EVALUATION_MODEL_ID      | model.id                       | Model-id for evaluation using Amazon Bedrock                                   |
+| COGNITO_SECRET_ID      | secret_id from Secrets Manager | Secret informaiton of client_id and secret                                     |
+| COGNITO_CLIENT_SECRET | secret_value                   | Is the client secret as environment variable. Required when AUTH_LOCAL is true |
+| COGNITO_CLIENT_ID | client_value | Is the client id as environment variable. Required when AUTH_LOCAL is true     |
 
 2. Create the S3 bucket required to store the pdf documents. The bucket_name used will be going into the environment variable BUCKET_NAME.  
 ```

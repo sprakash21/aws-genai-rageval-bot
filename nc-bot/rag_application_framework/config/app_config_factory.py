@@ -66,10 +66,8 @@ class AuthConfig(AppFactorySession):
                 raise ValueError("Cognito secret not found in Secrets Manager")
 
             auth_config = CognitoConfig(
-                client_secret=cognito_secret["COGNITO_CLIENT_SECRET"],
-                client_id=cognito_secret["COGNITO_CLIENT_ID"],
-                #username=cognito_secret["COGNITO_USERNAME"],
-                #password=cognito_secret["COGNITO_PASSWORD"]
+                client_secret=cognito_secret["client_secret"],
+                client_id=cognito_secret["client_id"]
             )
 
         return auth_config

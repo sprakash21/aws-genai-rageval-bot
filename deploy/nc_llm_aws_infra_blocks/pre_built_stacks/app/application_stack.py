@@ -72,7 +72,8 @@ class SimpleRagAppStack(Stack):
             sagemaker_endpoint_name=sagemaker_endpoint_name,
             app_params=app_params,
             db_secret=context_db.db_secret,
-            cognito_client_secret_name=cognito_stack.client_secret,
+            cognito_client_secret_name=cognito_stack.client_secret_name,
+            cognito_client_secret=cognito_stack.client_secret,
             domain_name=domain_name,
             hosted_zone_id=hosted_zone_id
         )
