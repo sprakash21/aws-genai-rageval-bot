@@ -8,6 +8,7 @@ from constructs import Construct
 from nc_llm_aws_infra_blocks.deploy_constructs.app.aurora_postgres_sl_context_db_construct import (
     AuroraPostgresSlContextDb,
 )
+from nc_llm_aws_infra_blocks.deploy_constructs.app.cognito_idp_construct import CognitoStack
 from nc_llm_aws_infra_blocks.deploy_constructs.app.fargate_ecs_app_construct import (
     EcsWithLoadBalancer,
 )
@@ -44,6 +45,17 @@ class SimpleRagAppStack(Stack):
             project_prefix=project_prefix,
             deploy_stage=deploy_stage,
         )
+        cognito_stack = CognitoStack(
+            self,
+            "cognito-idp",
+            account=account,
+            app_params=app_params,
+            deploy_region=deploy_region,
+            deploy_stage=deploy_stage,
+            project_prefix=project_prefix
+
+        )
+
         app_ecr_stack = EcsWithLoadBalancer(
             self,
             "ecs-app",
@@ -60,6 +72,8 @@ class SimpleRagAppStack(Stack):
             sagemaker_endpoint_name=sagemaker_endpoint_name,
             app_params=app_params,
             db_secret=context_db.db_secret,
+            cognito_client_secret_name=cognito_stack.client_secret_name,
+            cognito_client_secret=cognito_stack.client_secret,
             domain_name=domain_name,
             hosted_zone_id=hosted_zone_id
         )

@@ -42,6 +42,7 @@ Below is a detailed description of each parameter:
 * `app_container_memory`: The memory allocation (in MB) for the ECS task running the application.
 * `app_params`: Application-specific parameters.
     * `DB_LOCAL`: Whether database is locally setup or not (Boolean true or false).
+    * `AUTH_LOCAL`: Is default false when using AWS CDK.
     * `EMBEDDING_COLLECTION_NAME`: your_collection_name.
     * `USE_BEDROCK_EMBEDDINGS`: true/false.
     * `BEDROCK_EMBEDDINGS_REGION`: region.
@@ -51,13 +52,13 @@ Below is a detailed description of each parameter:
     * `BEDROCK_EVALUATION_ENGINE`: bedrock.
     * `BEDROCK_EVALUATION_REGION`: region.
     * `BEDROCK_EVALUATION_MODEL_ID`:"anthropic.claude-3-sonnet-20240229-v1:0".
-    * `LOGIN_CODE`: initial code for app to get access to.
     * `PGVECTOR_USER`:OPTIONAL: Applies When DB_LOCAL Is True.
     * `PGVECTOR_PASSWORD`:OPTIONAL: Applies When DB_LOCAL Is True.
     * `PGVECTOR_PORT`:5432.
     * `PGVECTOR_HOST`: OPTIONAL: Applies When DB_LOCAL Is True.
     * `PGVECTOR_DATABASE`: OPTIONAL: Applies When DB_LOCAL Is True.
-
+    * `COGNITO_USERNAME`: admin
+    * `COGNITO_EMAIL`: A valid email address
 ## Steps for deployment
 1. Copy the `cdk.template.json` to `cdk.json` and work with the adapting the values in accordance to your needs. For instance, it could model deployments, or adaptation to extend to deploy a new application.  
 2. `python3 -m .venv venv` to create the virtual environment and source `.venv/bin/activate` to activate it.  

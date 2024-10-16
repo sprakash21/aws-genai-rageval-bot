@@ -60,6 +60,7 @@
     "hosted_zone_id": "OPTIONAL - Route53 Hosted Zone ID",
     "app_params": {
       "DB_LOCAL": "false",
+      "AUTH_LOCAL": "false",
       "EMBEDDING_COLLECTION_NAME": "llm_collection",
       "USE_BEDROCK_EMBEDDINGS": "true",
       "BEDROCK_EMBEDDINGS_REGION": "eu-central-1",
@@ -69,12 +70,13 @@
       "BEDROCK_EVALUATION_ENGINE":"bedrock",
       "BEDROCK_EVALUATION_REGION":"eu-central-1",
       "BEDROCK_EVALUATION_MODEL_ID":"anthropic.claude-3-sonnet-20240229-v1:0",
-      "LOGIN_CODE": "...",
       "PGVECTOR_USER":"OPTIONAL: Applies When DB_LOCAL Is True",
       "PGVECTOR_PASSWORD":"OPTIONAL: Applies When DB_LOCAL Is True",
       "PGVECTOR_PORT":"5432",
       "PGVECTOR_HOST":"OPTIONAL: Applies When DB_LOCAL Is True",
-      "PGVECTOR_DATABASE":"OPTIONAL: Applies When DB_LOCAL Is True"
+      "PGVECTOR_DATABASE":"OPTIONAL: Applies When DB_LOCAL Is True",
+      "COGNITO_USERNAME": "admin",
+      "COGNITO_EMAIL": "Valid Email address"
     }
   }
 }

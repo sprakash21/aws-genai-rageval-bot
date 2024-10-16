@@ -31,11 +31,14 @@ class EcsWithLoadBalancer(BaseConstruct):
         sagemaker_endpoint_name: Union[CfnParameter, None],
         app_params: dict[str, str],
         db_secret: aws_secretsmanager.ISecret,
+        cognito_client_secret_name: str,
+        cognito_client_secret: aws_secretsmanager.ISecret,
         domain_name: Union[str, None] = None,
         hosted_zone_id: Union[str, None] = None,
         **kwargs,
     ) -> None:
         super().__init__(scope, id, **kwargs)
+        app_params["COGNITO_SECRET_ID"] = cognito_client_secret_name
         # Create ECS Fargate Cluster
         #print(self.deploy_account)
         self.cluster = ecs.Cluster(
@@ -100,6 +103,8 @@ class EcsWithLoadBalancer(BaseConstruct):
             memory_limit_mib=container_memory,
         )
         db_secret.grant_read(task_def.task_role)
+        cognito_client_secret.grant_read(task_def.task_role)
+
         # Bucket work
         #self.bucket.grant_read_write(task_def.task_role)
         #self.bucket.grant_put(task_def.task_role)

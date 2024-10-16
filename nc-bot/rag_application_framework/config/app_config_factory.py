@@ -18,6 +18,7 @@ from rag_application_framework.config.app_config import (
     InferenceConfig,
     EvaluationConfig,
     OpenAIConfig,
+    CognitoConfig,
 )
 from rag_application_framework.ml.embeddings.langchain_embeddings_factory import (
     LangchainEmbeddingsFactory,
@@ -30,7 +31,7 @@ from rag_application_framework.logging.logging import Logging
 logger = Logging.get_logger(__name__)
 
 
-class AppConfigFactory:
+class AppFactorySession:
     _boto3_session: Optional[Session] = None
     region_name = os.environ.get("AWS_REGION")
     profile_name = os.environ.get("AWS_PROFILE")
@@ -39,6 +40,40 @@ class AppConfigFactory:
         profile_name=profile_name,
     )
     aws_session = AwsSessionFactory.create_session_from_config(aws_config)
+
+
+class AuthConfig(AppFactorySession):
+
+    @staticmethod
+    def get_cognito_pool_config() -> CognitoConfig:
+        auth_local = os.environ["AUTH_LOCAL"].lower() == "true"
+        if auth_local:
+            auth_config = CognitoConfig(
+                client_secret=os.environ.get("APP_SECRET"),
+                client_id=os.environ.get("CLIENT_ID")
+            )
+        else:
+            secretsmanager_client = AwsClientFactory.build_from_boto_session(
+                AuthConfig.aws_session,
+                SecretsManagerApi,
+            )
+
+            cognito_secret = secretsmanager_client.get_secret_dict(
+                secret_name=os.environ["COGNITO_SECRET_ID"],
+            )
+
+            if not cognito_secret:
+                raise ValueError("Cognito secret not found in Secrets Manager")
+
+            auth_config = CognitoConfig(
+                client_secret=cognito_secret["client_secret"],
+                client_id=cognito_secret["client_id"]
+            )
+
+        return auth_config
+
+
+class AppConfigFactory(AppFactorySession):
 
     @staticmethod
     def build_from_env():
@@ -62,7 +97,7 @@ class AppConfigFactory:
             aws_config=AppConfigFactory.aws_config,
             inference_config=inference_config,
             evaluation_config=evaluation_config,
-            file_store_config=file_store_config,
+            file_store_config=file_store_config
             #confluence_config=confluence_config,
         )
 

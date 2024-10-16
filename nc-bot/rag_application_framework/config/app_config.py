@@ -4,7 +4,7 @@ from rag_application_framework.config.app_enums import InferenceEngine
 from langchain_community.embeddings.bedrock import BedrockEmbeddings
 from langchain_community.embeddings.huggingface import HuggingFaceEmbeddings
 from botocore.client import BaseClient
-
+from datetime import datetime
 
 @dataclass
 class DbConfig:
@@ -69,12 +69,29 @@ class ConfluenceConfig:
 
 
 @dataclass
+class CognitoConfig:
+    client_id: str
+    client_secret: str
+    username: str = None
+    password: str = None
+
+
+@dataclass
+class SessionToken:
+    access_token: str
+    refresh_token: str
+    granted_time: datetime = datetime.utcnow()
+    expiry_time: int = 3600
+
+
+@dataclass
 class AppConfig:
     db_config: DbConfig
     embedding_config: EmbeddingConfig
     aws_config: AwsConfig
     inference_config: InferenceConfig
     file_store_config: FileStoreConfig
+    cognito_config: Optional[CognitoConfig] = None
     openai_config: Optional[OpenAIConfig] = None
     evaluation_config: Optional[EvaluationConfig] = None
     confluence_config: Optional[ConfluenceConfig] = None
